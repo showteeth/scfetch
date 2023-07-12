@@ -63,6 +63,7 @@ ShowCBDatasets <- function() {
     )
     sd.df <- ExtractDesc(lst = sd.json, attr = used.attr)
     sd.df$name <- x
+    sd.df
   })
   desc.df <- do.call(rbind, desc.list)
   all.samples.final <- merge(all.samples.final, desc.df, by = "name")
@@ -96,7 +97,7 @@ ShowCBDatasets <- function() {
 #' @export
 #'
 #' @examples
-#' #
+#' # hbb.sample.df = ExtractCBDatasets(organ = c("brain", "blood"), organism = "Human (H. sapiens)")
 ExtractCBDatasets <- function(collection = NULL, sub.collection = NULL, organ = NULL, disease = NULL, organism = NULL,
                               project = NULL, fuzzy.match = TRUE) {
   # all sample dataframe
@@ -143,9 +144,9 @@ ExtractCBDatasets <- function(collection = NULL, sub.collection = NULL, organ = 
 #' @export
 #'
 #' @examples
-#' #
-DownloadCBDatasets <- function(sample.df = NULL, collection = NULL, sub.collection = NULL, organ = NULL, disease = NULL, organism = NULL,
-                               project = NULL, fuzzy.match = TRUE, merge = TRUE) {
+#' # hbb.sample.seu = ParseCBDatasets(organ = c("brain", "blood"), organism = "Human (H. sapiens)")
+ParseCBDatasets <- function(sample.df = NULL, collection = NULL, sub.collection = NULL, organ = NULL, disease = NULL, organism = NULL,
+                            project = NULL, fuzzy.match = TRUE, merge = TRUE) {
   # prepare samples for download
   if (!is.null(sample.df)) {
     # use provided dataframe to download data

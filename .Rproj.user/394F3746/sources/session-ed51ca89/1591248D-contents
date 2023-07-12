@@ -19,7 +19,7 @@ ShowPanglaoDBMeta <- function(specie = NULL, protocol = NULL, tissue = NULL, sho
   all.meta <- rPanglaoDB::getSampleList()
   # modify SMART-seq2 to Smart-seq2
   all.meta$Protocol <- gsub(pattern = "SMART-seq2", replacement = "Smart-seq2", x = all.meta$Protocol)
-  
+
   # no attribute filter
   if (is.null(specie) && is.null(protocol) && is.null(tissue)) {
     used.meta <- all.meta
@@ -107,17 +107,17 @@ ShowPanglaoDBMeta <- function(specie = NULL, protocol = NULL, tissue = NULL, sho
 ParsePanglaoDB = function(meta, cell.type = "All", include.gene = NA, exclude.gene = NA, merge = FALSE){
   # check columns
   CheckColumns(df = meta, columns = c("SRA", "SRS", "Tissue", "Protocol", "Species"))
-  
+
   # split meta to save time
   meta.normal = meta %>% dplyr::filter(SRS != "notused")
   meta.abnormal = meta %>% dplyr::filter(SRS == "notused")
-  
+
   # get Seurat object
   ## normal
   if(nrow(meta.normal)>0){
     message("Processing ", nrow(meta.normal), " samples with SRS!")
-    normal.seu = rPanglaoDB::getSamples(sra = meta.normal$SRA, srs = meta.normal$SRS, tissue = meta.normal$Tissue, 
-                                        protocol = meta.normal$Protocol, specie = meta.normal$Species, celltype = cell.type, 
+    normal.seu = rPanglaoDB::getSamples(sra = meta.normal$SRA, srs = meta.normal$SRS, tissue = meta.normal$Tissue,
+                                        protocol = meta.normal$Protocol, specie = meta.normal$Species, celltype = cell.type,
                                         include = include.gene, exclude = exclude.gene, merge = FALSE)
   }else{
     normal.seu = list()
@@ -129,14 +129,14 @@ ParsePanglaoDB = function(meta, cell.type = "All", include.gene = NA, exclude.ge
       abnormal.seu = list()
     }else{
       message("Processing ", nrow(meta.abnormal), " samples without SRS (notused)!")
-      abnormal.seu = getSamples_internal(sra = meta.abnormal$SRA, srs = meta.abnormal$SRS, tissue = meta.abnormal$Tissue, 
-                                         protocol = meta.abnormal$Protocol, specie = meta.abnormal$Species, celltype = cell.type, 
+      abnormal.seu = getSamples_internal(sra = meta.abnormal$SRA, srs = meta.abnormal$SRS, tissue = meta.abnormal$Tissue,
+                                         protocol = meta.abnormal$Protocol, specie = meta.abnormal$Species, celltype = cell.type,
                                          include = include.gene, exclude = exclude.gene, merge = FALSE)
     }
   }else{
     abnormal.seu = list()
   }
-  
+
   # merge list
   meta.seu = c(normal.seu, abnormal.seu)
   # merge or not
@@ -151,7 +151,7 @@ getSamples_internal <- function(sra = 'All', srs = 'All', tissue = 'All', protoc
   # SampleList
   sampleList <- rPanglaoDB::getSampleList()
   sampleList$SRS = gsub(pattern = "nSRS=[0-9]*", replacement = "notused", x = sampleList$SRS)
-  
+
   # Filters
   SRA <- match.arg(arg = sra, choices = unique(c('All',sampleList$SRA)), several.ok = TRUE)
   if(isTRUE('All' %in% SRA)){
@@ -161,7 +161,7 @@ getSamples_internal <- function(sra = 'All', srs = 'All', tissue = 'All', protoc
   if(isTRUE('All' %in% SRS)){
     SRS <- unique(sampleList$SRS)
   }
-  
+
   Tissue <- match.arg(arg = tissue, choices = unique(c('All',sampleList$Tissue)), several.ok = TRUE)
   if(isTRUE('All' %in% Tissue)){
     Tissue <- unique(sampleList$Tissue)
@@ -174,7 +174,7 @@ getSamples_internal <- function(sra = 'All', srs = 'All', tissue = 'All', protoc
   if(isTRUE('All' %in% Specie)){
     Specie <- unique(sampleList$Species)
   }
-  
+
   # Applying filter
   F1 <- sampleList$SRA %in% SRA
   F2 <- sampleList$SRS %in% SRS
@@ -182,13 +182,13 @@ getSamples_internal <- function(sra = 'All', srs = 'All', tissue = 'All', protoc
   F4 <- sampleList$Protocol %in% Protocol
   F5 <- sampleList$Species %in% Specie
   sampleList <- sampleList[F1 & F2 & F3 & F4 & F5,]
-  
+
   # Error
   if (nrow(sampleList) == 0){
     message('0 Samples Found')
     return()
   }
-  
+
   # Filtering by cell-type
   ctList.raw = lapply(1:nrow(sampleList), function(x){
     if(sampleList[x,"SRS"] == "notused"){
@@ -202,20 +202,20 @@ getSamples_internal <- function(sra = 'All', srs = 'All', tissue = 'All', protoc
   })
   ctList = do.call(rbind, ctList.raw)
   rownames(ctList) = NULL
-  
+
   CellType <- match.arg(arg = celltype, choices = unique(c('All', ctList$`Cell Type`)), several.ok = TRUE)
   if(isTRUE('All' %in% CellType)){
     CellType <- unique(ctList$`Cell Type`)
   }
   ctList <- ctList[ctList$`Cell Type` %in% CellType,]
   sampleList <- sampleList[sampleList$SRS %in% ctList$SRS,]
-  
+
   # Error
   if (nrow(sampleList) == 0){
     message('0 Samples Found')
     return()
   }
-  
+
   dataSets <- pbapply::pbapply(sampleList,1, function(X){
     oConnection <- paste0("https://panglaodb.se/data_dl.php?sra=",X[1],"&srs=",X[2],"&filetype=R&datatype=readcounts")
     oConnection <-  url(oConnection, headers = list(
@@ -257,7 +257,7 @@ getSamples_internal <- function(sra = 'All', srs = 'All', tissue = 'All', protoc
       sm$CellTypes[sm$CellTypes %in% 'Unknown'] <- NA
       sm$CellTypes[sm$CellTypes %in% 'None'] <- NA
       sm$Specie <- X[['Species']]
-      
+
       # Filtering by genes
       include <- include[include %in% rownames(sm@assays$RNA@counts)]
       exclude <- exclude[exclude %in% rownames(sm@assays$RNA@counts)]
@@ -289,9 +289,9 @@ getSamples_internal <- function(sra = 'All', srs = 'All', tissue = 'All', protoc
     return(sm)
   })
   names(dataSets) <- ifelse(sampleList$SRS == "notused", paste(sampleList$SRA, sampleList$SRS, sep = "_"), sampleList$SRS)
-  
+
   dataSets <- dataSets[unlist(lapply(dataSets, class)) %in% 'Seurat']
-  
+
   if(isTRUE(merge)){
     dataSets <- mergeExperiments(dataSets)
   }
@@ -371,7 +371,7 @@ file.ext = "rdata"
 
 #' Prepare Dataframe with Zenodo DOI.
 #'
-#' @param doi Zenodo DOI, should start with "10.5281/zenodo.". 
+#' @param doi Zenodo DOI, should start with "10.5281/zenodo.".
 #' @param file.ext The valid file extension for download. When NULL, use all files. Default: c("rdata", "h5ad").
 #'
 #' @return Dataframe contains files with valid extension in given Zenodo DOI.
@@ -412,7 +412,7 @@ PrepareZenodo = function(doi, file.ext = c("rdata", "h5ad")){
     record.files.used.final = data.frame(title = record.content$metadata$title, description = record.content$metadata$description,
                                          url = record.files.used$links$self, filename = basename(record.files.used$links$self),
                                          md5 = record.files.used$checksum, license = record.content$metadata$license$id)
-    
+
   }else{
     message(doi, " is not open access!")
     record.files.used.final = data.frame()
@@ -425,7 +425,7 @@ DownloadZenodo(doi = c("1111", "10.5281/zenodo.7243603", "10.5281/zenodo.7244441
 #'
 #' @param doi A vector of Zenodo DOIs to download. Default: NULL.
 #' @param file.ext The valid file extension for download. When NULL, use all files. Default: c("rdata", "rds", "h5ad").
-#' @param doi.df DOI dataframe for download. This is useful when something wrong happens in downloading 
+#' @param doi.df DOI dataframe for download. This is useful when something wrong happens in downloading
 #' (e.g. MD5 verification failure, \code{DownloadZenodo} will return a dataframe contains failure terms.). Default: NULL.
 #' It is required to provide either \code{doi} or \code{doi.df}.
 #' @param out.folder The output folder. Default: NULL (current working directory).
@@ -446,7 +446,7 @@ DownloadZenodo(doi = c("1111", "10.5281/zenodo.7243603", "10.5281/zenodo.7244441
 #'
 #' @examples
 #' # DownloadZenodo(doi = c("1111", "10.5281/zenodo.7243603", "10.5281/zenodo.7244441"), file.ext = c("rdata", "rds"), out.folder = "/path/to/outfoder")
-DownloadZenodo = function(doi = NULL, file.ext = c("rdata", "rds", "h5ad"), doi.df = NULL, out.folder = NULL, timeout = 1000, 
+DownloadZenodo = function(doi = NULL, file.ext = c("rdata", "rds", "h5ad"), doi.df = NULL, out.folder = NULL, timeout = 1000,
                           quiet = FALSE, parallel = TRUE){
   if(!is.null(doi.df)){
     doi.df = doi.df
@@ -517,27 +517,27 @@ library(BiocParallel)
 system.time(BiocParallel::bplapply(1:nrow(doi.df), BPPARAM = BiocParallel::MulticoreParam(workers = n.cores, progress = TRUE), FUN = function(x) {
   download.file(url = doi.df[x, "url"], destfile = doi.df[x, "filename"], quiet = quiet, mode = "wb")
 }))
-# user  system elapsed 
+# user  system elapsed
 # 4.194   7.259 282.335
 
 # 直接使用download.file --- 感觉默认的就是并行下载的(使用libcurl method下载是支持同时下载多个的)
 system.time(download.file(url = doi.df$url, destfile = doi.df$filename, quiet = quiet, mode = "wb"))
-# user  system elapsed 
-# 9.160  15.849 253.267 
+# user  system elapsed
+# 9.160  15.849 253.267
 
 # 使用pbapply，这个是线性的，好处是添加进度条
 system.time(pbapply::pbapply(doi.df, 1, function(x){
   download.file(url = x["url"], destfile = x["filename"], quiet = quiet, mode = "wb")
 }))
-# user  system elapsed 
-# 8.232  15.363 248.687 
+# user  system elapsed
+# 8.232  15.363 248.687
 
 # 使用mclapply
 system.time(parallel::mclapply(X = 1:nrow(doi.df), FUN = function(x){
   download.file(url = doi.df[x, "url"], destfile = doi.df[x, "filename"], quiet = quiet, mode = "wb")
 }, mc.cores = 2))
-# user  system elapsed 
-# 5.076   8.111 247.299 
+# user  system elapsed
+# 5.076   8.111 247.299
 
 # 针对 UCSC Cell Browser -------------
 # https://cells.ucsc.edu/cortex-dev/exprMatrix.tsv.gz
@@ -556,11 +556,11 @@ all.datasets.json = jsonlite::fromJSON(txt = "https://cells.ucsc.edu/dataset.jso
 all.datasets.df = jsonlite::flatten(all.datasets.json$datasets)
 colnames(all.datasets.df) = gsub(pattern = ".*\\.", replacement = "", x = colnames(all.datasets.df))
 # modify elements
-all.datasets.df = PasteAttr(df = all.datasets.df, attr = c("tags", "diseases", "organisms", "body_parts", 
+all.datasets.df = PasteAttr(df = all.datasets.df, attr = c("tags", "diseases", "organisms", "body_parts",
                                                            "projects", "life_stages", "domains", "sources", "assays"))
 # split all datasets
 single.dataset.df = all.datasets.df[is.na(all.datasets.df$isCollection), ]
-# dataset collection 
+# dataset collection
 dataset.collection.df = all.datasets.df[!is.na(all.datasets.df$isCollection), ]
 
 
@@ -632,14 +632,14 @@ ExtractSample = function(df){
 }
 all.samples.df = ExtractSample(all.datasets.df) %>% as.data.frame()
 # modify columns
-all.samples.df = PasteAttr(df = all.samples.df, attr = c("tags", "diseases", "organisms", "body_parts", 
+all.samples.df = PasteAttr(df = all.samples.df, attr = c("tags", "diseases", "organisms", "body_parts",
                                                          "projects", "life_stages", "domains", "sources", "assays"))
 # remove unused columns
 all.samples.df = all.samples.df %>% dplyr::select(-c("md5", "hasFiles", "isCollection", "datasetCount", "collectionCount"))
 # add label
 all.samples.df.single = all.samples.df %>% dplyr::filter(!grepl(x = name, pattern = "/"))
-all.samples.df.multi = all.samples.df %>% 
-  dplyr::filter(grepl(x = name, pattern = "/")) %>% 
+all.samples.df.multi = all.samples.df %>%
+  dplyr::filter(grepl(x = name, pattern = "/")) %>%
   dplyr::mutate(parent = gsub(pattern = "([^/]*).*", replacement = "\\1", x = name))
 all.datasets.df.multi = all.datasets.df[!is.na(all.datasets.df$isCollection), c("shortLabel", "name", "tags", "organisms", "body_parts", "diseases", "projects")]
 colnames(all.datasets.df.multi) = gsub(pattern = "^", replacement = "parent_", x = colnames(all.datasets.df.multi))
@@ -659,7 +659,7 @@ colnames(all.samples.df.multi) = gsub(pattern = "^parent_shortLabel$", replaceme
 all.samples.df.multi = all.samples.df.multi %>% dplyr::select(!starts_with("parent"))
 # final dataframe
 all.samples.final = data.table::rbindlist(list(all.samples.df.single, all.samples.df.multi), fill = TRUE) %>% as.data.frame()
-all.samples.final = all.samples.final[c("shortLabel", "subLabel", "name", "tags", "body_parts", "diseases", "organisms", 
+all.samples.final = all.samples.final[c("shortLabel", "subLabel", "name", "tags", "body_parts", "diseases", "organisms",
                                         "projects", "life_stages", "domains", "sources", "sampleCount", "assays")]
 
 
@@ -733,19 +733,19 @@ ShowCBDatasets = function(){
   all.datasets.df = jsonlite::flatten(all.datasets.json$datasets)
   colnames(all.datasets.df) = gsub(pattern = ".*\\.", replacement = "", x = colnames(all.datasets.df))
   # modify elements
-  all.datasets.df = PasteAttr(df = all.datasets.df, attr = c("tags", "diseases", "organisms", "body_parts", 
+  all.datasets.df = PasteAttr(df = all.datasets.df, attr = c("tags", "diseases", "organisms", "body_parts",
                                                              "projects", "life_stages", "domains", "sources", "assays"))
   # extract all samples
   all.samples.df = ExtractSample(all.datasets.df) %>% as.data.frame()
   # modify columns
-  all.samples.df = PasteAttr(df = all.samples.df, attr = c("tags", "diseases", "organisms", "body_parts", 
+  all.samples.df = PasteAttr(df = all.samples.df, attr = c("tags", "diseases", "organisms", "body_parts",
                                                            "projects", "life_stages", "domains", "sources", "assays"))
   # remove unused columns
   all.samples.df = all.samples.df %>% dplyr::select(-c("md5", "hasFiles", "isCollection", "datasetCount", "collectionCount"))
   # add label
   all.samples.df.single = all.samples.df %>% dplyr::filter(!grepl(x = name, pattern = "/"))
-  all.samples.df.multi = all.samples.df %>% 
-    dplyr::filter(grepl(x = name, pattern = "/")) %>% 
+  all.samples.df.multi = all.samples.df %>%
+    dplyr::filter(grepl(x = name, pattern = "/")) %>%
     dplyr::mutate(parent = gsub(pattern = "([^/]*).*", replacement = "\\1", x = name))
   all.datasets.df.multi = all.datasets.df[!is.na(all.datasets.df$isCollection), c("shortLabel", "name", "tags", "organisms", "body_parts", "diseases", "projects")]
   colnames(all.datasets.df.multi) = gsub(pattern = "^", replacement = "parent_", x = colnames(all.datasets.df.multi))
@@ -761,7 +761,7 @@ ShowCBDatasets = function(){
   all.samples.df.multi = all.samples.df.multi %>% dplyr::select(!dplyr::starts_with("parent"))
   # final dataframe
   all.samples.final = data.table::rbindlist(list(all.samples.df.single, all.samples.df.multi), fill = TRUE) %>% as.data.frame()
-  all.samples.final = all.samples.final[c("shortLabel", "subLabel", "name", "tags", "body_parts", "diseases", "organisms", 
+  all.samples.final = all.samples.final[c("shortLabel", "subLabel", "name", "tags", "body_parts", "diseases", "organisms",
                                           "projects", "life_stages", "domains", "sources", "sampleCount", "assays")]
   # add sample information
   base.url = "https://cells.ucsc.edu/"
@@ -769,7 +769,7 @@ ShowCBDatasets = function(){
   names(desc.files) = all.samples.final$name
   desc.list = lapply(names(desc.files), function(x){
     sd.json = jsonlite::fromJSON(txt = desc.files[x])
-    used.attr = c("title" = "title", "paper" = "paper_url", "abstract" = "abstract", "matrix" = "matrixFile", "unit" = "unitDesc", 
+    used.attr = c("title" = "title", "paper" = "paper_url", "abstract" = "abstract", "matrix" = "matrixFile", "unit" = "unitDesc",
                   "coords" = "coordFiles", "methods" = "methods", "geo" = "geo_series")
     sd.df = ExtractDesc(lst = sd.json, attr = used.attr)
     sd.df$name = x
@@ -788,7 +788,7 @@ dataset.dataset.json = jsonlite::fromJSON(txt = "https://cells.ucsc.edu/evocell/
 dataset.desc.json = jsonlite::fromJSON(txt = "https://cells.ucsc.edu/cortex-dev/desc.json")
 dataset.desc.json = jsonlite::fromJSON(txt = "https://cells.ucsc.edu/xena/zeisel2015/desc.json")
 
-dataset.desc.df = data.frame(title = dataset.desc.json$title, paper = paste0(cortex.json$paper_url, collapse = ", "), 
+dataset.desc.df = data.frame(title = dataset.desc.json$title, paper = paste0(cortex.json$paper_url, collapse = ", "),
                              abstract = dataset.desc.json$abstract, matrix = basename(dataset.desc.json$matrixFile),
                              coords = paste0(dataset.desc.json$coordFiles, collapse = ", "), method = dataset.desc.json$methods)
 
@@ -876,8 +876,16 @@ test = CheckParas(df = ucsc.cb.samples, column = "body_parts", para.value = c("b
 test.df = ucsc.cb.samples[test, ]
 
 
+collection = NULL
+sub.collection = NULL
+organ = c("brain", "blood")
+disease = NULL
+organism = "Human (H. sapiens)"
+project = NULL
+
 # 先生成一个dataframe，用于判断在否需要进一步地修改
-ExtractCBDatasets = function(collection = NULL, sub.collection = NULL, organ = NULL, disease = NULL, organism = NULL, 
+hbb.sample.df = ExtractCBDatasets(organ = c("brain", "blood"), organism = "Human (H. sapiens)")
+ExtractCBDatasets = function(collection = NULL, sub.collection = NULL, organ = NULL, disease = NULL, organism = NULL,
                              project = NULL, fuzzy.match = TRUE){
   # all sample dataframe
   all.samples.df = ShowCBDatasets()
@@ -895,7 +903,7 @@ ExtractCBDatasets = function(collection = NULL, sub.collection = NULL, organ = N
 }
 
 
-DownloadCBDatasets = function(sample.df = NULL, collection = NULL, sub.collection = NULL, organ = NULL, disease = NULL, organism = NULL, 
+DownloadCBDatasets = function(sample.df = NULL, collection = NULL, sub.collection = NULL, organ = NULL, disease = NULL, organism = NULL,
                       project = NULL, fuzzy.match = TRUE, merge = TRUE){
   # prepare samples for download
   if(!is.null(sample.df)){
@@ -962,7 +970,7 @@ seu.obj <- Seurat::CreateSeuratObject(counts = mat, project = "name", meta.data=
 Seurat::FeatureScatter(object = seu.obj, feature1 = 'V2', feature2 = 'V3', group.by = "WGCNAcluster", plot.cor = F)
 # 自己可视化
 library(ggplot2)
-ggplot(data = all.coord.df, mapping = aes(x = TriMap_1, y = TriMap_2)) + 
+ggplot(data = all.coord.df, mapping = aes(x = TriMap_1, y = TriMap_2)) +
   geom_point()
 
 exp.file = exp.urls["cortex-dev"]
@@ -985,9 +993,9 @@ Load2Seurat = function(exp.file, meta.file, coord.file = NULL, name = NULL){
     seu.obj <- Seurat::CreateSeuratObject(counts = mat, project = name, meta.data=meta)
   }else{
     # prepare coord file
-    coord.list = lapply(1:length(coord.file), function(x){ 
-      coord.name = gsub(pattern = ".coords.tsv.gz", replacement = "", x = basename(coord.file[x]))  
-      coord.df = data.frame(data.table::fread(coord.file[x], check.names = FALSE), row.names=1) 
+    coord.list = lapply(1:length(coord.file), function(x){
+      coord.name = gsub(pattern = ".coords.tsv.gz", replacement = "", x = basename(coord.file[x]))
+      coord.df = data.frame(data.table::fread(coord.file[x], check.names = FALSE), row.names=1)
       colnames(coord.df) = paste(coord.name, 1:ncol(coord.df), sep = "_")
       coord.df$Barcode = rownames(coord.df)
       return(coord.df)
@@ -998,7 +1006,7 @@ Load2Seurat = function(exp.file, meta.file, coord.file = NULL, name = NULL){
       all.coord.df = coord.list %>% purrr::reduce(dplyr::full_join, by = "Barcode")
     }
     # merge metadata
-    meta = merge(meta, all.coord.df, by.x = 0, by.y = "Barcode", all.x = TRUE) %>% 
+    meta = merge(meta, all.coord.df, by.x = 0, by.y = "Barcode", all.x = TRUE) %>%
       tibble::column_to_rownames(var = "Row.names")
     seu.obj <- Seurat::CreateSeuratObject(counts = mat, project = name, meta.data = meta)
   }
@@ -1007,6 +1015,21 @@ Load2Seurat = function(exp.file, meta.file, coord.file = NULL, name = NULL){
 
 head(meta)
 
+# 测试函数 --------
+library(scfetch)
+# * panglaodb ------
+hs10.meta = ShowPanglaoDBMeta(specie = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"))
+hsa.meta = ShowPanglaoDBMeta(specie = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"), show.cell.type = TRUE)
+hsa.seu = ParsePanglaoDB(hsa.meta, merge = TRUE)
 
+# * zenodo --------
+zebrafish.df = PrepareZenodo(doi = "10.5281/zenodo.7243603")
+zebrafish.seu = ParseZenodo(doi = c("1111", "10.5281/zenodo.7243603", "10.5281/zenodo.7244441"),
+                            file.ext = c("rdata", "rds"), out.folder = "/Users/soyabean/Desktop/tmp/scdown/download_zenodo")
+
+# * ucsc cell browser --------
+ucsc.cb.samples = ShowCBDatasets()
+hbb.sample.df = ExtractCBDatasets(organ = c("brain", "blood"), organism = "Human (H. sapiens)")
+hbb.sample.seu = ParseCBDatasets(organ = c("brain", "blood"), organism = "Human (H. sapiens)")
 
 

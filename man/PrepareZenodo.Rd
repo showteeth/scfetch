@@ -18,6 +18,6 @@ Dataframe contains files with valid extension in given Zenodo DOI.
 Prepare Dataframe with Zenodo DOI.
 }
 \examples{
-# zebraffish.df = PrepareZenodo(doi = "10.5281/zenodo.7243603")
+# zebrafish.df = PrepareZenodo(doi = "10.5281/zenodo.7243603")
 # PrepareZenodo(doi = "10.5281/zenodo.48065") # Restricted Access
 }

@@ -11,7 +11,7 @@
 #' @export
 #'
 #' @examples
-#' # zebraffish.df = PrepareZenodo(doi = "10.5281/zenodo.7243603")
+#' # zebrafish.df = PrepareZenodo(doi = "10.5281/zenodo.7243603")
 #' # PrepareZenodo(doi = "10.5281/zenodo.48065") # Restricted Access
 PrepareZenodo <- function(doi, file.ext = c("rdata", "h5ad")) {
   # prepare link
@@ -74,9 +74,10 @@ PrepareZenodo <- function(doi, file.ext = c("rdata", "h5ad")) {
 #' @export
 #'
 #' @examples
-#' # DownloadZenodo(doi = c("1111", "10.5281/zenodo.7243603", "10.5281/zenodo.7244441"), file.ext = c("rdata", "rds"), out.folder = "/path/to/outfoder")
-DownloadZenodo <- function(doi = NULL, file.ext = c("rdata", "rds", "h5ad"), doi.df = NULL, out.folder = NULL, timeout = 1000,
-                           quiet = FALSE, parallel = TRUE) {
+#' # zebrafish.seu = ParseZenodo(doi = c("1111", "10.5281/zenodo.7243603", "10.5281/zenodo.7244441"), file.ext = c("rdata", "rds"),
+#' #                             out.folder = "/path/to/outfoder")
+ParseZenodo <- function(doi = NULL, file.ext = c("rdata", "rds", "h5ad"), doi.df = NULL, out.folder = NULL, timeout = 1000,
+                        quiet = FALSE, parallel = TRUE) {
   if (!is.null(doi.df)) {
     doi.df <- doi.df
   } else if (!is.null(doi)) {
@@ -130,7 +131,7 @@ DownloadZenodo <- function(doi = NULL, file.ext = c("rdata", "rds", "h5ad"), doi
     wrong.md5.df <- doi.df[!md5.check, ]
     # restore filename
     wrong.md5.df$filename <- basename(wrong.md5.df$filename)
-    message("MD5 verification failure for: ", paste0(wrong.md5.df$filename, collapse = ", "), " . You can re-run DownloadZenodo with doi.df!")
+    message("MD5 verification failure for: ", paste0(wrong.md5.df$filename, collapse = ", "), " . You can re-run ParseZenodo with doi.df!")
     return(wrong.md5.df)
   }
 }

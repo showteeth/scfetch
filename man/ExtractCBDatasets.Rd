@@ -42,5 +42,5 @@ Dataframe contains filtered datasets.
 Extract Datasets with Attributes.
 }
 \examples{
-#
+# hbb.sample.df = ExtractCBDatasets(organ = c("brain", "blood"), organism = "Human (H. sapiens)")
 }
