@@ -54,6 +54,7 @@ ShowCBDatasets <- function(lazy = TRUE, json.folder = NULL, update = FALSE, quie
       as.data.frame()
     # desc folder
     desc.folder <- json.folder
+    datasets.folder <- json.folder
   } else {
     message("Lazy mode is off, always load json online (always up-to-date), this is also always time-consuming.")
     all.datasets.json <- jsonlite::fromJSON(txt = "https://cells.ucsc.edu/dataset.json")
@@ -68,8 +69,8 @@ ShowCBDatasets <- function(lazy = TRUE, json.folder = NULL, update = FALSE, quie
     all.samples.df <- ExtractSampleOnline(all.datasets.df) %>% as.data.frame()
     # desc folder
     desc.folder <- "https://cells.ucsc.edu"
+    datasets.folder <- "https://cells.ucsc.edu"
   }
-
   # modify columns
   all.samples.df <- PasteAttr(df = all.samples.df, attr = c(
     "tags", "diseases", "organisms", "body_parts",
@@ -100,13 +101,29 @@ ShowCBDatasets <- function(lazy = TRUE, json.folder = NULL, update = FALSE, quie
     "shortLabel", "subLabel", "name", "tags", "body_parts", "diseases", "organisms",
     "projects", "life_stages", "domains", "sources", "sampleCount", "assays"
   )]
+  # add matrix information
+  datasets.files <- file.path(datasets.folder, all.samples.final$name, "dataset.json")
+  names(datasets.files) <- all.samples.final$name
+  datasets.list <- lapply(names(datasets.files), function(x) {
+    x.json <- jsonlite::fromJSON(txt = datasets.files[x])
+    x.file.df <- jsonlite::flatten(as.data.frame(x.json$fileVersions))
+    mat.name <- ifelse("outMatrix.fname" %in% colnames(x.file.df), basename(x.file.df[, "outMatrix.fname"]), "")
+    barcode.name <- ifelse("barcodes.fname" %in% colnames(x.file.df), basename(x.file.df[, "barcodes.fname"]), "")
+    feature.name <- ifelse("features.fname" %in% colnames(x.file.df), basename(x.file.df[, "features.fname"]), "")
+    x.file.df <- data.frame(matrix = mat.name, barcode = barcode.name, feature = feature.name)
+    x.file.df$name <- x
+    x.file.df
+  })
+  dts.df <- do.call(rbind, datasets.list)
+  all.samples.final <- merge(all.samples.final, dts.df, by = "name") %>% as.data.frame()
+  all.samples.final$matrixType <- ifelse(all.samples.final$barcode == "", "matrix", "10x")
   # add sample information
   desc.files <- file.path(desc.folder, all.samples.final$name, "desc.json")
   names(desc.files) <- all.samples.final$name
   desc.list <- lapply(names(desc.files), function(x) {
     sd.json <- jsonlite::fromJSON(txt = desc.files[x])
     used.attr <- c(
-      "title" = "title", "paper" = "paper_url", "abstract" = "abstract", "matrix" = "matrixFile", "unit" = "unitDesc",
+      "title" = "title", "paper" = "paper_url", "abstract" = "abstract", "unit" = "unitDesc",
       "coords" = "coordFiles", "methods" = "methods", "geo" = "geo_series"
     )
     sd.df <- ExtractDesc(lst = sd.json, attr = used.attr)
@@ -114,8 +131,7 @@ ShowCBDatasets <- function(lazy = TRUE, json.folder = NULL, update = FALSE, quie
     sd.df
   })
   desc.df <- do.call(rbind, desc.list)
-  all.samples.final <- merge(all.samples.final, desc.df, by = "name")
-  all.samples.final$matrix <- basename(all.samples.final$matrix)
+  all.samples.final <- merge(all.samples.final, desc.df, by = "name") %>% as.data.frame()
   # return value
   return(all.samples.final)
 }

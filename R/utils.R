@@ -29,9 +29,7 @@ PasteAttr <- function(df, attr) {
 # used in UCSCCellBrowser, recursively extract samples
 ExtractSample <- function(df, base.url, json.folder, quiet) {
   # prepare json
-  if (base.url == json.folder) {
-    df.json.folder <- file.path(json.folder, df$name)
-  } else {
+  if (base.url != json.folder) {
     df.json <- file.path(base.url, df$name, "dataset.json")
     names(df.json) <- df$name
     df.json.folder <- file.path(json.folder, df$name)

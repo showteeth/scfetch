@@ -9,6 +9,7 @@
 * Supported lazy mode in `ShowCBDatasets` to save time for multi-runs.
 * Optimized the paras for `ExtractCBDatasets` and `ParseCBDatasets`.
 * Added `cell.num` filter to `ParseCBDatasets`, `ExtractCBDatasets` and `ShowPanglaoDBMeta`.
+* Extracted matrix, barcode and feature info from dataset.json (comprehensive) instead of desc.json.
 
 -------------------
 
