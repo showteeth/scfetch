@@ -13,7 +13,7 @@
 #' @export
 #'
 #' @examples
-#' # ShowPanglaoDBMeta(specie = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"))
+#' # human.meta = ShowPanglaoDBMeta(specie = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"))
 ShowPanglaoDBMeta <- function(specie = NULL, protocol = NULL, tissue = NULL, show.cell.type = TRUE) {
   # get all sample metadata
   all.meta <- rPanglaoDB::getSampleList()
@@ -79,8 +79,6 @@ ShowPanglaoDBMeta <- function(specie = NULL, protocol = NULL, tissue = NULL, sho
   used.meta$SRS <- gsub(pattern = "nSRS=[0-9]*", replacement = "notused", x = used.meta$SRS)
   return(used.meta)
 }
-
-
 
 #' Parse PanglaoDB Data.
 #'

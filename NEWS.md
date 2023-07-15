@@ -8,6 +8,7 @@
 ## Minor changes
 * Supported lazy mode in `ShowCBDatasets` to save time for multi-runs.
 * Optimized the paras for `ExtractCBDatasets` and `ParseCBDatasets`.
+* Added `cell.num` filter to `ParseCBDatasets` and `ExtractCBDatasets`.
 
 -------------------
 

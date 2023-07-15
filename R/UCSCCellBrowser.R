@@ -137,6 +137,7 @@ ShowCBDatasets <- function(lazy = TRUE, json.folder = NULL, update = FALSE, quie
 #' @param project The project of the datasets, corresponds to \code{projects} column
 #' of \code{ShowCBDatasets}. Default: NULL (without filtering).
 #' @param fuzzy.match Logical value, whether to perform fuzzy match with provided attribute values. Default: TRUE.
+#' @param cell.num Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter. Deault: NULL.
 #'
 #' @return Dataframe contains filtered datasets.
 #' @export
@@ -144,9 +145,11 @@ ShowCBDatasets <- function(lazy = TRUE, json.folder = NULL, update = FALSE, quie
 #' @examples
 #' # # lazy mode, load datasets json files locally
 #' # ucsc.cb.samples = ShowCBDatasets(lazy = TRUE, json.folder = NULL, update = FALSE)
-#' # hbb.sample.df = ExtractCBDatasets(all.samples.df = ucsc.cb.samples, organ = c("brain", "blood"), organism = "Human (H. sapiens)")
+#' # # cell number is between 1000 and 2000
+#' # hbb.sample.df = ExtractCBDatasets(all.samples.df = ucsc.cb.samples, organ = c("brain", "blood"),
+#' #                                   organism = "Human (H. sapiens)", cell.num = c(1000,2000))
 ExtractCBDatasets <- function(all.samples.df, collection = NULL, sub.collection = NULL, organ = NULL, disease = NULL, organism = NULL,
-                              project = NULL, fuzzy.match = TRUE) {
+                              project = NULL, fuzzy.match = TRUE, cell.num = NULL) {
   # extract row index under different filter
   collection.idx <- CheckParas(df = all.samples.df, column = "shortLabel", para.value = collection, fuzzy.match = fuzzy.match)
   sub.collection.idx <- CheckParas(df = all.samples.df, column = "subLabel", para.value = sub.collection, fuzzy.match = fuzzy.match)
@@ -154,8 +157,15 @@ ExtractCBDatasets <- function(all.samples.df, collection = NULL, sub.collection 
   disease.idx <- CheckParas(df = all.samples.df, column = "diseases", para.value = disease, fuzzy.match = fuzzy.match)
   organism.idx <- CheckParas(df = all.samples.df, column = "organisms", para.value = organism, fuzzy.match = fuzzy.match)
   project.idx <- CheckParas(df = all.samples.df, column = "projects", para.value = project, fuzzy.match = fuzzy.match)
+  if (is.null(cell.num)) {
+    cnum.idx <- 1:nrow(all.samples.df)
+  } else if (length(cell.num) == 1) {
+    cnum.idx <- which(all.samples.df$sampleCount > as.numeric(cell.num))
+  } else {
+    cnum.idx <- which(all.samples.df$sampleCount > as.numeric(cell.num[1]) & all.samples.df$sampleCount < as.numeric(cell.num[2]))
+  }
   # filter on the whole dataset
-  valid.idx <- Reduce(intersect, list(collection.idx, sub.collection.idx, organ.idx, disease.idx, organism.idx, project.idx))
+  valid.idx <- Reduce(intersect, list(collection.idx, sub.collection.idx, organ.idx, disease.idx, organism.idx, project.idx, cnum.idx))
   used.sample.df <- all.samples.df[valid.idx, ]
   return(used.sample.df)
 }
@@ -178,6 +188,7 @@ ExtractCBDatasets <- function(all.samples.df, collection = NULL, sub.collection 
 #' @param project The project of the datasets, corresponds to \code{projects} column
 #' of \code{ShowCBDatasets}. Default: NULL (without filtering).
 #' @param fuzzy.match Logical value, whether to perform fuzzy match with provided attribute values. Default: TRUE.
+#' @param cell.num Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter. Deault: NULL.
 #' @param merge Logical value, whether to merge Seurat list. Default: FALSE.
 #'
 #' @return Seurat object (if \code{merge} is TRUE) or list of Seurat objects (if \code{merge} is FALSE).
@@ -192,9 +203,12 @@ ExtractCBDatasets <- function(all.samples.df, collection = NULL, sub.collection 
 #' @examples
 #' # # lazy mode, load datasets json files locally
 #' # ucsc.cb.samples = ShowCBDatasets(lazy = TRUE, json.folder = NULL, update = FALSE)
-#' # hbb.sample.seu = ParseCBDatasets(all.samples.df = ucsc.cb.samples, organ = c("brain", "blood"), organism = "Human (H. sapiens)")
+#' # # cell number is between 1000 and 2000
+#' # hbb.sample.df = ExtractCBDatasets(all.samples.df = ucsc.cb.samples, organ = c("brain", "blood"),
+#' #                                   organism = "Human (H. sapiens)", cell.num = c(1000,2000))
+#' # hbb.sample.seu = ParseCBDatasets(sample.df = hbb.sample.df)
 ParseCBDatasets <- function(sample.df = NULL, all.samples.df = NULL, collection = NULL, sub.collection = NULL, organ = NULL,
-                            disease = NULL, organism = NULL, project = NULL, fuzzy.match = TRUE, merge = TRUE) {
+                            disease = NULL, organism = NULL, project = NULL, fuzzy.match = TRUE, cell.num = NULL, merge = TRUE) {
   # prepare samples for download
   if (!is.null(sample.df)) {
     # use provided dataframe to download data
@@ -203,16 +217,10 @@ ParseCBDatasets <- function(sample.df = NULL, all.samples.df = NULL, collection 
     if (is.null(all.samples.df)) {
       stop("Please provide all.samples.df, obtained with ShowCBDatasets.")
     }
-    # extract row index under different filter
-    collection.idx <- CheckParas(df = all.samples.df, column = "shortLabel", para.value = collection, fuzzy.match = fuzzy.match)
-    sub.collection.idx <- CheckParas(df = all.samples.df, column = "subLabel", para.value = sub.collection, fuzzy.match = fuzzy.match)
-    organ.idx <- CheckParas(df = all.samples.df, column = "body_parts", para.value = organ, fuzzy.match = fuzzy.match)
-    disease.idx <- CheckParas(df = all.samples.df, column = "diseases", para.value = disease, fuzzy.match = fuzzy.match)
-    organism.idx <- CheckParas(df = all.samples.df, column = "organisms", para.value = organism, fuzzy.match = fuzzy.match)
-    project.idx <- CheckParas(df = all.samples.df, column = "projects", para.value = project, fuzzy.match = fuzzy.match)
-    # filter on the whole dataset
-    valid.idx <- Reduce(intersect, list(collection.idx, sub.collection.idx, organ.idx, disease.idx, organism.idx, project.idx))
-    used.sample.df <- all.samples.df[valid.idx, ]
+    used.sample.df <- ExtractCBDatasets(
+      all.samples.df = all.samples.df, collection = collection, sub.collection = sub.collection, organ = organ,
+      disease = disease, organism = organism, project = project, fuzzy.match = fuzzy.match, cell.num = cell.num
+    )
   }
   # parepare exp
   base.url <- "https://cells.ucsc.edu/"
