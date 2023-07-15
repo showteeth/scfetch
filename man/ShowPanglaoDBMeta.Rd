@@ -8,6 +8,7 @@ ShowPanglaoDBMeta(
   specie = NULL,
   protocol = NULL,
   tissue = NULL,
+  cell.num = NULL,
   show.cell.type = TRUE
 )
 }
@@ -19,6 +20,8 @@ ShowPanglaoDBMeta(
 
 \item{tissue}{The tissue of the datasets. Default: NULL (All).}
 
+\item{cell.num}{Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter. Deault: NULL.}
+
 \item{show.cell.type}{Logical value, whether to show inferred cell type. Default: TRUE.}
 }
 \value{
@@ -28,5 +31,5 @@ Dataframe contains SRA, SRS, Tissue, Protocol, Specie, Cells, CellType (inferred
 Show Metadata of scRNA-seq Datasets in PanglaoDB.
 }
 \examples{
-# ShowPanglaoDBMeta(specie = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"))
+# human.meta = ShowPanglaoDBMeta(specie = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"), cell.num = c(1000,2000))
 }

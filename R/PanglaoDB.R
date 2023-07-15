@@ -4,6 +4,7 @@
 #' @param protocol Protocol used to generate the datasets, choose from "10x chromium", "drop-seq", "microwell-seq",
 #' "C1 Fluidigm", "inDrops", "Smart-seq2", "CEL-seq", one or multiple value. Default: NULL (All).
 #' @param tissue The tissue of the datasets. Default: NULL (All).
+#' @param cell.num Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter. Deault: NULL.
 #' @param show.cell.type Logical value, whether to show inferred cell type. Default: TRUE.
 #'
 #' @return Dataframe contains SRA, SRS, Tissue, Protocol, Specie, Cells, CellType (inferred).
@@ -13,8 +14,8 @@
 #' @export
 #'
 #' @examples
-#' # human.meta = ShowPanglaoDBMeta(specie = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"))
-ShowPanglaoDBMeta <- function(specie = NULL, protocol = NULL, tissue = NULL, show.cell.type = TRUE) {
+#' # human.meta = ShowPanglaoDBMeta(specie = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"), cell.num = c(1000,2000))
+ShowPanglaoDBMeta <- function(specie = NULL, protocol = NULL, tissue = NULL, cell.num = NULL, show.cell.type = TRUE) {
   # get all sample metadata
   all.meta <- rPanglaoDB::getSampleList()
   # modify SMART-seq2 to Smart-seq2
@@ -54,6 +55,17 @@ ShowPanglaoDBMeta <- function(specie = NULL, protocol = NULL, tissue = NULL, sho
       used.meta <- used.meta %>% dplyr::filter(Tissue %in% valid.tissue)
     }
   }
+  used.meta$CellNum <- as.numeric(gsub(pattern = ",", replacement = "", x = used.meta$Cells))
+  # filter cell number
+  if (is.null(cell.num)) {
+    used.meta <- used.meta
+  } else if (length(cell.num) == 1) {
+    used.meta <- used.meta %>% dplyr::filter(CellNum > cell.num)
+  } else {
+    used.meta <- used.meta %>%
+      dplyr::filter(CellNum > as.numeric(cell.num[1])) %>%
+      dplyr::filter(CellNum < as.numeric(cell.num[2]))
+  }
   # get sample cell type
   if (show.cell.type) {
     if (nrow(used.meta) > 0) {
@@ -77,6 +89,7 @@ ShowPanglaoDBMeta <- function(specie = NULL, protocol = NULL, tissue = NULL, sho
   }
   # replace srs with '=' with notused
   used.meta$SRS <- gsub(pattern = "nSRS=[0-9]*", replacement = "notused", x = used.meta$SRS)
+
   return(used.meta)
 }
 
@@ -100,7 +113,8 @@ ShowPanglaoDBMeta <- function(specie = NULL, protocol = NULL, tissue = NULL, sho
 #' @export
 #'
 #' @examples
-#' # hsa.meta = ShowPanglaoDBMeta(specie = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"), show.cell.type = TRUE)
+#' # hsa.meta = ShowPanglaoDBMeta(specie = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"),
+#' # .                             show.cell.type = TRUE, cell.num = c(1000,2000))
 #' # hsa.seu = ParsePanglaoDB(hsa.meta, merge = TRUE)
 ParsePanglaoDB <- function(meta, cell.type = "All", include.gene = NA, exclude.gene = NA, merge = FALSE) {
   # check columns
