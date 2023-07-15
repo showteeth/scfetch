@@ -6,6 +6,7 @@
 \usage{
 ParseCBDatasets(
   sample.df = NULL,
+  all.samples.df = NULL,
   collection = NULL,
   sub.collection = NULL,
   organ = NULL,
@@ -18,6 +19,9 @@ ParseCBDatasets(
 }
 \arguments{
 \item{sample.df}{Dataframe contains used datasets. Default: NULL.}
+
+\item{all.samples.df}{Dataframe contains all samples metadata, obtained with \code{ShowCBDatasets}. Default: NULL.
+\code{sample.df} and \code{all.samples.df} cannot be both NULL.}
 
 \item{collection}{The collection of the datasets, corresponds to \code{shortLabel} column
 of \code{ShowCBDatasets}. Default: NULL (without filtering).}
@@ -48,5 +52,7 @@ Seurat object (if \code{merge} is TRUE) or list of Seurat objects (if \code{merg
 Download UCSC Cell Browser Datasets.
 }
 \examples{
-# hbb.sample.seu = ParseCBDatasets(organ = c("brain", "blood"), organism = "Human (H. sapiens)")
+# # lazy mode, load datasets json files locally
+# ucsc.cb.samples = ShowCBDatasets(lazy = TRUE, json.folder = NULL, update = FALSE)
+# hbb.sample.seu = ParseCBDatasets(all.samples.df = ucsc.cb.samples, organ = c("brain", "blood"), organism = "Human (H. sapiens)")
 }

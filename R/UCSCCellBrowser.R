@@ -1,26 +1,75 @@
 #' Show All Available Datasets in UCSC Cell Browser.
 #'
+#' @param lazy Logical value, whether to always load datasets online or locally. Default: TRUE (load locally).
+#' @param json.folder Folder used to save or load datasets json files. Default: NULL (current working directory).
+#' @param update Logical value, whther to update local datasets json. Default: FALSE. For the first time, you should set \code{lazy} TRUE and
+#' \code{update} TRUE to save json files.
+#' @param quiet Logical value, whether to show downloading progress. Default: FALSE (show).
+#'
 #' @return Dataframe contains all available datasets.
 #' @importFrom magrittr %>%
 #' @importFrom jsonlite fromJSON flatten
 #' @importFrom data.table rbindlist
 #' @importFrom dplyr select filter mutate starts_with
+#' @importFrom utils download.file
 #' @export
 #'
 #' @examples
-#' # ucsc.cb.samples = ShowCBDatasets()
-ShowCBDatasets <- function() {
+#' # # first time run (lazy mode)
+#' # ucsc.cb.samples = ShowCBDatasets(lazy = TRUE, update = TRUE)
+#' # # second time run (lazy mode)
+#' # ucsc.cb.samples = ShowCBDatasets(lazy = TRUE, update = FALSE)
+ShowCBDatasets <- function(lazy = TRUE, json.folder = NULL, update = FALSE, quiet = FALSE) {
   # parse all datasets json
-  all.datasets.json <- jsonlite::fromJSON(txt = "https://cells.ucsc.edu/dataset.json")
-  all.datasets.df <- jsonlite::flatten(all.datasets.json$datasets)
-  colnames(all.datasets.df) <- gsub(pattern = ".*\\.", replacement = "", x = colnames(all.datasets.df))
-  # modify elements
-  all.datasets.df <- PasteAttr(df = all.datasets.df, attr = c(
-    "tags", "diseases", "organisms", "body_parts",
-    "projects", "life_stages", "domains", "sources", "assays"
-  ))
-  # extract all samples
-  all.samples.df <- ExtractSample(all.datasets.df) %>% as.data.frame()
+  if (lazy) {
+    if (is.null(json.folder)) {
+      json.folder <- getwd()
+    }
+    base.url <- json.folder
+    if (update) {
+      message("Lazy mode is on (save time for next time), save all json file to ", json.folder)
+      # download top-level json
+      utils::download.file(url = "https://cells.ucsc.edu/dataset.json", destfile = file.path(base.url, "dataset.json"), quiet = quiet, mode = "wb")
+      # top-level info
+      all.datasets.json <- jsonlite::fromJSON(txt = file.path(base.url, "dataset.json"))
+      base.url <- "https://cells.ucsc.edu"
+    } else {
+      message("Lazy mode is on, load downloaded json from ", json.folder)
+      json.files <- list.files(path = json.folder, pattern = "json$")
+      if (length(json.files) == 0) {
+        stop("There is no json file in ", json.folder, " please re-run ShowCBDatasets with update = TRUE to download the json files!")
+      }
+      all.datasets.json <- jsonlite::fromJSON(txt = file.path(json.folder, "dataset.json"))
+      base.url <- json.folder
+    }
+    all.datasets.df <- jsonlite::flatten(all.datasets.json$datasets)
+    colnames(all.datasets.df) <- gsub(pattern = ".*\\.", replacement = "", x = colnames(all.datasets.df))
+    # modify elements
+    all.datasets.df <- PasteAttr(df = all.datasets.df, attr = c(
+      "tags", "diseases", "organisms", "body_parts",
+      "projects", "life_stages", "domains", "sources", "assays"
+    ))
+    # extract all samples
+    all.samples.df <- ExtractSample(df = all.datasets.df, base.url = base.url, json.folder = json.folder, quiet = quiet) %>%
+      as.data.frame()
+    # desc folder
+    desc.folder <- json.folder
+  } else {
+    message("Lazy mode is off, always load json online (always up-to-date), this is also always time-consuming.")
+    all.datasets.json <- jsonlite::fromJSON(txt = "https://cells.ucsc.edu/dataset.json")
+    all.datasets.df <- jsonlite::flatten(all.datasets.json$datasets)
+    colnames(all.datasets.df) <- gsub(pattern = ".*\\.", replacement = "", x = colnames(all.datasets.df))
+    # modify elements
+    all.datasets.df <- PasteAttr(df = all.datasets.df, attr = c(
+      "tags", "diseases", "organisms", "body_parts",
+      "projects", "life_stages", "domains", "sources", "assays"
+    ))
+    # extract all samples
+    all.samples.df <- ExtractSampleOnline(all.datasets.df) %>% as.data.frame()
+    # desc folder
+    desc.folder <- "https://cells.ucsc.edu"
+  }
+
   # modify columns
   all.samples.df <- PasteAttr(df = all.samples.df, attr = c(
     "tags", "diseases", "organisms", "body_parts",
@@ -52,8 +101,7 @@ ShowCBDatasets <- function() {
     "projects", "life_stages", "domains", "sources", "sampleCount", "assays"
   )]
   # add sample information
-  base.url <- "https://cells.ucsc.edu/"
-  desc.files <- paste0(base.url, all.samples.final$name, "/desc.json")
+  desc.files <- file.path(desc.folder, all.samples.final$name, "desc.json")
   names(desc.files) <- all.samples.final$name
   desc.list <- lapply(names(desc.files), function(x) {
     sd.json <- jsonlite::fromJSON(txt = desc.files[x])
@@ -75,6 +123,7 @@ ShowCBDatasets <- function() {
 
 #' Extract Datasets with Attributes.
 #'
+#' @param all.samples.df Dataframe contains all samples metadata, obtained with \code{ShowCBDatasets}.
 #' @param collection The collection of the datasets, corresponds to \code{shortLabel} column
 #' of \code{ShowCBDatasets}. Default: NULL (without filtering).
 #' @param sub.collection The sub-collection of the datasets, corresponds to \code{subLabel} column
@@ -90,18 +139,14 @@ ShowCBDatasets <- function() {
 #' @param fuzzy.match Logical value, whether to perform fuzzy match with provided attribute values. Default: TRUE.
 #'
 #' @return Dataframe contains filtered datasets.
-#' @importFrom magrittr %>%
-#' @importFrom jsonlite fromJSON flatten
-#' @importFrom data.table rbindlist
-#' @importFrom dplyr select filter mutate starts_with
 #' @export
 #'
 #' @examples
-#' # hbb.sample.df = ExtractCBDatasets(organ = c("brain", "blood"), organism = "Human (H. sapiens)")
-ExtractCBDatasets <- function(collection = NULL, sub.collection = NULL, organ = NULL, disease = NULL, organism = NULL,
+#' # # lazy mode, load datasets json files locally
+#' # ucsc.cb.samples = ShowCBDatasets(lazy = TRUE, json.folder = NULL, update = FALSE)
+#' # hbb.sample.df = ExtractCBDatasets(all.samples.df = ucsc.cb.samples, organ = c("brain", "blood"), organism = "Human (H. sapiens)")
+ExtractCBDatasets <- function(all.samples.df, collection = NULL, sub.collection = NULL, organ = NULL, disease = NULL, organism = NULL,
                               project = NULL, fuzzy.match = TRUE) {
-  # all sample dataframe
-  all.samples.df <- ShowCBDatasets()
   # extract row index under different filter
   collection.idx <- CheckParas(df = all.samples.df, column = "shortLabel", para.value = collection, fuzzy.match = fuzzy.match)
   sub.collection.idx <- CheckParas(df = all.samples.df, column = "subLabel", para.value = sub.collection, fuzzy.match = fuzzy.match)
@@ -118,6 +163,8 @@ ExtractCBDatasets <- function(collection = NULL, sub.collection = NULL, organ = 
 #' Download UCSC Cell Browser Datasets.
 #'
 #' @param sample.df Dataframe contains used datasets. Default: NULL.
+#' @param all.samples.df Dataframe contains all samples metadata, obtained with \code{ShowCBDatasets}. Default: NULL.
+#' \code{sample.df} and \code{all.samples.df} cannot be both NULL.
 #' @param collection The collection of the datasets, corresponds to \code{shortLabel} column
 #' of \code{ShowCBDatasets}. Default: NULL (without filtering).
 #' @param sub.collection The sub-collection of the datasets, corresponds to \code{subLabel} column
@@ -135,25 +182,27 @@ ExtractCBDatasets <- function(collection = NULL, sub.collection = NULL, organ = 
 #'
 #' @return Seurat object (if \code{merge} is TRUE) or list of Seurat objects (if \code{merge} is FALSE).
 #' @importFrom magrittr %>%
-#' @importFrom jsonlite fromJSON flatten
-#' @importFrom data.table rbindlist fread
-#' @importFrom dplyr select filter mutate starts_with full_join
+#' @importFrom data.table fread
+#' @importFrom dplyr full_join
 #' @importFrom Seurat CreateSeuratObject
 #' @importFrom purrr reduce
 #' @importFrom tibble column_to_rownames
 #' @export
 #'
 #' @examples
-#' # hbb.sample.seu = ParseCBDatasets(organ = c("brain", "blood"), organism = "Human (H. sapiens)")
-ParseCBDatasets <- function(sample.df = NULL, collection = NULL, sub.collection = NULL, organ = NULL, disease = NULL, organism = NULL,
-                            project = NULL, fuzzy.match = TRUE, merge = TRUE) {
+#' # # lazy mode, load datasets json files locally
+#' # ucsc.cb.samples = ShowCBDatasets(lazy = TRUE, json.folder = NULL, update = FALSE)
+#' # hbb.sample.seu = ParseCBDatasets(all.samples.df = ucsc.cb.samples, organ = c("brain", "blood"), organism = "Human (H. sapiens)")
+ParseCBDatasets <- function(sample.df = NULL, all.samples.df = NULL, collection = NULL, sub.collection = NULL, organ = NULL,
+                            disease = NULL, organism = NULL, project = NULL, fuzzy.match = TRUE, merge = TRUE) {
   # prepare samples for download
   if (!is.null(sample.df)) {
     # use provided dataframe to download data
     used.sample.df <- sample.df
   } else {
-    # all sample dataframe
-    all.samples.df <- ShowCBDatasets()
+    if (is.null(all.samples.df)) {
+      stop("Please provide all.samples.df, obtained with ShowCBDatasets.")
+    }
     # extract row index under different filter
     collection.idx <- CheckParas(df = all.samples.df, column = "shortLabel", para.value = collection, fuzzy.match = fuzzy.match)
     sub.collection.idx <- CheckParas(df = all.samples.df, column = "subLabel", para.value = sub.collection, fuzzy.match = fuzzy.match)

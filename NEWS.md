@@ -1,6 +1,13 @@
 # scfetch 0.2.0
 
+## New features
 * Provided APIs for GEO.
+
+-------------------
+
+## Minor changes
+* Supported lazy mode in `ShowCBDatasets` to save time for multi-runs.
+* Optimized the paras for `ExtractCBDatasets` and `ParseCBDatasets`.
 
 -------------------
 

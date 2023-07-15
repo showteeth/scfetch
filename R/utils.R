@@ -27,14 +27,54 @@ PasteAttr <- function(df, attr) {
 }
 
 # used in UCSCCellBrowser, recursively extract samples
-ExtractSample <- function(df) {
+ExtractSample <- function(df, base.url, json.folder, quiet) {
+  # prepare json
+  if (base.url == json.folder) {
+    df.json.folder <- file.path(json.folder, df$name)
+  } else {
+    df.json <- file.path(base.url, df$name, "dataset.json")
+    names(df.json) <- df$name
+    df.json.folder <- file.path(json.folder, df$name)
+    names(df.json.folder) <- df$name
+    df.desc <- file.path(base.url, df$name, "desc.json")
+    names(df.desc) <- df$name
+    dird <- sapply(df.json.folder, function(x) {
+      dir.create(x, showWarnings = FALSE, recursive = TRUE)
+    })
+    down.status <- lapply(df$name, function(x) {
+      utils::download.file(url = df.json[x], destfile = file.path(df.json.folder[x], "dataset.json"), quiet = quiet, mode = "wb", method = "wget")
+      utils::download.file(url = df.desc[x], destfile = file.path(df.json.folder[x], "desc.json"), quiet = quiet, mode = "wb", method = "wget")
+    })
+  }
+  # process
+  if (!"isCollection" %in% colnames(df)) {
+    return(df)
+  } else {
+    cf <- df[!is.na(df$isCollection), ]
+    sf <- df[is.na(df$isCollection), ]
+    cu.json.folder <- file.path(json.folder, cf$name)
+    cul <- lapply(file.path(cu.json.folder, "dataset.json"), function(x) {
+      x.json <- jsonlite::fromJSON(txt = x)
+      x.df <- jsonlite::flatten(x.json$datasets)
+      colnames(x.df) <- gsub(pattern = ".*\\.", replacement = "", x = colnames(x.df))
+      x.df
+    })
+    cu.df <- data.table::rbindlist(cul, fill = TRUE)
+    # df = data.table::rbindlist(list(sf, cu.df), fill = TRUE)
+    # return(list(sf, ExtractSample(cu.df)))
+    return(data.table::rbindlist(list(sf, ExtractSample(df = cu.df, base.url = base.url, json.folder = json.folder, quiet = quiet)), fill = TRUE))
+  }
+}
+
+# used in UCSCCellBrowser, recursively extract samples online
+ExtractSampleOnline <- function(df) {
   base.url <- "https://cells.ucsc.edu/"
   if (!"isCollection" %in% colnames(df)) {
     return(df)
   } else {
     cf <- df[!is.na(df$isCollection), ]
     sf <- df[is.na(df$isCollection), ]
-    cu <- paste0(base.url, cf$name, "/dataset.json")
+    cu <- file.path(base.url, cf$name, "dataset.json")
     cul <- lapply(cu, function(x) {
       x.json <- jsonlite::fromJSON(txt = x)
       x.df <- jsonlite::flatten(x.json$datasets)
@@ -44,7 +84,7 @@ ExtractSample <- function(df) {
     cu.df <- data.table::rbindlist(cul, fill = TRUE)
     # df = data.table::rbindlist(list(sf, cu.df), fill = TRUE)
     # return(list(sf, ExtractSample(cu.df)))
-    return(data.table::rbindlist(list(sf, ExtractSample(cu.df)), fill = TRUE))
+    return(data.table::rbindlist(list(sf, ExtractSampleOnline(cu.df)), fill = TRUE))
   }
 }
 

@@ -4,7 +4,17 @@
 \alias{ShowCBDatasets}
 \title{Show All Available Datasets in UCSC Cell Browser.}
 \usage{
-ShowCBDatasets()
+ShowCBDatasets(lazy = TRUE, json.folder = NULL, update = FALSE, quiet = FALSE)
+}
+\arguments{
+\item{lazy}{Logical value, whether to always load datasets online or locally. Default: TRUE (load locally).}
+
+\item{json.folder}{Folder used to save or load datasets json files. Default: NULL (current working directory).}
+
+\item{update}{Logical value, whther to update local datasets json. Default: FALSE. For the first time, you should set \code{lazy} TRUE and
+\code{update} TRUE to save json files.}
+
+\item{quiet}{Logical value, whether to show downloading progress. Default: FALSE (show).}
 }
 \value{
 Dataframe contains all available datasets.
@@ -13,5 +23,8 @@ Dataframe contains all available datasets.
 Show All Available Datasets in UCSC Cell Browser.
 }
 \examples{
-# ucsc.cb.samples = ShowCBDatasets()
+# # first time run (lazy mode)
+# ucsc.cb.samples = ShowCBDatasets(lazy = TRUE, update = TRUE)
+# # second time run (lazy mode)
+# ucsc.cb.samples = ShowCBDatasets(lazy = TRUE, update = FALSE)
 }

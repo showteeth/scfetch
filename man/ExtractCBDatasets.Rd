@@ -5,6 +5,7 @@
 \title{Extract Datasets with Attributes.}
 \usage{
 ExtractCBDatasets(
+  all.samples.df,
   collection = NULL,
   sub.collection = NULL,
   organ = NULL,
@@ -15,6 +16,8 @@ ExtractCBDatasets(
 )
 }
 \arguments{
+\item{all.samples.df}{Dataframe contains all samples metadata, obtained with \code{ShowCBDatasets}.}
+
 \item{collection}{The collection of the datasets, corresponds to \code{shortLabel} column
 of \code{ShowCBDatasets}. Default: NULL (without filtering).}
 
@@ -42,5 +45,7 @@ Dataframe contains filtered datasets.
 Extract Datasets with Attributes.
 }
 \examples{
-# hbb.sample.df = ExtractCBDatasets(organ = c("brain", "blood"), organism = "Human (H. sapiens)")
+# # lazy mode, load datasets json files locally
+# ucsc.cb.samples = ShowCBDatasets(lazy = TRUE, json.folder = NULL, update = FALSE)
+# hbb.sample.df = ExtractCBDatasets(all.samples.df = ucsc.cb.samples, organ = c("brain", "blood"), organism = "Human (H. sapiens)")
 }
