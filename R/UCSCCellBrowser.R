@@ -137,7 +137,7 @@ ShowCBDatasets <- function(lazy = TRUE, json.folder = NULL, update = FALSE, quie
 }
 
 
-#' Extract Datasets with Attributes.
+#' Extract UCSC Cell Browser Datasets with Attributes.
 #'
 #' @param all.samples.df Dataframe contains all samples metadata, obtained with \code{ShowCBDatasets}.
 #' @param collection The collection of the datasets, corresponds to \code{shortLabel} column
@@ -186,23 +186,116 @@ ExtractCBDatasets <- function(all.samples.df, collection = NULL, sub.collection 
   return(used.sample.df)
 }
 
+#' Extract Cell Type Composition of UCSC Cell Browser Datasets.
+#'
+#' @param json.folder Folder contains datasets json files, same as \code{json.folder} of \code{ShowCBDatasets}.
+#' Default: NULL (current working directory).
+#' @param sample.df Dataframe contains used datasets. Default: NULL.
+#' @param all.samples.df Dataframe contains all samples metadata, obtained with \code{ShowCBDatasets}. Default: NULL.
+#' \code{sample.df} and \code{all.samples.df} cannot be both NULL.
+#' @param collection The collection of the datasets, corresponds to \code{shortLabel} column
+#' of \code{all.samples.df}. Default: NULL (without filtering).
+#' @param sub.collection The sub-collection of the datasets, corresponds to \code{subLabel} column
+#' of \code{all.samples.df}. Default: NULL (without filtering).
+#' @param organ The organ of the datasets, corresponds to \code{body_parts} column
+#' of \code{all.samples.df}. Default: NULL (without filtering).
+#' @param disease The disease of the datasets, corresponds to \code{diseases} column
+#' of \code{all.samples.df}. Default: NULL (without filtering).
+#' @param organism The specie of the datasets, corresponds to \code{organisms} column
+#' of \code{all.samples.df}. Default: NULL (without filtering).
+#' @param project The project of the datasets, corresponds to \code{projects} column
+#' of \code{all.samples.df}. Default: NULL (without filtering).
+#' @param fuzzy.match Logical value, whether to perform fuzzy match with provided attribute values. Default: TRUE.
+#' @param cell.num Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter. Deault: NULL.
+#'
+#' @return Dataframe contains sample information and cell type composition.
+#' @importFrom jsonlite fromJSON
+#' @importFrom data.table rbindlist
+#' @importFrom dplyr select
+#' @importFrom magrittr %>%
+#' @export
+#'
+#' @examples
+#' # # lazy mode, load datasets json files locally
+#' # ucsc.cb.samples = ShowCBDatasets(lazy = TRUE, json.folder = NULL, update = FALSE)
+#' # # cell number is between 1000 and 2000
+#' # hbb.sample.df = ExtractCBDatasets(all.samples.df = ucsc.cb.samples, organ = c("brain", "blood"),
+#' #                                   organism = "Human (H. sapiens)", cell.num = c(1000,2000))
+#' # hbb.sample.ct = ExtractCBComposition(json.folder = NULL, sample.df = hbb.sample.df)
+ExtractCBComposition <- function(json.folder = NULL, sample.df = NULL, all.samples.df = NULL, collection = NULL, sub.collection = NULL, organ = NULL,
+                                 disease = NULL, organism = NULL, project = NULL, fuzzy.match = TRUE, cell.num = NULL) {
+  # prepare samples for download
+  if (!is.null(sample.df)) {
+    # use provided dataframe to download data
+    used.sample.df <- sample.df
+  } else {
+    if (is.null(all.samples.df)) {
+      stop("Please provide all.samples.df, obtained with ShowCBDatasets.")
+    }
+    used.sample.df <- ExtractCBDatasets(
+      all.samples.df = all.samples.df, collection = collection, sub.collection = sub.collection, organ = organ,
+      disease = disease, organism = organism, project = project, fuzzy.match = fuzzy.match, cell.num = cell.num
+    )
+  }
+  # prepare json folder
+  if (is.null(json.folder)) {
+    json.folder <- getwd()
+  }
+  # check json files
+  expect.json.files <- file.path(json.folder, used.sample.df$name, "dataset.json")
+  available.json.files <- list.files(path = json.folder, pattern = "dataset.json", recursive = TRUE, full.names = TRUE)
+  diff.json.files <- setdiff(expect.json.files, available.json.files)
+  valid.json.files <- intersect(expect.json.files, available.json.files)
+  if (length(diff.json.files) > 0) {
+    warning(paste0(diff.json.files, collapse = ","), " json files are not available, please check!")
+  }
+  if (length(valid.json.files) > 0) {
+    cell.type.list <- lapply(valid.json.files, function(x) {
+      ct.name <- gsub(pattern = paste0(json.folder, "/", "(.*?)", "/dataset.json"), replacement = "\\1", x = x)
+      ct.json <- jsonlite::fromJSON(txt = x)
+      valid.label.id <- intersect(c("labelField", "clusterField"), names(ct.json))
+      cid <- ct.json[[valid.label.id[1]]]
+      meta.fields <- ct.json$metaFields
+      cid.idx <- which(meta.fields$label == cid)
+      ct.list <- ct.json$metaFields$valCounts[cid.idx][[1]]
+      if (is.null(ct.list)) {
+        ct.df <- data.frame(CellType = NA, Num = NA)
+      } else {
+        ct.df <- ct.list %>% as.data.frame()
+        colnames(ct.df) <- c("CellType", "Num")
+        ct.df$Num <- as.numeric(ct.df$Num)
+      }
+      ct.df$name <- ct.name
+      ct.df
+    })
+    cell.type.df <- data.table::rbindlist(cell.type.list, fill = TRUE) %>% as.data.frame()
+    cell.type.df <- merge(used.sample.df, cell.type.df, by = "name", all.y = TRUE) %>% as.data.frame()
+    cell.type.df <- cell.type.df %>%
+      dplyr::select(-c("matrix", "barcode", "feature", "matrixType", "unit", "coords", "name")) %>%
+      dplyr::relocate(c("CellType", "Num"), .after = "subLabel")
+  } else {
+    cell.type.df <- data.frame()
+  }
+  return(cell.type.df)
+}
+
 #' Download UCSC Cell Browser Datasets.
 #'
 #' @param sample.df Dataframe contains used datasets. Default: NULL.
 #' @param all.samples.df Dataframe contains all samples metadata, obtained with \code{ShowCBDatasets}. Default: NULL.
 #' \code{sample.df} and \code{all.samples.df} cannot be both NULL.
 #' @param collection The collection of the datasets, corresponds to \code{shortLabel} column
-#' of \code{ShowCBDatasets}. Default: NULL (without filtering).
+#' of \code{all.samples.df}. Default: NULL (without filtering).
 #' @param sub.collection The sub-collection of the datasets, corresponds to \code{subLabel} column
-#' of \code{ShowCBDatasets}. Default: NULL (without filtering).
+#' of \code{all.samples.df}. Default: NULL (without filtering).
 #' @param organ The organ of the datasets, corresponds to \code{body_parts} column
-#' of \code{ShowCBDatasets}. Default: NULL (without filtering).
+#' of \code{all.samples.df}. Default: NULL (without filtering).
 #' @param disease The disease of the datasets, corresponds to \code{diseases} column
-#' of \code{ShowCBDatasets}. Default: NULL (without filtering).
+#' of \code{all.samples.df}. Default: NULL (without filtering).
 #' @param organism The specie of the datasets, corresponds to \code{organisms} column
-#' of \code{ShowCBDatasets}. Default: NULL (without filtering).
+#' of \code{all.samples.df}. Default: NULL (without filtering).
 #' @param project The project of the datasets, corresponds to \code{projects} column
-#' of \code{ShowCBDatasets}. Default: NULL (without filtering).
+#' of \code{all.samples.df}. Default: NULL (without filtering).
 #' @param fuzzy.match Logical value, whether to perform fuzzy match with provided attribute values. Default: TRUE.
 #' @param cell.num Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter. Deault: NULL.
 #' @param merge Logical value, whether to merge Seurat list. Default: FALSE.

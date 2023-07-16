@@ -3,6 +3,7 @@
 ## New features
 * Provided APIs for GEO.
 * Added `Read10XOnline` to load cellranger output.
+* Added `ExtractCBComposition` to extract cell type composition of UCSC Cell Browser datasets.
 
 -------------------
 
