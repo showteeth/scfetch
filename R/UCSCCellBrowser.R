@@ -211,9 +211,10 @@ ExtractCBDatasets <- function(all.samples.df, collection = NULL, sub.collection 
 #' @importFrom magrittr %>%
 #' @importFrom data.table fread
 #' @importFrom dplyr full_join
-#' @importFrom Seurat CreateSeuratObject
+#' @importFrom Seurat CreateSeuratObject as.sparse
 #' @importFrom purrr reduce
 #' @importFrom tibble column_to_rownames
+#' @importFrom Matrix readMM
 #' @export
 #'
 #' @examples
@@ -223,6 +224,9 @@ ExtractCBDatasets <- function(all.samples.df, collection = NULL, sub.collection 
 #' # hbb.sample.df = ExtractCBDatasets(all.samples.df = ucsc.cb.samples, organ = c("brain", "blood"),
 #' #                                   organism = "Human (H. sapiens)", cell.num = c(1000,2000))
 #' # hbb.sample.seu = ParseCBDatasets(sample.df = hbb.sample.df)
+#' # # test 10x and matrix load
+#' # complex.df = ucsc.cb.samples[c(1, 927, 379), ] # two 10x and one matrix
+#' # complex.seu.list = ParseCBDatasets(sample.df = test.df, merge = F)
 ParseCBDatasets <- function(sample.df = NULL, all.samples.df = NULL, collection = NULL, sub.collection = NULL, organ = NULL,
                             disease = NULL, organism = NULL, project = NULL, fuzzy.match = TRUE, cell.num = NULL, merge = TRUE) {
   # prepare samples for download
@@ -238,29 +242,31 @@ ParseCBDatasets <- function(sample.df = NULL, all.samples.df = NULL, collection 
       disease = disease, organism = organism, project = project, fuzzy.match = fuzzy.match, cell.num = cell.num
     )
   }
-  # parepare exp
+  # base url
   base.url <- "https://cells.ucsc.edu/"
-  sample.names <- gsub(pattern = "/", replacement = "_", x = used.sample.df$name)
-  # prepare exp matrix
-  exp.urls <- paste0(base.url, used.sample.df$name, "/exprMatrix.tsv.gz")
-  names(exp.urls) <- sample.names
-  # out.exp.files = file.path(out.folder, paste(sample.names, "exprMatrix.tsv.gz", sep = "_"))
-  # names(out.exp.files) = sample.names
-  # prepare metadata
-  meta.urls <- paste0(base.url, used.sample.df$name, "/meta.tsv")
-  names(meta.urls) <- sample.names
-  # out.meta.files = file.path(out.folder, paste(sample.names, "meta.tsv", sep = "_"))
-  # names(out.meta.files) = sample.names
-  # prepare coord
-  coord.files <- sapply(1:nrow(used.sample.df), function(x) {
-    paste0(base.url, used.sample.df$name[x], "/", strsplit(x = used.sample.df$coords[x], split = ", ")[[1]])
-  })
-  names(coord.files) <- sample.names
-  # create seurat object
-  seu.obj.list <- lapply(sample.names, function(x) {
-    message(x)
-    Load2Seurat(exp.file = exp.urls[x], meta.file = meta.urls[x], coord.file = coord.files[[x]], name = x)
-  })
+  seu.obj.list <- list()
+  for (rn in 1:nrow(used.sample.df)) {
+    sample.name <- gsub(pattern = "/", replacement = "_", x = used.sample.df[rn, "name"])
+    matrix.type <- used.sample.df[rn, "matrixType"]
+    # prepare exp matrix
+    exp.url <- paste0(base.url, used.sample.df[rn, "name"], "/", used.sample.df[rn, "matrix"])
+    # prepare barcode and feature
+    if (matrix.type == "matrix") {
+      barcode.url <- NULL
+      feature.url <- NULL
+    } else if (matrix.type == "10x") {
+      barcode.url <- paste0(base.url, used.sample.df[rn, "name"], "/", used.sample.df[rn, "barcode"])
+      feature.url <- paste0(base.url, used.sample.df[rn, "name"], "/", used.sample.df[rn, "feature"])
+    }
+    # prepare metadata
+    meta.url <- paste0(base.url, used.sample.df[rn, "name"], "/meta.tsv")
+    # prepare coord
+    coord.file <- paste0(base.url, used.sample.df[rn, "name"], "/", strsplit(x = used.sample.df[rn, "coords"], split = ", ")[[1]])
+    seu.obj.list[[rn]] <- Load2Seurat(
+      exp.file = exp.url, barcode.url = barcode.url, feature.url = feature.url,
+      meta.file = meta.url, coord.file = coord.file, name = sample.name
+    )
+  }
   # merge or not
   if (isTRUE(merge)) {
     seu.obj <- mergeExperiments(seu.obj.list)

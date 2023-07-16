@@ -61,4 +61,7 @@ Download UCSC Cell Browser Datasets.
 # hbb.sample.df = ExtractCBDatasets(all.samples.df = ucsc.cb.samples, organ = c("brain", "blood"),
 #                                   organism = "Human (H. sapiens)", cell.num = c(1000,2000))
 # hbb.sample.seu = ParseCBDatasets(sample.df = hbb.sample.df)
+# # test 10x and matrix load
+# complex.df = ucsc.cb.samples[c(1, 927, 379), ] # two 10x and one matrix
+# complex.seu.list = ParseCBDatasets(sample.df = test.df, merge = F)
 }

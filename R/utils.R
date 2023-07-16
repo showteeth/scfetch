@@ -168,16 +168,22 @@ CheckParas <- function(df, column, para.value, fuzzy.match = TRUE) {
 }
 
 # used in UCSCCellBrowser, create seurat object (add coord to metadata)
-Load2Seurat <- function(exp.file, meta.file, coord.file = NULL, name = NULL) {
+Load2Seurat <- function(exp.file, barcode.url = NULL, feature.url = NULL,
+                        meta.file, coord.file = NULL, name = NULL) {
   # source: https://cellbrowser.readthedocs.io/en/master/load.html
   # read matrix
-  mat <- data.table::fread(exp.file, check.names = FALSE)
+  if (is.null(barcode.url)) {
+    mat <- data.table::fread(exp.file, check.names = FALSE)
+    # get genes
+    genes <- gsub(".+[|]", "", mat[, 1][[1]])
+    # modify mat genes
+    mat <- data.frame(mat[, -1], row.names = genes, check.names = FALSE)
+  } else {
+    # with default parameters
+    mat <- Read10XOnline(matrix.url = exp.file, barcode.url = barcode.url, feature.url = feature.url)
+  }
   # read metadata
   meta <- data.frame(data.table::fread(meta.file, check.names = FALSE), row.names = 1)
-  # get genes
-  genes <- gsub(".+[|]", "", mat[, 1][[1]])
-  # modify mat genes
-  mat <- data.frame(mat[, -1], row.names = genes, check.names = FALSE)
   if (is.null(coord.file)) {
     seu.obj <- Seurat::CreateSeuratObject(counts = mat, project = name, meta.data = meta)
   } else {
