@@ -2,6 +2,7 @@
 
 ## New features
 * Provided APIs for GEO.
+* Added `Read10XOnline` to load cellranger output.
 
 -------------------
 

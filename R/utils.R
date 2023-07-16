@@ -201,3 +201,80 @@ Load2Seurat <- function(exp.file, meta.file, coord.file = NULL, name = NULL) {
   }
   return(seu.obj)
 }
+
+# used in UCSCCellBrowser
+# source: https://github.com/satijalab/seurat/blob/master/R/utilities.R#L1949
+ExtractField <- function(string, field = 1, delim = "_") {
+  fields <- as.numeric(x = unlist(x = strsplit(x = as.character(x = field), split = ",")))
+  if (length(x = fields) == 1) {
+    return(strsplit(x = string, split = delim)[[1]][field])
+  }
+  return(paste(strsplit(x = string, split = delim)[[1]][fields], collapse = delim))
+}
+
+# used in UCSCCellBrowser, load cellranger output to matrix
+Read10XOnline <- function(matrix.url, barcode.url, feature.url, gene.column = 2,
+                          cell.column = 1, unique.features = TRUE, strip.suffix = FALSE) {
+  # load matrix
+  data <- Matrix::readMM(file = gzcon(url(matrix.url)))
+  # load barcode
+  cell.barcodes <- as.data.frame(data.table::fread(barcode.url, header = FALSE))
+  cn <- ifelse(ncol(x = cell.barcodes) > 1, cell.column, 1)
+  cell.names <- cell.barcodes[, cn]
+  if (all(grepl(pattern = "\\-1$", x = cell.names)) & strip.suffix) {
+    cell.names <- as.vector(x = as.character(x = sapply(
+      X = cell.names,
+      FUN = ExtractField,
+      field = 1,
+      delim = "-"
+    )))
+  }
+  # matrix colnames
+  colnames(x = data) <- cell.names
+  # load feature
+  feature.names <- as.data.frame(data.table::fread(feature.url, header = FALSE))
+  # modify gene column
+  gene.column <- min(ncol(feature.names), gene.column)
+  if (any(is.na(x = feature.names[, gene.column]))) {
+    warning(
+      "Some features names are NA. Replacing NA names with ID from the opposite column requested",
+      call. = FALSE,
+      immediate. = TRUE
+    )
+    na.features <- which(x = is.na(x = feature.names[, gene.column]))
+    replacement.column <- ifelse(test = gene.column == 2, yes = 1, no = 2)
+    feature.names[na.features, gene.column] <- feature.names[na.features, replacement.column]
+  }
+
+  # modify matrix rownames
+  if (unique.features) {
+    rownames(x = data) <- make.unique(names = feature.names[, gene.column])
+  } else {
+    rownames(x = data) <- feature.names[, gene.column]
+  }
+  # In cell ranger 3.0, a third column specifying the type of data was added
+  # and we will return each type of data as a separate matrix
+  if (ncol(x = feature.names) > 2) {
+    data_types <- factor(x = feature.names$V3)
+    lvls <- levels(x = data_types)
+    if (length(x = lvls) > 1 && length(x = full.data) == 0) {
+      message("10X data contains more than one type and is being returned as a list containing matrices of each type.")
+    }
+    expr_name <- "Gene Expression"
+    if (expr_name %in% lvls) { # Return Gene Expression first
+      lvls <- c(expr_name, lvls[-which(x = lvls == expr_name)])
+    }
+    data <- lapply(
+      X = lvls,
+      FUN = function(l) {
+        return(data[data_types == l, , drop = FALSE])
+      }
+    )
+    names(x = data) <- lvls
+  } else {
+    data <- list(data)
+  }
+  # convert to dgCMatrix
+  final.data <- Seurat::as.sparse(data[[1]])
+  return(final.data)
+}
