@@ -15,6 +15,7 @@ ParseCBDatasets(
   project = NULL,
   fuzzy.match = TRUE,
   cell.num = NULL,
+  timeout = 1000,
   merge = TRUE
 )
 }
@@ -45,6 +46,8 @@ of \code{all.samples.df}. Default: NULL (without filtering).}
 \item{fuzzy.match}{Logical value, whether to perform fuzzy match with provided attribute values. Default: TRUE.}
 
 \item{cell.num}{Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter. Deault: NULL.}
+
+\item{timeout}{Maximum request time when loading data online. Default: 1000.}
 
 \item{merge}{Logical value, whether to merge Seurat list. Default: FALSE.}
 }

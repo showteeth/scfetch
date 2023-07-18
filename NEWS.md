@@ -13,6 +13,7 @@
 * Added `cell.num` filter to `ParseCBDatasets`, `ExtractCBDatasets` and `ShowPanglaoDBMeta`.
 * Extracted matrix, barcode and feature info from dataset.json (comprehensive) instead of desc.json.
 * Fixed bugs in `ParseCBDatasets` when dealing with cellranger output.
+* Added `timeout` in `ParseCBDatasets` to avoid possible timeout error.
 
 -------------------
 

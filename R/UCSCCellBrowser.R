@@ -298,6 +298,7 @@ ExtractCBComposition <- function(json.folder = NULL, sample.df = NULL, all.sampl
 #' of \code{all.samples.df}. Default: NULL (without filtering).
 #' @param fuzzy.match Logical value, whether to perform fuzzy match with provided attribute values. Default: TRUE.
 #' @param cell.num Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter. Deault: NULL.
+#' @param timeout Maximum request time when loading data online. Default: 1000.
 #' @param merge Logical value, whether to merge Seurat list. Default: FALSE.
 #'
 #' @return Seurat object (if \code{merge} is TRUE) or list of Seurat objects (if \code{merge} is FALSE).
@@ -321,7 +322,8 @@ ExtractCBComposition <- function(json.folder = NULL, sample.df = NULL, all.sampl
 #' # complex.df = ucsc.cb.samples[c(1, 927, 379), ] # two 10x and one matrix
 #' # complex.seu.list = ParseCBDatasets(sample.df = test.df, merge = F)
 ParseCBDatasets <- function(sample.df = NULL, all.samples.df = NULL, collection = NULL, sub.collection = NULL, organ = NULL,
-                            disease = NULL, organism = NULL, project = NULL, fuzzy.match = TRUE, cell.num = NULL, merge = TRUE) {
+                            disease = NULL, organism = NULL, project = NULL, fuzzy.match = TRUE, cell.num = NULL,
+                            timeout = 1000, merge = TRUE) {
   # prepare samples for download
   if (!is.null(sample.df)) {
     # use provided dataframe to download data
@@ -335,6 +337,9 @@ ParseCBDatasets <- function(sample.df = NULL, all.samples.df = NULL, collection 
       disease = disease, organism = organism, project = project, fuzzy.match = fuzzy.match, cell.num = cell.num
     )
   }
+  # set timeout
+  env.timeout <- getOption("timeout")
+  options(timeout = timeout)
   # base url
   base.url <- "https://cells.ucsc.edu/"
   seu.obj.list <- list()
@@ -360,6 +365,8 @@ ParseCBDatasets <- function(sample.df = NULL, all.samples.df = NULL, collection 
       meta.file = meta.url, coord.file = coord.file, name = sample.name
     )
   }
+  # restore timeout
+  options(timeout = env.timeout)
   # merge or not
   if (isTRUE(merge)) {
     seu.obj <- mergeExperiments(seu.obj.list)
