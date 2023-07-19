@@ -42,7 +42,8 @@ and 10x (cellranger output files, contains barcodes, genes/features and matrix).
 \item{...}{Parameters for \code{\link{getGEO}}.}
 }
 \value{
-List contains GEO object of platform, study information, raw count matrix and metadata.
+List contains GEO object of platform, raw count matrix, Seurat object (if \code{merge} is TRUE) or
+Seurat object list (if \code{merge} is FALSE).
 }
 \description{
 Parse GEO Data.

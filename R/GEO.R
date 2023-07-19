@@ -14,7 +14,8 @@
 #' @param merge Logical value, whether to merge Seurat list when there are multiple 10x files (\code{supp.type} is 10x). Default: FALSE.
 #' @param ... Parameters for \code{\link{getGEO}}.
 #'
-#' @return List contains GEO object of platform, study information, raw count matrix and metadata.
+#' @return List contains GEO object of platform, raw count matrix, Seurat object (if \code{merge} is TRUE) or
+#' Seurat object list (if \code{merge} is FALSE).
 #' @importFrom magrittr %>%
 #' @importFrom GEOquery getGEO getGEOSuppFiles gunzip
 #' @importFrom Biobase annotation experimentData pData phenoData notes sampleNames exprs
@@ -38,8 +39,6 @@ ParseGEO <- function(acce, platform, supp.idx = 1, down.supp = FALSE, timeout = 
 
   # get GEO object
   pf.obj <- GEOobj(acce = acce, platform = platform, ...)
-  # extract general information
-  pf.info <- ExtractGEOInfo(pf.obj = pf.obj, sample.wise = FALSE)
   # extract raw counts
   pf.count <- ExtractGEOExp(
     pf.obj = pf.obj, acce = acce, supp.idx = supp.idx, down.supp = down.supp,
@@ -68,16 +67,62 @@ ParseGEO <- function(acce, platform, supp.idx = 1, down.supp = FALSE, timeout = 
   } else if (!is.null(pf.count) && supp.type == "count") {
     seu.obj <- Seurat::CreateSeuratObject(counts = pf.count, project = acce)
   }
-  # select meta data
-  pf.meta <- ExtractGEOMeta(pf.obj = pf.obj)
   # return list
   res.list <- list(
-    obj = pf.obj, exp.info = pf.info, count = pf.count,
-    seu.obj = seu.obj, metadata = pf.meta
+    obj = pf.obj, count = pf.count,
+    seu.obj = seu.obj
   )
   return(res.list)
 }
 
+#' Extract Sample Metadata from GEO.
+#'
+#' @param acce GEO accession number.
+#' @param platform Platform information/field.
+#' @param ... Parameters for \code{\link{getGEO}}.
+#'
+#' @return Dataframe contains all metadata of provided GEO accession number.
+#' @importFrom magrittr %>%
+#' @importFrom GEOquery getGEO
+#' @importFrom Biobase annotation experimentData pData phenoData notes sampleNames exprs
+#' @export
+#'
+#' @examples
+#' # GSE200257.meta = ExtractGEOMeta(acce = "GSE200257", platform = "GPL24676")
+#' # GSE94820.meta = ExtractGEOMeta(acce = "GSE94820", platform = "GPL15520")
+ExtractGEOMeta <- function(acce, platform = NULL, ...) {
+  # get GEO object
+  if (is.null(platform)) {
+    geo.obj <- GEOquery::getGEO(GEO = acce, ...)
+    pfs <- sapply(geo.obj, function(x) {
+      Biobase::annotation(x)
+    })
+    names(geo.obj) <- pfs
+  } else {
+    geo.obj <- list()
+    pf.obj <- GEOobj(acce = acce, platform = platform, ...)
+    geo.obj[[platform]] <- pf.obj
+  }
+  # extract metadata
+  geo.meta.list <- lapply(names(geo.obj), function(x) {
+    # extract general information
+    pf.info <- ExtractGEOInfo(pf.obj = geo.obj[[x]], sample.wise = FALSE)
+    pf.info$Platform <- x
+    # select meta data
+    pf.meta <- ExtractGEOSubMeta(pf.obj = geo.obj[[x]])
+    pf.meta$Platform <- x
+    # merge all dataframe
+    pf.all <- merge(pf.meta, pf.info, by = "Platform", all.x = TRUE) %>% as.data.frame()
+    pf.all
+  })
+  # all metadta
+  if (length(geo.meta.list) > 1) {
+    geo.meta.df <- data.table::rbindlist(geo.meta.list, fill = TRUE) %>% as.data.frame()
+  } else {
+    geo.meta.df <- geo.meta.list[[1]]
+  }
+  return(geo.meta.df)
+}
 
 # connect to GEO, extract GEO object, extract platform object
 GEOobj <- function(acce, platform, ...) {
@@ -167,8 +212,8 @@ ExtractGEOInfo <- function(pf.obj, sample.wise = FALSE) {
 #'
 #' @examples
 #' # pf.obj = GEOobj(acce = "GSE94820", platform = "GPL16791")
-#' # pf.info = ExtractGEOMeta(pf.obj)
-ExtractGEOMeta <- function(pf.obj) {
+#' # pf.info = ExtractGEOSubMeta(pf.obj)
+ExtractGEOSubMeta <- function(pf.obj) {
   # extract sample detail information
   pf.info <- as.data.frame(Biobase::pData(Biobase::phenoData(pf.obj)))
   # select used basic cols

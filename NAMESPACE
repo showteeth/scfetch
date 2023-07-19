@@ -2,6 +2,7 @@
 
 export(ExtractCBComposition)
 export(ExtractCBDatasets)
+export(ExtractGEOMeta)
 export(ParseCBDatasets)
 export(ParseGEO)
 export(ParsePanglaoDB)

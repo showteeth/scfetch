@@ -2,20 +2,24 @@
 % Please edit documentation in R/GEO.R
 \name{ExtractGEOMeta}
 \alias{ExtractGEOMeta}
-\title{Extract Sample Metadata.}
+\title{Extract Sample Metadata from GEO.}
 \usage{
-ExtractGEOMeta(pf.obj)
+ExtractGEOMeta(acce, platform = NULL, ...)
 }
 \arguments{
-\item{pf.obj}{GEO object of platform.}
+\item{acce}{GEO accession number.}
+
+\item{platform}{Platform information/field.}
+
+\item{...}{Parameters for \code{\link{getGEO}}.}
 }
 \value{
-A dataframe.
+Dataframe contains all metadata of provided GEO accession number.
 }
 \description{
-Extract Sample Metadata.
+Extract Sample Metadata from GEO.
 }
 \examples{
-# pf.obj = GEOobj(acce = "GSE94820", platform = "GPL16791")
-# pf.info = ExtractGEOMeta(pf.obj)
+# GSE200257.meta = ExtractGEOMeta(acce = "GSE200257", platform = "GPL24676")
+# GSE94820.meta = ExtractGEOMeta(acce = "GSE94820", platform = "GPL15520")
 }
