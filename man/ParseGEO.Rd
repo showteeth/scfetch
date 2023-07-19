@@ -6,9 +6,9 @@
 \usage{
 ParseGEO(
   acce,
-  platform,
-  supp.idx = 1,
+  platform = NULL,
   down.supp = FALSE,
+  supp.idx = 1,
   timeout = 3600,
   supp.type = c("count", "10x"),
   out.folder = NULL,
@@ -20,13 +20,13 @@ ParseGEO(
 \arguments{
 \item{acce}{GEO accession number.}
 
-\item{platform}{Platform information/field.}
-
-\item{supp.idx}{The index of supplementary files to download. This should be consistent with \code{platform}. Default: 1.}
+\item{platform}{Platform information/field. Disable when \code{down.supp} is TRUE. Default: NULL (disable).}
 
 \item{down.supp}{Logical value, whether to download supplementary files to create count matrix. If TRUE, always
 download supplementary files. If FALSE, use \code{ExpressionSet} (If contains non-integer or emoty,
 download supplementary files automatically). Default: FALSE.}
+
+\item{supp.idx}{The index of supplementary files to download. This should be consistent with \code{platform}. Default: 1.}
 
 \item{timeout}{Timeout for \code{\link{download.file}}. Default: 3600.}
 
@@ -42,16 +42,15 @@ and 10x (cellranger output files, contains barcodes, genes/features and matrix).
 \item{...}{Parameters for \code{\link{getGEO}}.}
 }
 \value{
-List contains GEO object of platform, raw count matrix, Seurat object (if \code{merge} is TRUE) or
-Seurat object list (if \code{merge} is FALSE).
+Seurat object (if \code{merge} is TRUE) or Seurat object list (if \code{merge} is FALSE).
 }
 \description{
 Parse GEO Data.
 }
 \examples{
 # # the supp files are count matrix
-# GSE94820.list = ParseGEO(acce = "GSE94820", platform = "GPL16791")
+# GSE94820.seu = ParseGEO(acce = "GSE94820", down.supp = TRUE, supp.idx = 1, supp.type = "count")
 # # the supp files are cellranger output files: barcodes, genes/features and matrix
-# GSE200257.list = ParseGEO(acce = "GSE200257", platform = "GPL24676", supp.idx = 1, down.supp = TRUE, supp.type = "10x",
-#                           out.folder = "/path/to/output/folder")
+# GSE200257.seu = ParseGEO(acce = "GSE200257", down.supp = TRUE, supp.idx = 1, supp.type = "10x",
+#                          out.folder = "/path/to/output/folder")
 }

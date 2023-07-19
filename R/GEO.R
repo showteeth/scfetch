@@ -1,11 +1,11 @@
 #' Parse GEO Data.
 #'
 #' @param acce GEO accession number.
-#' @param platform Platform information/field.
-#' @param supp.idx The index of supplementary files to download. This should be consistent with \code{platform}. Default: 1.
+#' @param platform Platform information/field. Disable when \code{down.supp} is TRUE. Default: NULL (disable).
 #' @param down.supp Logical value, whether to download supplementary files to create count matrix. If TRUE, always
 #' download supplementary files. If FALSE, use \code{ExpressionSet} (If contains non-integer or emoty,
 #' download supplementary files automatically). Default: FALSE.
+#' @param supp.idx The index of supplementary files to download. This should be consistent with \code{platform}. Default: 1.
 #' @param timeout Timeout for \code{\link{download.file}}. Default: 3600.
 #' @param supp.type The type of downloaded supplementary files, choose from count (count matrix file or single count matrix file)
 #' and 10x (cellranger output files, contains barcodes, genes/features and matrix). Default: count.
@@ -14,8 +14,7 @@
 #' @param merge Logical value, whether to merge Seurat list when there are multiple 10x files (\code{supp.type} is 10x). Default: FALSE.
 #' @param ... Parameters for \code{\link{getGEO}}.
 #'
-#' @return List contains GEO object of platform, raw count matrix, Seurat object (if \code{merge} is TRUE) or
-#' Seurat object list (if \code{merge} is FALSE).
+#' @return Seurat object (if \code{merge} is TRUE) or Seurat object list (if \code{merge} is FALSE).
 #' @importFrom magrittr %>%
 #' @importFrom GEOquery getGEO getGEOSuppFiles gunzip
 #' @importFrom Biobase annotation experimentData pData phenoData notes sampleNames exprs
@@ -28,18 +27,27 @@
 #'
 #' @examples
 #' # # the supp files are count matrix
-#' # GSE94820.list = ParseGEO(acce = "GSE94820", platform = "GPL16791")
+#' # GSE94820.seu = ParseGEO(acce = "GSE94820", down.supp = TRUE, supp.idx = 1, supp.type = "count")
 #' # # the supp files are cellranger output files: barcodes, genes/features and matrix
-#' # GSE200257.list = ParseGEO(acce = "GSE200257", platform = "GPL24676", supp.idx = 1, down.supp = TRUE, supp.type = "10x",
-#' #                           out.folder = "/path/to/output/folder")
-ParseGEO <- function(acce, platform, supp.idx = 1, down.supp = FALSE, timeout = 3600,
+#' # GSE200257.seu = ParseGEO(acce = "GSE200257", down.supp = TRUE, supp.idx = 1, supp.type = "10x",
+#' #                          out.folder = "/path/to/output/folder")
+ParseGEO <- function(acce, platform = NULL, down.supp = FALSE, supp.idx = 1, timeout = 3600,
                      supp.type = c("count", "10x"), out.folder = NULL, gene2feature = TRUE, merge = TRUE, ...) {
   # check parameters
   supp.type <- match.arg(arg = supp.type)
-
-  # get GEO object
-  pf.obj <- GEOobj(acce = acce, platform = platform, ...)
-  # extract raw counts
+  # check platform
+  if (down.supp) {
+    message("Download supplementary files to generate matrix!")
+    pf.obj <- NULL
+  } else {
+    message("Extract expression data from eSets!")
+    if (is.null(platform)) {
+      stop("Platform is required to extract expression data!")
+    }
+    # get GEO object
+    pf.obj <- GEOobj(acce = acce, platform = platform, ...)
+  }
+  # extract counts matrix
   pf.count <- ExtractGEOExp(
     pf.obj = pf.obj, acce = acce, supp.idx = supp.idx, down.supp = down.supp,
     timeout = timeout, supp.type = supp.type, out.folder = out.folder, gene2feature = gene2feature
@@ -67,12 +75,7 @@ ParseGEO <- function(acce, platform, supp.idx = 1, down.supp = FALSE, timeout = 
   } else if (!is.null(pf.count) && supp.type == "count") {
     seu.obj <- Seurat::CreateSeuratObject(counts = pf.count, project = acce)
   }
-  # return list
-  res.list <- list(
-    obj = pf.obj, count = pf.count,
-    seu.obj = seu.obj
-  )
-  return(res.list)
+  return(seu.obj)
 }
 
 #' Extract Sample Metadata from GEO.
@@ -88,8 +91,10 @@ ParseGEO <- function(acce, platform, supp.idx = 1, down.supp = FALSE, timeout = 
 #' @export
 #'
 #' @examples
+#' # # extract metadata of specified platform
 #' # GSE200257.meta = ExtractGEOMeta(acce = "GSE200257", platform = "GPL24676")
-#' # GSE94820.meta = ExtractGEOMeta(acce = "GSE94820", platform = "GPL15520")
+#' # # extract metadata of all platforms
+#' # GSE94820.meta = ExtractGEOMeta(acce = "GSE94820", platform = NULL)
 ExtractGEOMeta <- function(acce, platform = NULL, ...) {
   # get GEO object
   if (is.null(platform)) {

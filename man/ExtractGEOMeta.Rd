@@ -20,6 +20,8 @@ Dataframe contains all metadata of provided GEO accession number.
 Extract Sample Metadata from GEO.
 }
 \examples{
+# # extract metadata of specified platform
 # GSE200257.meta = ExtractGEOMeta(acce = "GSE200257", platform = "GPL24676")
-# GSE94820.meta = ExtractGEOMeta(acce = "GSE94820", platform = "GPL15520")
+# # extract metadata of all platforms
+# GSE94820.meta = ExtractGEOMeta(acce = "GSE94820", platform = NULL)
 }

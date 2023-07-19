@@ -17,6 +17,7 @@
 * Fixed bugs in `ParseCBDatasets` when dealing with cellranger output.
 * Added `timeout` in `ParseCBDatasets` to avoid possible timeout error.
 * Changed `time.out` in GEO related functions to `timeout`.
+* Simplified the output of `ParseGEO`. 
 
 -------------------
 
