@@ -7,7 +7,7 @@
 ExtractGEOExpSupp10x(
   acce,
   supp.idx = 1,
-  time.out = 3600,
+  timeout = 3600,
   out.folder = NULL,
   gene2feature = TRUE
 )
@@ -17,7 +17,7 @@ ExtractGEOExpSupp10x(
 
 \item{supp.idx}{The index of supplementary files to download. Default: 1.}
 
-\item{time.out}{Timeout for \code{\link{download.file}}. Default: 3600.}
+\item{timeout}{Timeout for \code{\link{download.file}}. Default: 3600.}
 
 \item{out.folder}{Output folder to save 10x files. Default: NULL (current working directory).}
 

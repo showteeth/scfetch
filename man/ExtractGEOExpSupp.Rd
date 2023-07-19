@@ -4,12 +4,12 @@
 \alias{ExtractGEOExpSupp}
 \title{Extract Raw Count Matrix from Supplementary Files.}
 \usage{
-ExtractGEOExpSupp(acce, time.out = 3600, supp.idx = 1)
+ExtractGEOExpSupp(acce, timeout = 3600, supp.idx = 1)
 }
 \arguments{
 \item{acce}{GEO accession number.}
 
-\item{time.out}{Timeout for \code{\link{download.file}}. Default: 3600.}
+\item{timeout}{Timeout for \code{\link{download.file}}. Default: 3600.}
 
 \item{supp.idx}{The index of supplementary files to download. Default: 1.}
 }

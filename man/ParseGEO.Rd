@@ -9,10 +9,11 @@ ParseGEO(
   platform,
   supp.idx = 1,
   down.supp = FALSE,
-  time.out = 3600,
+  timeout = 3600,
   supp.type = c("count", "10x"),
   out.folder = NULL,
   gene2feature = TRUE,
+  merge = TRUE,
   ...
 )
 }
@@ -27,7 +28,7 @@ ParseGEO(
 download supplementary files. If FALSE, use \code{ExpressionSet} (If contains non-integer or emoty,
 download supplementary files automatically). Default: FALSE.}
 
-\item{time.out}{Timeout for \code{\link{download.file}}. Default: 3600.}
+\item{timeout}{Timeout for \code{\link{download.file}}. Default: 3600.}
 
 \item{supp.type}{The type of downloaded supplementary files, choose from count (count matrix file or single count matrix file)
 and 10x (cellranger output files, contains barcodes, genes/features and matrix). Default: count.}
@@ -35,6 +36,8 @@ and 10x (cellranger output files, contains barcodes, genes/features and matrix).
 \item{out.folder}{Output folder to save 10x files. Default: NULL (current working directory).}
 
 \item{gene2feature}{Logical value, whether to rename \code{genes.tsv.gz} to \code{features.tsv.gz}. Default: TRUE.}
+
+\item{merge}{Logical value, whether to merge Seurat list when there are multiple 10x files (\code{supp.type} is 10x). Default: FALSE.}
 
 \item{...}{Parameters for \code{\link{getGEO}}.}
 }

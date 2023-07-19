@@ -4,6 +4,7 @@
 * Provided APIs for GEO.
 * Added `Read10XOnline` to load cellranger output.
 * Added `ExtractCBComposition` to extract cell type composition of UCSC Cell Browser datasets.
+* `ParseGEO` support creating Seurat object.
 
 -------------------
 
@@ -14,6 +15,7 @@
 * Extracted matrix, barcode and feature info from dataset.json (comprehensive) instead of desc.json.
 * Fixed bugs in `ParseCBDatasets` when dealing with cellranger output.
 * Added `timeout` in `ParseCBDatasets` to avoid possible timeout error.
+* Changed `time.out` in GEO related functions to `timeout`.
 
 -------------------
 

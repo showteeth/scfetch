@@ -284,3 +284,36 @@ Read10XOnline <- function(matrix.url, barcode.url, feature.url, gene.column = 2,
   final.data <- Seurat::as.sparse(data[[1]])
   return(final.data)
 }
+
+# used in GEO, check the integrity of 10x files
+Check10XFiles <- function(folders, gene2feature) {
+  folders.flag <- sapply(folders, function(x) {
+    if (gene2feature) {
+      if (file.exists(file.path(x, "matrix.mtx.gz")) &&
+        file.exists(file.path(x, "barcodes.tsv.gz")) &&
+        file.exists(file.path(x, "features.tsv.gz"))) {
+        return(TRUE)
+      } else {
+        return(FALSE)
+      }
+    } else {
+      if (file.exists(file.path(x, "matrix.mtx.gz")) &&
+        file.exists(file.path(x, "barcodes.tsv.gz"))) {
+        if (file.exists(file.path(x, "features.tsv.gz")) ||
+          file.exists(file.path(x, "genes.tsv.gz"))) {
+          return(TRUE)
+        } else {
+          return(FALSE)
+        }
+      } else {
+        return(FALSE)
+      }
+    }
+  })
+  valid.folders <- folders[folders.flag]
+  drop.folders <- setdiff(folders, valid.folders)
+  if (length(drop.folders) > 0) {
+    message(paste0(drop.folders, collapse = ", "), " don't contain matrix.mtx.gz, barcodes.tsv.gz, features.tsv.gz/genes.tsv.gz.")
+  }
+  return(valid.folders)
+}

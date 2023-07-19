@@ -6,11 +6,12 @@
 #' @param down.supp Logical value, whether to download supplementary files to create count matrix. If TRUE, always
 #' download supplementary files. If FALSE, use \code{ExpressionSet} (If contains non-integer or emoty,
 #' download supplementary files automatically). Default: FALSE.
-#' @param time.out Timeout for \code{\link{download.file}}. Default: 3600.
+#' @param timeout Timeout for \code{\link{download.file}}. Default: 3600.
 #' @param supp.type The type of downloaded supplementary files, choose from count (count matrix file or single count matrix file)
 #' and 10x (cellranger output files, contains barcodes, genes/features and matrix). Default: count.
 #' @param out.folder Output folder to save 10x files. Default: NULL (current working directory).
 #' @param gene2feature Logical value, whether to rename \code{genes.tsv.gz} to \code{features.tsv.gz}. Default: TRUE.
+#' @param merge Logical value, whether to merge Seurat list when there are multiple 10x files (\code{supp.type} is 10x). Default: FALSE.
 #' @param ... Parameters for \code{\link{getGEO}}.
 #'
 #' @return List contains GEO object of platform, study information, raw count matrix and metadata.
@@ -21,6 +22,7 @@
 #' @importFrom utils untar
 #' @importFrom data.table fread
 #' @importFrom openxlsx read.xlsx
+#' @importFrom Seurat Read10X CreateSeuratObject
 #' @export
 #'
 #' @examples
@@ -29,8 +31,8 @@
 #' # # the supp files are cellranger output files: barcodes, genes/features and matrix
 #' # GSE200257.list = ParseGEO(acce = "GSE200257", platform = "GPL24676", supp.idx = 1, down.supp = TRUE, supp.type = "10x",
 #' #                           out.folder = "/path/to/output/folder")
-ParseGEO <- function(acce, platform, supp.idx = 1, down.supp = FALSE, time.out = 3600,
-                     supp.type = c("count", "10x"), out.folder = NULL, gene2feature = TRUE, ...) {
+ParseGEO <- function(acce, platform, supp.idx = 1, down.supp = FALSE, timeout = 3600,
+                     supp.type = c("count", "10x"), out.folder = NULL, gene2feature = TRUE, merge = TRUE, ...) {
   # check parameters
   supp.type <- match.arg(arg = supp.type)
 
@@ -41,17 +43,41 @@ ParseGEO <- function(acce, platform, supp.idx = 1, down.supp = FALSE, time.out =
   # extract raw counts
   pf.count <- ExtractGEOExp(
     pf.obj = pf.obj, acce = acce, supp.idx = supp.idx, down.supp = down.supp,
-    time.out = time.out, supp.type = supp.type, out.folder = out.folder, gene2feature = gene2feature
+    timeout = timeout, supp.type = supp.type, out.folder = out.folder, gene2feature = gene2feature
   )
+  # load seurat
+  if (is.null(pf.count) && supp.type == "10x") {
+    message("Loading data to Seurat!")
+    all.samples.folder <- dir(out.folder, full.names = TRUE)
+    # check file
+    valid.samples.folder <- Check10XFiles(folders = all.samples.folder, gene2feature = gene2feature)
+    if (length(valid.samples.folder) == 0) {
+      stop("No valid sample folder detected under ", out.folder, ". Please check!")
+    }
+    # load to seurat
+    seu.list <- sapply(valid.samples.folder, function(x) {
+      x.mat <- Seurat::Read10X(data.dir = x)
+      seu.obj <- Seurat::CreateSeuratObject(counts = x.mat, project = basename(x))
+      seu.obj
+    })
+    if (isTRUE(merge)) {
+      seu.obj <- mergeExperiments(seu.list)
+    } else {
+      seu.obj <- seu.list
+    }
+  } else if (!is.null(pf.count) && supp.type == "count") {
+    seu.obj <- Seurat::CreateSeuratObject(counts = pf.count, project = acce)
+  }
   # select meta data
   pf.meta <- ExtractGEOMeta(pf.obj = pf.obj)
   # return list
   res.list <- list(
-    obj = pf.obj, exp.info = pf.info,
-    count = pf.count, metadata = pf.meta
+    obj = pf.obj, exp.info = pf.info, count = pf.count,
+    seu.obj = seu.obj, metadata = pf.meta
   )
   return(res.list)
 }
+
 
 # connect to GEO, extract GEO object, extract platform object
 GEOobj <- function(acce, platform, ...) {
@@ -169,7 +195,7 @@ ExtractGEOMeta <- function(pf.obj) {
 #' Extract Raw Count Matrix from Supplementary Files.
 #'
 #' @param acce GEO accession number.
-#' @param time.out Timeout for \code{\link{download.file}}. Default: 3600.
+#' @param timeout Timeout for \code{\link{download.file}}. Default: 3600.
 #' @param supp.idx The index of supplementary files to download. Default: 1.
 #'
 #' @return A dataframe.
@@ -182,9 +208,14 @@ ExtractGEOMeta <- function(pf.obj) {
 #' # count.mat = ExtractGEOExpSupp(acce = "GSE122774")
 #' # # for single cell matrix
 #' # count.mat = ExtractGEOExpSupp(acce = "GSE94820")
-ExtractGEOExpSupp <- function(acce, time.out = 3600, supp.idx = 1) {
+ExtractGEOExpSupp <- function(acce, timeout = 3600, supp.idx = 1) {
   # create tmp folder
   tmp.folder <- tempdir()
+  # get current timeout
+  if (!is.null(timeout)) {
+    message("Change Timeout to: ", timeout)
+    options(timeout = timeout)
+  }
   # download supplementary file
   # supp.down.log <- GEOquery::getGEOSuppFiles(GEO = acce, baseDir = tmp.folder)
   supp.down.log <- tryCatch(
@@ -193,7 +224,7 @@ ExtractGEOExpSupp <- function(acce, time.out = 3600, supp.idx = 1) {
     },
     error = function(e) {
       print(e)
-      stop("You can change the Timeout with options(timeout=3600) or pass time.out parameter.")
+      stop("You can change the timeout with a larger value.")
     }
   )
   if (supp.idx > nrow(supp.down.log)) {
@@ -256,7 +287,7 @@ ExtractGEOExpSupp <- function(acce, time.out = 3600, supp.idx = 1) {
 #'
 #' @param acce GEO accession number.
 #' @param supp.idx The index of supplementary files to download. Default: 1.
-#' @param time.out Timeout for \code{\link{download.file}}. Default: 3600.
+#' @param timeout Timeout for \code{\link{download.file}}. Default: 3600.
 #' @param out.folder Output folder to save 10x files. Default: NULL (current working directory).
 #' @param gene2feature Logical value, whether to rename \code{genes.tsv.gz} to \code{features.tsv.gz}.
 #' Default: TURE.
@@ -266,14 +297,14 @@ ExtractGEOExpSupp <- function(acce, time.out = 3600, supp.idx = 1) {
 #' @examples
 #' # ExtractGEOExpSupp10x(acce = "GSE200257", out.folder = '/path/to/output')
 #' # ExtractGEOExpSupp10x(acce = "GSE226160", out.folder = '/path/to/output')
-ExtractGEOExpSupp10x <- function(acce, supp.idx = 1, time.out = 3600,
+ExtractGEOExpSupp10x <- function(acce, supp.idx = 1, timeout = 3600,
                                  out.folder = NULL, gene2feature = TRUE) {
   # create tmp folder
   tmp.folder <- tempdir()
   # get current timeout
-  if (!is.null(time.out)) {
-    message("Change Timeout to: ", time.out)
-    options(timeout = time.out)
+  if (!is.null(timeout)) {
+    message("Change Timeout to: ", timeout)
+    options(timeout = timeout)
   }
   # download supp file
   supp.down.log <- tryCatch(
@@ -282,7 +313,7 @@ ExtractGEOExpSupp10x <- function(acce, supp.idx = 1, time.out = 3600,
     },
     error = function(e) {
       print(e)
-      stop("You can change the Timeout with options(timeout=3600) or pass time.out parameter.")
+      stop("You can change the timeout with a larger value.")
     }
   )
   # check supp.idx
@@ -360,7 +391,7 @@ ExtractGEOExpSupp10x <- function(acce, supp.idx = 1, time.out = 3600,
 #'
 #' @param acce GEO accession number.
 #' @param supp.idx The index of supplementary files to download. Default: 1.
-#' @param time.out Timeout for \code{\link{download.file}}. Default: 3600.
+#' @param timeout Timeout for \code{\link{download.file}}. Default: 3600.
 #' @param supp.type The type of downloaded supplementary files, choose from count (count matrix file or single count matrix file)
 #' and 10x (cellranger output files, contains barcodes, genes/features and matrix). Default: count.
 #' @param out.folder Output folder to save 10x files. Default: NULL (current working directory).
@@ -372,13 +403,13 @@ ExtractGEOExpSupp10x <- function(acce, supp.idx = 1, time.out = 3600,
 #' @examples
 #' # exp.data = ExtractGEOExpSuppAll(acce = "GSE200257", supp.idx = 1, supp.type = "10x",
 #' #                                 out.folder = "/path/to/output/folder")
-ExtractGEOExpSuppAll <- function(acce, supp.idx = 1, time.out = 3600,
+ExtractGEOExpSuppAll <- function(acce, supp.idx = 1, timeout = 3600,
                                  supp.type = c("count", "10x"), out.folder = NULL, gene2feature = TRUE) {
   if (supp.type == "count") {
-    count.mat <- ExtractGEOExpSupp(acce = acce, supp.idx = supp.idx, time.out = time.out)
+    count.mat <- ExtractGEOExpSupp(acce = acce, supp.idx = supp.idx, timeout = timeout)
     return(count.mat)
   } else if (supp.type == "10x") {
-    ExtractGEOExpSupp10x(acce = acce, supp.idx = supp.idx, time.out = time.out, out.folder = out.folder, gene2feature = gene2feature)
+    ExtractGEOExpSupp10x(acce = acce, supp.idx = supp.idx, timeout = timeout, out.folder = out.folder, gene2feature = gene2feature)
     return(NULL)
   }
 }
@@ -391,7 +422,7 @@ ExtractGEOExpSuppAll <- function(acce, supp.idx = 1, time.out = 3600,
 #' @param down.supp Logical value, whether to download supplementary files to create count matrix. If TRUE, always
 #' download supplementary files. If FALSE, use \code{ExpressionSet} (If contains non-integer or emoty,
 #' download supplementary files automatically). Default: FALSE.
-#' @param time.out Timeout for \code{\link{download.file}}. Default: 3600.
+#' @param timeout Timeout for \code{\link{download.file}}. Default: 3600.
 #' @param supp.type The type of downloaded supplementary files, choose from count (count matrix file or single count matrix file)
 #' and 10x (cellranger output files, contains barcodes, genes/features and matrix). Default: count.
 #' @param out.folder Output folder to save 10x files. Default: NULL (current working directory).
@@ -403,14 +434,14 @@ ExtractGEOExpSuppAll <- function(acce, supp.idx = 1, time.out = 3600,
 #' # pf.obj = GEOobj(acce = "GSE200257", platform = "GPL24676")
 #' # count.mat = ExtractGEOExp(pf.obj, acce = "GSE200257", supp.idx = 1, down.supp = TRUE, supp.type = "10x",
 #' #                           out.folder = "/path/to/output/folder")
-ExtractGEOExp <- function(pf.obj, acce, supp.idx = 1, down.supp = FALSE, time.out = 3600,
+ExtractGEOExp <- function(pf.obj, acce, supp.idx = 1, down.supp = FALSE, timeout = 3600,
                           supp.type = c("count", "10x"), out.folder = NULL, gene2feature = TRUE) {
   # check parameters
   supp.type <- match.arg(arg = supp.type)
   # download supplementary files
   if (down.supp) {
     exp.data <- ExtractGEOExpSuppAll(
-      acce = acce, supp.idx = supp.idx, time.out = time.out,
+      acce = acce, supp.idx = supp.idx, timeout = timeout,
       supp.type = supp.type, out.folder = out.folder, gene2feature = gene2feature
     )
   } else {
@@ -418,7 +449,7 @@ ExtractGEOExp <- function(pf.obj, acce, supp.idx = 1, down.supp = FALSE, time.ou
     if (nrow(expr.mat) == 0) {
       message("Matrix not available! Downloading supplementary files.")
       exp.data <- ExtractGEOExpSuppAll(
-        acce = acce, supp.idx = supp.idx, time.out = time.out,
+        acce = acce, supp.idx = supp.idx, timeout = timeout,
         supp.type = supp.type, out.folder = out.folder, gene2feature = gene2feature
       )
     } else {
@@ -427,7 +458,7 @@ ExtractGEOExp <- function(pf.obj, acce, supp.idx = 1, down.supp = FALSE, time.ou
       } else {
         message("Matrix contains non-integer values! Downloading supplementary files.")
         exp.data <- ExtractGEOExpSuppAll(
-          acce = acce, supp.idx = supp.idx, time.out = time.out,
+          acce = acce, supp.idx = supp.idx, timeout = timeout,
           supp.type = supp.type, out.folder = out.folder, gene2feature = gene2feature
         )
       }

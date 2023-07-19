@@ -9,7 +9,7 @@ ExtractGEOExp(
   acce,
   supp.idx = 1,
   down.supp = FALSE,
-  time.out = 3600,
+  timeout = 3600,
   supp.type = c("count", "10x"),
   out.folder = NULL,
   gene2feature = TRUE
@@ -26,7 +26,7 @@ ExtractGEOExp(
 download supplementary files. If FALSE, use \code{ExpressionSet} (If contains non-integer or emoty,
 download supplementary files automatically). Default: FALSE.}
 
-\item{time.out}{Timeout for \code{\link{download.file}}. Default: 3600.}
+\item{timeout}{Timeout for \code{\link{download.file}}. Default: 3600.}
 
 \item{supp.type}{The type of downloaded supplementary files, choose from count (count matrix file or single count matrix file)
 and 10x (cellranger output files, contains barcodes, genes/features and matrix). Default: count.}
