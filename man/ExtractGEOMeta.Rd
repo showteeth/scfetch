@@ -9,7 +9,7 @@ ExtractGEOMeta(acce, platform = NULL, ...)
 \arguments{
 \item{acce}{GEO accession number.}
 
-\item{platform}{Platform information/field.}
+\item{platform}{Platform information/field. Default: NULL (all platforms).}
 
 \item{...}{Parameters for \code{\link{getGEO}}.}
 }

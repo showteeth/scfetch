@@ -1,7 +1,7 @@
 Package: scfetch
 Type: Package
 Title: Download Single-cell RNA-seq Datasets from Public Resources 
-Version: 0.2.0
+Version: 0.3.0
 Authors@R: 
     person(given = "Yabing",
            family = "Song",
@@ -19,6 +19,7 @@ Imports:
     curl,
     data.table,
     dplyr,
+    GEOfastq,
     GEOquery,
     jsonlite,
     magrittr,

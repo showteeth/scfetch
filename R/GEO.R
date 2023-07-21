@@ -81,7 +81,7 @@ ParseGEO <- function(acce, platform = NULL, down.supp = FALSE, supp.idx = 1, tim
 #' Extract Sample Metadata from GEO.
 #'
 #' @param acce GEO accession number.
-#' @param platform Platform information/field.
+#' @param platform Platform information/field. Default: NULL (all platforms).
 #' @param ... Parameters for \code{\link{getGEO}}.
 #'
 #' @return Dataframe contains all metadata of provided GEO accession number.
@@ -222,7 +222,8 @@ ExtractGEOSubMeta <- function(pf.obj) {
   # extract sample detail information
   pf.info <- as.data.frame(Biobase::pData(Biobase::phenoData(pf.obj)))
   # select used basic cols
-  pf.info.used <- pf.info[c("title", "geo_accession", "source_name_ch1", "description")]
+  valid.cols <- intersect(colnames(pf.info), c(c("title", "geo_accession", "source_name_ch1", "description")))
+  pf.info.used <- pf.info[valid.cols]
   # process characteristics
   pf.info.charac <- pf.info[grep(pattern = "^characteristics", x = colnames(pf.info))]
   ## modify colnames

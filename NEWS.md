@@ -1,3 +1,13 @@
+# scfetch 0.3.0
+
+## New features
+* Added `ExtractRun` to extract run number from GEO.
+* Added `DownloadSRA` to download SRA according to run number.
+* Added `SplitSRA` to split SRA to fastqs and format the fastqs to 10x format.
+
+
+-------------------
+
 # scfetch 0.2.0
 
 ## New features
@@ -18,6 +28,7 @@
 * Added `timeout` in `ParseCBDatasets` to avoid possible timeout error.
 * Changed `time.out` in GEO related functions to `timeout`.
 * Simplified the output of `ParseGEO`. 
+* Fixed bug in `ExtractGEOMeta`.
 
 -------------------
 
