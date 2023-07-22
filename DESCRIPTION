@@ -1,15 +1,16 @@
 Package: scfetch
 Type: Package
-Title: Download Single-cell RNA-seq Datasets from Public Resources 
-Version: 0.3.0
+Title: Access and format Single-cell RNA-seq Datasets from Public Resources 
+Version: 0.4.0
 Authors@R: 
     person(given = "Yabing",
            family = "Song",
            role = c("aut", "cre"),
            email = "songyb0519@gmail.com")
 Maintainer: Yabing Song <songyb0519@gmail.com>
-Description: The goal of 'scfetch' is to download single-cell RNA-seq datasets from widely used 
-    public resources, including GEO, Zenodo, PanglaoDB and UCSC Cell Browser.
+Description: The goal of 'scfetch' is to access and format scRNA-seq datasets. It can be used to download scRNA-seq 
+    datasets from widely used public resources, including GEO, Zenodo, PanglaoDB and UCSC Cell Browser. And, it can also be 
+    used to perform data format conversion between SeuratObject, loom,  h5ad, SingleCellExperiment and cell_data_set.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -32,4 +33,9 @@ Imports:
     Seurat,
     tibble,
     tools,
-    utils
+    utils,
+    sceasy,
+    SeuratDisk,
+    SeuratWrappers,
+    zellkonverter,
+    SingleCellExperiment

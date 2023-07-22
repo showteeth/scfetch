@@ -1,3 +1,13 @@
+# scfetch 0.4.0
+
+## New features
+* Added `ExportSeurat` to convert SeuratObject to other scRNA-seq formats.
+* Added `ImportSeurat` to convert other scRNA-seq formats to SeuratObject.
+* Added `SCEaAnnData` to perform data format conversion between SingleCellExperiment and AnnData.
+* Added `SCELoom` to perform data format conversion between SingleCellExperiment and loom.
+
+-------------------
+
 # scfetch 0.3.0
 
 ## New features
