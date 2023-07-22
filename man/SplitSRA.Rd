@@ -18,7 +18,7 @@ SplitSRA(
 \arguments{
 \item{sra.folder}{Folder contains all sras, obtained from \code{DownloadSRA}. Default: NULL.}
 
-\item{sra.path}{Paths of sras. Default: NULL.}
+\item{sra.path}{Paths of sras. \code{sra.folder} and \code{sra.path} cannot be both NULL. Default: NULL.}
 
 \item{split.cmd.path}{The full command path used to split, can be path to parallel-fastq-dump,
 fasterq-dump and fastq-dump. Default: NULL (conduct automatic detection).}

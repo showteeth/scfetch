@@ -4,6 +4,8 @@
 * Added `ExtractRun` to extract run number from GEO.
 * Added `DownloadSRA` to download SRA according to run number.
 * Added `SplitSRA` to split SRA to fastqs and format the fastqs to 10x format.
+* Added `DownloadBam` to download 10x bam files from GEO.
+* Added `Bam2Fastq` to convert bam to 10x formatted fastqs.
 
 -------------------
 

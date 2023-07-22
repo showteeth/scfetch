@@ -130,7 +130,7 @@ RunPrefetch <- function(sra, prefetch.path, out.folder, prefetch.paras) {
 #' Split SRA to fastqs.
 #'
 #' @param sra.folder Folder contains all sras, obtained from \code{DownloadSRA}. Default: NULL.
-#' @param sra.path Paths of sras. Default: NULL.
+#' @param sra.path Paths of sras. \code{sra.folder} and \code{sra.path} cannot be both NULL. Default: NULL.
 #' @param split.cmd.path The full command path used to split, can be path to parallel-fastq-dump,
 #' fasterq-dump and fastq-dump. Default: NULL (conduct automatic detection).
 #' @param sratools.path Path to sratoolkit bin. When \code{split.cmd.path} is path to parallel-fastq-dump,
@@ -195,7 +195,7 @@ SplitSRA <- function(sra.folder = NULL, sra.path = NULL, split.cmd.path = NULL, 
   }
   # check sras
   if (length(all.sras) == 0) {
-    stop("There is no sra files detected under ", sra.folder, ". Please check!")
+    stop("There is no sra files. Please check!")
   }
   # run split
   all.sras.split <- sapply(all.sras, function(x) {
