@@ -5,6 +5,10 @@
 * Added `DownloadSRA` to download SRA according to run number.
 * Added `SplitSRA` to split SRA to fastqs and format the fastqs to 10x format.
 
+-------------------
+
+## Minor changes
+* Fixed bug in `DownloadSRA` when downloading bam files.
 
 -------------------
 

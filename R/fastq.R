@@ -76,6 +76,7 @@ DownloadSRA <- function(gsm.df, prefetch.path = NULL, out.folder = NULL, prefetc
   } else {
     prefetch.path <- prefetch.path
   }
+  cwd <- getwd()
   # prepare sample output folder
   samples.folder <- file.path(out.folder, gsm.df$gsm_name)
   names(samples.folder) <- gsm.df$run
@@ -83,6 +84,7 @@ DownloadSRA <- function(gsm.df, prefetch.path = NULL, out.folder = NULL, prefetc
     sf <- samples.folder[x]
     RunPrefetch(sra = x, prefetch.path = prefetch.path, out.folder = sf, prefetch.paras = prefetch.paras)
   })
+  setwd(cwd)
   # select fail samples
   fail.flag <- sapply(names(all.runs.down), function(x) {
     !is.null(all.runs.down[[x]])
@@ -107,6 +109,8 @@ RunPrefetch <- function(sra, prefetch.path, out.folder, prefetch.paras) {
   if (!dir.exists(out.folder)) {
     dir.create(path = out.folder, recursive = TRUE)
   }
+  # change directory to avoid bam download bug
+  setwd(out.folder)
   # prefetch command
   prefetch.cmd <- paste(prefetch.path, prefetch.paras, "-O", out.folder, sra)
   # run command
