@@ -7,6 +7,7 @@
 #' Default: "SCE".
 #' @param anndata.file File used to save AnnData results. Default: NULL.
 #' @param loom.file File used to save loom results. Default: NULL.
+#' @param conda.path Conda environment path, used when \code{to} is "AnnData". Default: NULL.
 #' @param ... Parameter for \code{\link{as.SingleCellExperiment}}, \code{sceasy::convertFormat}, \code{\link{as.CellDataSet}},
 #' \code{\link{as.cell_data_set}}, \code{\link{SaveLoom}}, corresponding to \code{to}.
 #'
@@ -19,7 +20,7 @@
 #'
 ExportSeurat <- function(seu.obj, assay = NULL, reduction = NULL,
                          to = c("SCE", "AnnData", "CellDataSet", "cell_data_set", "loom"),
-                         anndata.file = NULL, loom.file = NULL, ...) {
+                         anndata.file = NULL, loom.file = NULL, conda.path = NULL, ...) {
   # check parameters
   to <- match.arg(arg = to)
 
@@ -51,6 +52,11 @@ ExportSeurat <- function(seu.obj, assay = NULL, reduction = NULL,
     # SeuratDisk::Convert(source = h5Seurat.file, assay = assay, dest = "h5ad", overwrite = overwrite, ...)
     # # remove h5Seurat file
     # file.remove(h5Seurat.file)
+    # set conda env
+    # python environment
+    if (!is.null(conda.path)) {
+      reticulate::use_condaenv(conda.path, required = TRUE)
+    }
     sceasy::convertFormat(seu.obj,
       from = "seurat", to = "anndata", drop_single_values = F,
       assay = assay, outFile = anndata.file, ...
@@ -95,6 +101,7 @@ ExportSeurat <- function(seu.obj, assay = NULL, reduction = NULL,
 #' @param slot Slot to store expression data as, used when \code{from} is "CellDataSet". Default: counts.
 #' @param anndata.file The file contains AnnData. Default: NULL.
 #' @param loom.file The file contains loom. Default: NULL.
+#' @param conda.path Conda environment path, used when \code{from} is "AnnData". Default: NULL.
 #' @param ... Parameter for \code{\link{as.Seurat}}, \code{sceasy::convertFormat}, \code{\link{as.Seurat}}, \code{\link{as.Seurat}},
 #' \code{\link{as.Seurat}}, corresponding to \code{from}.
 #'
@@ -114,10 +121,10 @@ ExportSeurat <- function(seu.obj, assay = NULL, reduction = NULL,
 #' # import data from AnnData
 #' # seu.obj = ImportSeurat(anndata.file = 'path/to/h5ad', from="AnnData", assay = "RNA")
 #' # import data from loom
-#' # seu.obj = ImportSeurat(anndata.file = 'path/to/loom', from="loom")
+#' # seu.obj = ImportSeurat(loom.file = 'path/to/loom', from="loom")
 ImportSeurat <- function(obj = NULL, assay = "RNA", from = c("SCE", "AnnData", "CellDataSet", "cell_data_set", "loom"),
                          count.assay = "counts", data.assay = "logcounts", slot = "counts",
-                         anndata.file = NULL, loom.file = NULL, ...) {
+                         anndata.file = NULL, loom.file = NULL, conda.path = NULL, ...) {
   # check parameters
   from <- match.arg(arg = from)
 
@@ -144,6 +151,10 @@ ImportSeurat <- function(obj = NULL, assay = "RNA", from = c("SCE", "AnnData", "
       # SeuratDisk::Convert(source = anndata.file, assay = assay, dest = "h5seurat", overwrite = overwrite, ...)
       # h5Seurat.file <- gsub(pattern = ".h5ad$", replacement = ".h5seurat", x = anndata.file)
       # seu.obj <- SeuratDisk::LoadH5Seurat(h5Seurat.file, assay = assay)
+      # python environment
+      if (!is.null(conda.path)) {
+        reticulate::use_condaenv(conda.path, required = TRUE)
+      }
       seu.obj <- sceasy::convertFormat(anndata.file,
         from = "anndata", to = "seurat",
         assay = assay, outFile = NULL, ...
@@ -208,9 +219,9 @@ ImportSeurat <- function(obj = NULL, assay = "RNA", from = c("SCE", "AnnData", "
 #' @examples
 #' # library(scRNAseq)
 #' # seger <- SegerstolpePancreasData()
-#' # SCEaAnnData(from = "SingleCellExperiment", to = "AnnData", sce = seger, X_name = "counts")
-#' # sce = SCEaAnnData(from = "AnnData", to = "SingleCellExperiment", anndata.file = "path/to/seger.h5ad")
-SCEaAnnData <- function(from = c("SingleCellExperiment", "AnnData"),
+#' # SCEAnnData(from = "SingleCellExperiment", to = "AnnData", sce = seger, X_name = "counts")
+#' # sce = SCEAnnData(from = "AnnData", to = "SingleCellExperiment", anndata.file = "path/to/seger.h5ad")
+SCEAnnData <- function(from = c("SingleCellExperiment", "AnnData"),
                         to = c("AnnData", "SingleCellExperiment"),
                         sce = NULL, anndata.file = NULL, slot.name = "counts", ...) {
   # check parameters
@@ -262,7 +273,9 @@ SCEaAnnData <- function(from = c("SingleCellExperiment", "AnnData"),
 #' @param ... Parameters for \code{sceasy::convertFormat} and \code{sceasy::convertFormat}.
 #'
 #' @return NULL or SingleCellExperiment.
-#' @importFrom sceasy convertFormat
+#' @importFrom LoomExperiment SingleCellLoomExperiment export import
+#' @importFrom SummarizedExperiment assayNames
+#' @importFrom reticulate use_condaenv
 #' @export
 #'
 #' @examples
@@ -278,7 +291,7 @@ SCELoom <- function(from = c("SingleCellExperiment", "loom"),
   # check parameters
   from <- match.arg(arg = from)
   to <- match.arg(arg = to)
-
+  # convension
   if (from == "SingleCellExperiment" & to == "loom") {
     message("Convert SingleCellExperiment to loom.")
     # check SingleCellExperiment
@@ -297,7 +310,8 @@ SCELoom <- function(from = c("SingleCellExperiment", "loom"),
       message(loom.file, " exists!")
     } else {
       # Convert SingleCellExperiment to loom
-      sceasy::convertFormat(sce, from = "sce", to = "loom", outFile = loom.file, ...)
+      # sceasy::convertFormat(sce, from = "sce", to = "loom", outFile = loom.file, ...)
+      suppressMessages(suppressWarnings(sce2loom_internal(obj = sce, outFile = loom.file, ...)))
     }
   } else if (from == "loom" & to == "SingleCellExperiment") {
     message("Convert loom to SingleCellExperiment.")
@@ -305,9 +319,39 @@ SCELoom <- function(from = c("SingleCellExperiment", "loom"),
       stop("Please provide loom with loom.file!")
     }
     # Convert loom to SingleCellExperiment
-    sce <- sceasy::convertFormat(loom.file, from = "loom", to = "sce", ...)
+    # sce <- sceasy::convertFormat(loom.file, from = "loom", to = "sce", ...)
+    sce <- loom2sce_internal(inFile = loom.file, ...)
     return(sce)
   } else {
     stop(paste0("Invalid conversion from ", from, " to ", to, "."))
   }
+}
+
+
+# modified from https://github.com/cellgeni/sceasy/blob/master/R/functions.R to save rownames and colnames
+sce2loom_internal <- function(obj, outFile, ...) {
+  if (!requireNamespace("LoomExperiment")) {
+    stop("This function requires the 'LoomExperiment' package.")
+  }
+  scle <- LoomExperiment::SingleCellLoomExperiment(obj)
+  if (!is.null(outFile)) {
+    LoomExperiment::export(
+      scle, outFile,
+      matrix = SummarizedExperiment::assayNames(scle)[1],
+      colnames_attr = "CellID", rownames_attr = "Gene", ...
+    )
+  }
+}
+
+# modified from https://github.com/cellgeni/sceasy/blob/master/R/functions.R to identify rownames and colnames
+loom2sce_internal <- function(inFile, ...) {
+  if (!requireNamespace("LoomExperiment")) {
+    stop("This function requires the 'LoomExperiment' package.")
+  }
+  if (!requireNamespace("SingleCellExperiment")) {
+    stop("This function requires the 'SingleCellExperiment' package.")
+  }
+  scle <- LoomExperiment::import(inFile, rownames_attr = "Gene", colnames_attr = "CellID", ...)
+  sce <- as(scle, "SingleCellExperiment")
+  return(sce)
 }

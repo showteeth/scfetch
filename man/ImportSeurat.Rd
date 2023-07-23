@@ -13,6 +13,7 @@ ImportSeurat(
   slot = "counts",
   anndata.file = NULL,
   loom.file = NULL,
+  conda.path = NULL,
   ...
 )
 }
@@ -36,6 +37,8 @@ used when \code{from} is "SCE" or cell_data_set. Default: logcounts.}
 
 \item{loom.file}{The file contains loom. Default: NULL.}
 
+\item{conda.path}{Conda environment path, used when \code{from} is "AnnData". Default: NULL.}
+
 \item{...}{Parameter for \code{\link{as.Seurat}}, \code{sceasy::convertFormat}, \code{\link{as.Seurat}}, \code{\link{as.Seurat}},
 \code{\link{as.Seurat}}, corresponding to \code{from}.}
 }
@@ -55,5 +58,5 @@ Convert Other Formats to SeuratObject.
 # import data from AnnData
 # seu.obj = ImportSeurat(anndata.file = 'path/to/h5ad', from="AnnData", assay = "RNA")
 # import data from loom
-# seu.obj = ImportSeurat(anndata.file = 'path/to/loom', from="loom")
+# seu.obj = ImportSeurat(loom.file = 'path/to/loom', from="loom")
 }

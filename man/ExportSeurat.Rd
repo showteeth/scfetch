@@ -11,6 +11,7 @@ ExportSeurat(
   to = c("SCE", "AnnData", "CellDataSet", "cell_data_set", "loom"),
   anndata.file = NULL,
   loom.file = NULL,
+  conda.path = NULL,
   ...
 )
 }
@@ -27,6 +28,8 @@ Default: "SCE".}
 \item{anndata.file}{File used to save AnnData results. Default: NULL.}
 
 \item{loom.file}{File used to save loom results. Default: NULL.}
+
+\item{conda.path}{Conda environment path, used when \code{to} is "AnnData". Default: NULL.}
 
 \item{...}{Parameter for \code{\link{as.SingleCellExperiment}}, \code{sceasy::convertFormat}, \code{\link{as.CellDataSet}},
 \code{\link{as.cell_data_set}}, \code{\link{SaveLoom}}, corresponding to \code{to}.}

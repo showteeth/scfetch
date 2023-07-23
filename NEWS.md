@@ -8,6 +8,12 @@
 
 -------------------
 
+## Minor changes
+* Added `conda.path` in `ExportSeurat` to specify conda enviroment used.
+* Fixed bug in `SCELoom` to keep gene names and cell ID.
+
+-------------------
+
 # scfetch 0.3.0
 
 ## New features
