@@ -39,3 +39,7 @@ Imports:
     SeuratWrappers,
     zellkonverter,
     SingleCellExperiment
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

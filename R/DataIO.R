@@ -222,8 +222,8 @@ ImportSeurat <- function(obj = NULL, assay = "RNA", from = c("SCE", "AnnData", "
 #' # SCEAnnData(from = "SingleCellExperiment", to = "AnnData", sce = seger, X_name = "counts")
 #' # sce = SCEAnnData(from = "AnnData", to = "SingleCellExperiment", anndata.file = "path/to/seger.h5ad")
 SCEAnnData <- function(from = c("SingleCellExperiment", "AnnData"),
-                        to = c("AnnData", "SingleCellExperiment"),
-                        sce = NULL, anndata.file = NULL, slot.name = "counts", ...) {
+                       to = c("AnnData", "SingleCellExperiment"),
+                       sce = NULL, anndata.file = NULL, slot.name = "counts", ...) {
   # check parameters
   from <- match.arg(arg = from)
   to <- match.arg(arg = to)

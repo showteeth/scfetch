@@ -93,7 +93,7 @@ DownloadSRA <- function(gsm.df, prefetch.path = NULL, out.folder = NULL, prefetc
   if (length(fail.run) > 0) {
     fail.df <- gsm.df[gsm.df$run %in% fail.run, ]
     message(
-      length(fail.df), " samples failed to download: ",
+      length(fail.run), " samples failed to download: ",
       paste0(fail.run, collapse = ","), ". Return dataframe contains failed samples, you can re-run!"
     )
     return(fail.df)

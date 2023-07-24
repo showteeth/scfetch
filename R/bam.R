@@ -27,8 +27,13 @@ DownloadBam <- function(gsm.df, prefetch.path = NULL, out.folder = NULL, prefetc
 #'
 #' @param bam.folder Folder contains bam files, obtained from \code{DownloadSRA}. Default: NULL.
 #' @param bam.path Paths of bams. \code{bam.folder} and \code{bam.path} cannot be both NULL. Default: NULL.
-#' @param bamtofastq.path Path to 10x bamtofastq. Default: NULL (conduct automatic detection with bamtofastq_linux).
+#' @param bam.type The source of bam files, choose from 10x (e.g. CellRanger) or other. Default: 10x.
+#' @param pair.end The bam files are pair-end or single-end, used when \code{bam.type} is other. Default: NULL (identify with flag).
+#' @param bamtofastq.path Path to 10x bamtofastq (\code{bam.type} is 10x) or samtools (\code{bam.type} is other).
+#' Default: NULL (conduct automatic detection with bamtofastq_linux/samtools).
 #' @param bamtofastq.paras Parameters for \code{bamtofastq.path}. Default: "--nthreads 4".
+#' @param sort.name Logical value, whether the bam files are sorted by name, required when \code{bam.type} is other. Default: FALSE.
+#' @param sort.thread The number of threads for bam sorting, used when \code{bam.type} is other. Default: 4.
 #'
 #' @return NULL or paths of failed bams.
 #' @export
@@ -37,15 +42,24 @@ DownloadBam <- function(gsm.df, prefetch.path = NULL, out.folder = NULL, prefetc
 #' # GSE138266.runs = ExtractRun(acce = "GSE138266", platform = "GPL18573")
 #' # GSE138266.down = DownloadBam(gsm.df = GSE138266.runs, prefetch.path = "/path/to/prefetch",
 #' #                              out.folder = "/path/to/output")
-#' # GSE138266.convert = Bam2Fastq(bam.folder = "/path/to/output", bamtofastq.path = "/path/to/bamtofastq_linux",
+#' # GSE138266.convert = Bam2Fastq(bam.folder = "/path/to/output", bamtofastq.path = "/path/to/bamtofastq_linux or samtools",
 #' #                               bamtofastq.paras = "--nthreads 4")
-Bam2Fastq <- function(bam.folder = NULL, bam.path = NULL, bamtofastq.path = NULL, bamtofastq.paras = "--nthreads 4") {
-  # get bamtofastq path
+Bam2Fastq <- function(bam.folder = NULL, bam.path = NULL, bam.type = c("10x", "other"), pair.end = NULL,
+                      bamtofastq.path = NULL, bamtofastq.paras = "--nthreads 4", sort.name = FALSE, sort.thread = 4) {
+  # check parameters
+  bam.type <- match.arg(arg = bam.type)
+
+  # get bamtofastq/samtools path
   if (is.null(bamtofastq.path)) {
-    # specify bamtofastq path
-    bamtofastq.path <- Sys.which("bamtofastq_linux")
+    if (bam.type == "10x") {
+      # specify bamtofastq path
+      bamtofastq.path <- Sys.which("bamtofastq_linux")
+    } else {
+      # specify samtools path
+      bamtofastq.path <- Sys.which("samtools")
+    }
     if (bamtofastq.path == "") {
-      stop("Can not find bamtofastq_linux automatically, please specify the path!")
+      stop("Can not find bamtofastq_linux/samtools automatically, please specify the path!")
     }
   } else {
     bamtofastq.path <- bamtofastq.path
@@ -64,7 +78,10 @@ Bam2Fastq <- function(bam.folder = NULL, bam.path = NULL, bamtofastq.path = NULL
   }
   # run conversion
   all.bams.convert <- sapply(all.bams, function(x) {
-    Runbamtofastq(bam.path = x, bamtofastq.path = bamtofastq.path, bamtofastq.paras = bamtofastq.paras)
+    Runbamtofastq(
+      bam.path = x, bam.type = bam.type, pair.end = pair.end, bamtofastq.path = bamtofastq.path,
+      bamtofastq.paras = bamtofastq.paras, sort.name = sort.name, sort.thread = sort.thread
+    )
   })
   # select fail bams
   fail.flag <- sapply(names(all.bams.convert), function(x) {
@@ -84,11 +101,39 @@ Bam2Fastq <- function(bam.folder = NULL, bam.path = NULL, bamtofastq.path = NULL
   }
 }
 
-# convert bam to fastq
-Runbamtofastq <- function(bam.path, bamtofastq.path, bamtofastq.paras) {
+# convert bam to fastq: for 10x bam or general bam files
+Runbamtofastq <- function(bam.path, bam.type, pair.end, bamtofastq.path, bamtofastq.paras, sort.name, sort.thread) {
   out.folder <- file.path(dirname(bam.path), "bam2fastq")
   # bamtofastq command
-  bamtofastq.cmd <- paste(bamtofastq.path, bamtofastq.paras, bam.path, out.folder)
+  if (bam.type == "10x") {
+    bamtofastq.cmd <- paste(bamtofastq.path, bamtofastq.paras, bam.path, out.folder)
+  } else if (bam.type == "other") {
+    if (isFALSE(sort.name)) {
+      sortn.bam <- gsub(pattern = ".bam$", replacement = ".sortname.bam", x = bam.path)
+      bam.prefix <- gsub(pattern = ".bam$", replacement = "", x = basename(bam.path))
+      sort.cmd <- paste(bamtofastq.path, "sort -@", sort.thread, "-T", bam.prefix, "-o", sortn.bam, bam.path)
+      sort.status <- system(sort.cmd, intern = TRUE)
+      bam.path <- sortn.bam
+    }
+    # check pair or single
+    if (is.null(pair.end)) {
+      bam.end <- CheckBam(bam = bam.path, samtools.path = bamtofastq.path)
+    } else {
+      bam.end <- pair.end
+    }
+    # create output folder
+    if (!dir.exists(out.folder)) {
+      dir.create(path = out.folder, recursive = TRUE)
+    }
+    if (bam.end) {
+      fq1.name <- file.path(out.folder, gsub(pattern = ".bam$", replacement = "_1.fastq.gz", x = basename(bam.path)))
+      fq2.name <- file.path(out.folder, gsub(pattern = ".bam$", replacement = "_2.fastq.gz", x = basename(bam.path)))
+      bamtofastq.cmd <- paste(bamtofastq.path, "fastq", bamtofastq.paras, "-1", fq1.name, "-2", fq2.name, "-0 /dev/null -s /dev/null", bam.path)
+    } else {
+      fq.name <- file.path(out.folder, gsub(pattern = ".bam$", replacement = ".fastq.gz", x = basename(bam.path)))
+      bamtofastq.cmd <- paste(bamtofastq.path, "fastq", bamtofastq.paras, bam.path, "|gzip - >", fq.name)
+    }
+  }
   # run command
   message(paste("Calling bamtofastq: ", bamtofastq.cmd))
   bamtofastq.status <- system(bamtofastq.cmd, intern = TRUE)
@@ -101,3 +146,21 @@ Runbamtofastq <- function(bam.path, bamtofastq.path, bamtofastq.paras) {
     return(NULL)
   }
 }
+
+# # convert bam to fastq: only for 10x
+# Runbamtofastq <- function(bam.path, bamtofastq.path, bamtofastq.paras) {
+#   out.folder <- file.path(dirname(bam.path), "bam2fastq")
+#   # bamtofastq command
+#   bamtofastq.cmd <- paste(bamtofastq.path, bamtofastq.paras, bam.path, out.folder)
+#   # run command
+#   message(paste("Calling bamtofastq: ", bamtofastq.cmd))
+#   bamtofastq.status <- system(bamtofastq.cmd, intern = TRUE)
+#   bamtofastq.status.code <- attr(bamtofastq.status, "status")
+#   if (!is.null(bamtofastq.status.code)) {
+#     warning("Run bamtofastq error on: ", bam.path, ", please remove ", out.folder, " and re-run!")
+#     return(bam.path)
+#   } else {
+#     message("Conversion successful: ", bam.path)
+#     return(NULL)
+#   }
+# }

@@ -317,3 +317,17 @@ Check10XFiles <- function(folders, gene2feature) {
   }
   return(valid.folders)
 }
+
+# check pair-end or single-end
+CheckBam <- function(bam, samtools.path) {
+  samtools.cmd <- paste(samtools.path, "view -h", bam, "2>/dev/null |head -n 100000 |", samtools.path, "view -c -f 1 -")
+  # run command
+  message(paste("Check pair/single end: ", samtools.cmd))
+  samtools.status <- system(samtools.cmd, intern = TRUE)
+  samtools.status <- as.numeric(samtools.status)
+  if (samtools.status == 0) {
+    return(FALSE)
+  } else if (samtools.status > 0) {
+    return(TRUE)
+  }
+}
