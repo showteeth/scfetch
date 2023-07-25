@@ -6,19 +6,28 @@
 \usage{
 DownloadBam(
   gsm.df,
+  bam.type = c("10x", "other"),
   prefetch.path = NULL,
+  samdump.path = NULL,
   out.folder = NULL,
-  prefetch.paras = "-X 100G"
+  prefetch.paras = "-X 100G",
+  samdump.paras = ""
 )
 }
 \arguments{
 \item{gsm.df}{Dataframe contains GSM and Run numbers, obtained from \code{ExtractRun}.}
 
+\item{bam.type}{The source of bam files to download, choose from 10x (e.g. CellRanger) or other. Default: 10x.}
+
 \item{prefetch.path}{Path to prefetch. Default: NULL (conduct automatic detection).}
+
+\item{samdump.path}{Path to sam-dump, used when \code{bam.type} is other. Default: NULL (conduct automatic detection).}
 
 \item{out.folder}{Output folder. Default: NULL (current working directory).}
 
 \item{prefetch.paras}{Parameters for \code{prefetch}. This should not contain --type or -T values. Default: "-X 100G".}
+
+\item{samdump.paras}{Parameters for \code{sam-dump}. Default: "".}
 }
 \value{
 Dataframe contains failed runs or NULL.
@@ -28,6 +37,6 @@ Download bam.
 }
 \examples{
 # GSE138266.runs = ExtractRun(acce = "GSE138266", platform = "GPL18573")
-# GSE138266.down = DownloadBam(gsm.df = GSE138266.runs, prefetch.path = "/path/to/prefetch",
+# GSE138266.down = DownloadBam(gsm.df = GSE138266.runs, bam.type = "10x", prefetch.path = "/path/to/prefetch",
 #                              out.folder = "/path/to/output")
 }
