@@ -1,8 +1,7 @@
 
 # scfetch - Access and Format Single-cell RNA-seq Datasets from Public Resources 
 
-<!-- badges: start -->
-<!-- badges: end -->
+<img src = "man/figures/scfetch.png" align = "right" width = "200"/>
 
 ## Introduction
 
