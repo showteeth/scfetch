@@ -1,4 +1,4 @@
-#' Parse GEO Data.
+#' Download Matrix from GEO and Load to Seurat.
 #'
 #' @param acce GEO accession number.
 #' @param platform Platform information/field. Disable when \code{down.supp} is TRUE. Default: NULL (disable).

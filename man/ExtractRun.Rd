@@ -2,7 +2,7 @@
 % Please edit documentation in R/fastq.R
 \name{ExtractRun}
 \alias{ExtractRun}
-\title{Etract Runs with GEO Accession Number or GSM Number.}
+\title{Extract Runs with GEO Accession Number or GSM Number.}
 \usage{
 ExtractRun(gsm = NULL, acce = NULL, platform = NULL, parallel = TRUE, ...)
 }
@@ -22,7 +22,7 @@ ExtractRun(gsm = NULL, acce = NULL, platform = NULL, parallel = TRUE, ...)
 Dataframe contains GSM and Runs.
 }
 \description{
-Etract Runs with GEO Accession Number or GSM Number.
+Extract Runs with GEO Accession Number or GSM Number.
 }
 \examples{
 # GSE186003.runs = ExtractRun(acce = "GSE186003", platform = "GPL24247")

@@ -23,7 +23,7 @@ DownloadBam <- function(gsm.df, prefetch.path = NULL, out.folder = NULL, prefetc
   return(bam.down)
 }
 
-#' Convert 10x bam to fastqs.
+#' Convert bam files to fastq files.
 #'
 #' @param bam.folder Folder contains bam files, obtained from \code{DownloadSRA}. Default: NULL.
 #' @param bam.path Paths of bams. \code{bam.folder} and \code{bam.path} cannot be both NULL. Default: NULL.

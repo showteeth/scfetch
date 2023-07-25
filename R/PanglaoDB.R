@@ -1,4 +1,4 @@
-#' Show Metadata of scRNA-seq Datasets in PanglaoDB.
+#' Extract Metadata of scRNA-seq Datasets in PanglaoDB.
 #'
 #' @param specie The specie of the datasets, choose from "Homo sapiens", "Mus musculus", one or multiple value. Default: NULL (All).
 #' @param protocol Protocol used to generate the datasets, choose from "10x chromium", "drop-seq", "microwell-seq",
@@ -14,8 +14,8 @@
 #' @export
 #'
 #' @examples
-#' # human.meta = ShowPanglaoDBMeta(specie = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"), cell.num = c(1000,2000))
-ShowPanglaoDBMeta <- function(specie = NULL, protocol = NULL, tissue = NULL, cell.num = NULL, show.cell.type = TRUE) {
+#' # human.meta = ExtractPanglaoDBMeta(specie = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"), cell.num = c(1000,2000))
+ExtractPanglaoDBMeta <- function(specie = NULL, protocol = NULL, tissue = NULL, cell.num = NULL, show.cell.type = TRUE) {
   # get all sample metadata
   all.meta <- rPanglaoDB::getSampleList()
   # modify SMART-seq2 to Smart-seq2
@@ -95,7 +95,7 @@ ShowPanglaoDBMeta <- function(specie = NULL, protocol = NULL, tissue = NULL, cel
 
 #' Parse PanglaoDB Data.
 #'
-#' @param meta Metadata contains "SRA", "SRS", "Tissue", "Protocol", "Species", can be obtained with \code{ShowPanglaoDBMeta}.
+#' @param meta Metadata contains "SRA", "SRS", "Tissue", "Protocol", "Species", can be obtained with \code{ExtractPanglaoDBMeta}.
 #' @param cell.type Extract samples with specified cell types. For samples without SRS (notused), this value can only be "All" or "None", or
 #' these samples will be filtered. Default: "All".
 #' @param include.gene Include cells expressing the genes. Default: NA.
@@ -113,8 +113,8 @@ ShowPanglaoDBMeta <- function(specie = NULL, protocol = NULL, tissue = NULL, cel
 #' @export
 #'
 #' @examples
-#' # hsa.meta = ShowPanglaoDBMeta(specie = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"),
-#' # .                             show.cell.type = TRUE, cell.num = c(1000,2000))
+#' # hsa.meta = ExtractPanglaoDBMeta(specie = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"),
+#' #                                 show.cell.type = TRUE, cell.num = c(1000,2000))
 #' # hsa.seu = ParsePanglaoDB(hsa.meta, merge = TRUE)
 ParsePanglaoDB <- function(meta, cell.type = "All", include.gene = NA, exclude.gene = NA, merge = FALSE) {
   # check columns

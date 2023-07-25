@@ -13,7 +13,7 @@ ParsePanglaoDB(
 )
 }
 \arguments{
-\item{meta}{Metadata contains "SRA", "SRS", "Tissue", "Protocol", "Species", can be obtained with \code{ShowPanglaoDBMeta}.}
+\item{meta}{Metadata contains "SRA", "SRS", "Tissue", "Protocol", "Species", can be obtained with \code{ExtractPanglaoDBMeta}.}
 
 \item{cell.type}{Extract samples with specified cell types. For samples without SRS (notused), this value can only be "All" or "None", or
 these samples will be filtered. Default: "All".}
@@ -31,7 +31,7 @@ Seurat object (if \code{merge} is TRUE) or list of Seurat objects (if \code{merg
 Parse PanglaoDB Data.
 }
 \examples{
-# hsa.meta = ShowPanglaoDBMeta(specie = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"),
-# .                             show.cell.type = TRUE, cell.num = c(1000,2000))
+# hsa.meta = ExtractPanglaoDBMeta(specie = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"),
+#                                 show.cell.type = TRUE, cell.num = c(1000,2000))
 # hsa.seu = ParsePanglaoDB(hsa.meta, merge = TRUE)
 }

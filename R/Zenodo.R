@@ -11,9 +11,9 @@
 #' @export
 #'
 #' @examples
-#' # zebrafish.df = PrepareZenodo(doi = "10.5281/zenodo.7243603")
-#' # PrepareZenodo(doi = "10.5281/zenodo.48065") # Restricted Access
-PrepareZenodo <- function(doi, file.ext = c("rdata", "h5ad")) {
+#' # zebrafish.df = ExtractZenodoMeta(doi = "10.5281/zenodo.7243603")
+#' # ExtractZenodoMeta(doi = "10.5281/zenodo.48065") # Restricted Access
+ExtractZenodoMeta <- function(doi, file.ext = c("rdata", "h5ad")) {
   # prepare link
   record.id <- gsub(pattern = "10.5281/zenodo.", replacement = "", x = doi, fixed = TRUE)
   record.api <- paste0("https://zenodo.org/api/records/", record.id)
@@ -92,7 +92,7 @@ ParseZenodo <- function(doi = NULL, file.ext = c("rdata", "rds", "h5ad"), doi.df
     file.ext <- tolower(file.ext)
     # prepare data frame
     doi.list <- lapply(doi, function(x) {
-      PrepareZenodo(doi = x, file.ext = file.ext)
+      ExtractZenodoMeta(doi = x, file.ext = file.ext)
     })
     doi.df <- do.call(rbind, doi.list)
   } else {

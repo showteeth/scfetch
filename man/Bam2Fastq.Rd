@@ -2,7 +2,7 @@
 % Please edit documentation in R/bam.R
 \name{Bam2Fastq}
 \alias{Bam2Fastq}
-\title{Convert 10x bam to fastqs.}
+\title{Convert bam files to fastq files.}
 \usage{
 Bam2Fastq(
   bam.folder = NULL,
@@ -37,7 +37,7 @@ Default: NULL (conduct automatic detection with bamtofastq_linux/samtools).}
 NULL or paths of failed bams.
 }
 \description{
-Convert 10x bam to fastqs.
+Convert bam files to fastq files.
 }
 \examples{
 # GSE138266.runs = ExtractRun(acce = "GSE138266", platform = "GPL18573")

@@ -2,7 +2,7 @@
 % Please edit documentation in R/fastq.R
 \name{SplitSRA}
 \alias{SplitSRA}
-\title{Split SRA to fastqs.}
+\title{Split SRA to fastq Files and Format to 10x Standard Style.}
 \usage{
 SplitSRA(
   sra.folder = NULL,
@@ -39,7 +39,7 @@ Default: NULL (1).}
 NULL or paths of failed sras.
 }
 \description{
-Split SRA to fastqs.
+Split SRA to fastq Files and Format to 10x Standard Style.
 }
 \examples{
 # GSE186003.runs = ExtractRun(acce = "GSE186003", platform = "GPL24247")

@@ -2,7 +2,7 @@
 % Please edit documentation in R/GEO.R
 \name{ParseGEO}
 \alias{ParseGEO}
-\title{Parse GEO Data.}
+\title{Download Matrix from GEO and Load to Seurat.}
 \usage{
 ParseGEO(
   acce,
@@ -45,7 +45,7 @@ and 10x (cellranger output files, contains barcodes, genes/features and matrix).
 Seurat object (if \code{merge} is TRUE) or Seurat object list (if \code{merge} is FALSE).
 }
 \description{
-Parse GEO Data.
+Download Matrix from GEO and Load to Seurat.
 }
 \examples{
 # # the supp files are count matrix

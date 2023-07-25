@@ -1,4 +1,4 @@
-#' Etract Runs with GEO Accession Number or GSM Number.
+#' Extract Runs with GEO Accession Number or GSM Number.
 #'
 #' @param gsm GSM number. Default: NULL (use \code{acce}).
 #' @param acce GEO accession number. Default: NULL (use \code{gsm}).
@@ -127,7 +127,7 @@ RunPrefetch <- function(sra, prefetch.path, out.folder, prefetch.paras) {
   }
 }
 
-#' Split SRA to fastqs.
+#' Split SRA to fastq Files and Format to 10x Standard Style.
 #'
 #' @param sra.folder Folder contains all sras, obtained from \code{DownloadSRA}. Default: NULL.
 #' @param sra.path Paths of sras. \code{sra.folder} and \code{sra.path} cannot be both NULL. Default: NULL.

@@ -12,6 +12,7 @@
 * Added `conda.path` in `ExportSeurat` to specify conda enviroment used.
 * Fixed bug in `SCELoom` to keep gene names and cell ID.
 * `Bam2Fastq` supported normal bam files (non-10x bam files).
+* Changed function names: `ShowPanglaoDBMeta` to `ExtractPanglaoDBMeta`, `PrepareZenodo` to `ExtractZenodoMeta`.
 
 -------------------
 
