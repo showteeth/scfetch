@@ -82,7 +82,7 @@ Detailed usage is available in [website](https://showteeth.github.io/scfetch/).
   </tr>
   <tr>
     <td>ExtractPanglaoDBMeta</td>
-    <td>Extract sample metadata from PandlaoDB</td>
+    <td>Extract sample metadata and cell type annotation from PandlaoDB</td>
   </tr>
   <tr>
     <td>ParsePanglaoDB</td>
@@ -102,7 +102,7 @@ Detailed usage is available in [website](https://showteeth.github.io/scfetch/).
   </tr>
   <tr>
     <td>ParseCBDatasets</td>
-    <td>Download UCSC Cell Browser datasets and load to Seurat</td>
+    <td>Load the online UCSC Cell Browser datasets to Seurat</td>
   </tr>
   <tr>
     <td rowspan="4">Convert between different single-cell objects</td>

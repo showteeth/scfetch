@@ -5,7 +5,7 @@
 \title{Extract Metadata of scRNA-seq Datasets in PanglaoDB.}
 \usage{
 ExtractPanglaoDBMeta(
-  specie = NULL,
+  species = NULL,
   protocol = NULL,
   tissue = NULL,
   cell.num = NULL,
@@ -13,7 +13,7 @@ ExtractPanglaoDBMeta(
 )
 }
 \arguments{
-\item{specie}{The specie of the datasets, choose from "Homo sapiens", "Mus musculus", one or multiple value. Default: NULL (All).}
+\item{species}{The species of the datasets, choose from "Homo sapiens", "Mus musculus", one or multiple value. Default: NULL (All).}
 
 \item{protocol}{Protocol used to generate the datasets, choose from "10x chromium", "drop-seq", "microwell-seq",
 "C1 Fluidigm", "inDrops", "Smart-seq2", "CEL-seq", one or multiple value. Default: NULL (All).}
@@ -25,11 +25,11 @@ ExtractPanglaoDBMeta(
 \item{show.cell.type}{Logical value, whether to show inferred cell type. Default: TRUE.}
 }
 \value{
-Dataframe contains SRA, SRS, Tissue, Protocol, Specie, Cells, CellType (inferred).
+Dataframe contains SRA, SRS, Tissue, Protocol, Species, Cells, CellType (inferred).
 }
 \description{
 Extract Metadata of scRNA-seq Datasets in PanglaoDB.
 }
 \examples{
-# human.meta = ExtractPanglaoDBMeta(specie = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"), cell.num = c(1000,2000))
+# human.meta = ExtractPanglaoDBMeta(species = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"), cell.num = c(1000,2000))
 }

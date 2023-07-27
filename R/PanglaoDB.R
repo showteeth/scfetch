@@ -1,38 +1,38 @@
 #' Extract Metadata of scRNA-seq Datasets in PanglaoDB.
 #'
-#' @param specie The specie of the datasets, choose from "Homo sapiens", "Mus musculus", one or multiple value. Default: NULL (All).
+#' @param species The species of the datasets, choose from "Homo sapiens", "Mus musculus", one or multiple value. Default: NULL (All).
 #' @param protocol Protocol used to generate the datasets, choose from "10x chromium", "drop-seq", "microwell-seq",
 #' "C1 Fluidigm", "inDrops", "Smart-seq2", "CEL-seq", one or multiple value. Default: NULL (All).
 #' @param tissue The tissue of the datasets. Default: NULL (All).
 #' @param cell.num Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter. Deault: NULL.
 #' @param show.cell.type Logical value, whether to show inferred cell type. Default: TRUE.
 #'
-#' @return Dataframe contains SRA, SRS, Tissue, Protocol, Specie, Cells, CellType (inferred).
+#' @return Dataframe contains SRA, SRS, Tissue, Protocol, Species, Cells, CellType (inferred).
 #' @importFrom magrittr %>%
 #' @importFrom rPanglaoDB getSampleList getSampleComposition
 #' @importFrom dplyr filter
 #' @export
 #'
 #' @examples
-#' # human.meta = ExtractPanglaoDBMeta(specie = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"), cell.num = c(1000,2000))
-ExtractPanglaoDBMeta <- function(specie = NULL, protocol = NULL, tissue = NULL, cell.num = NULL, show.cell.type = TRUE) {
+#' # human.meta = ExtractPanglaoDBMeta(species = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"), cell.num = c(1000,2000))
+ExtractPanglaoDBMeta <- function(species = NULL, protocol = NULL, tissue = NULL, cell.num = NULL, show.cell.type = TRUE) {
   # get all sample metadata
   all.meta <- rPanglaoDB::getSampleList()
   # modify SMART-seq2 to Smart-seq2
   all.meta$Protocol <- gsub(pattern = "SMART-seq2", replacement = "Smart-seq2", x = all.meta$Protocol)
 
   # no attribute filter
-  if (is.null(specie) && is.null(protocol) && is.null(tissue)) {
+  if (is.null(species) && is.null(protocol) && is.null(tissue)) {
     used.meta <- all.meta
   }
-  # test specie
-  if (!is.null(specie)) {
-    valid.specie <- intersect(specie, unique(all.meta$Species))
-    if (length(valid.specie) == 0) {
-      warning("Please provide valid specie! The returned dataframe contains metadata without specie filtering, please check!")
+  # test species
+  if (!is.null(species)) {
+    valid.species <- intersect(species, unique(all.meta$Species))
+    if (length(valid.species) == 0) {
+      warning("Please provide valid species! The returned dataframe contains metadata without species filtering, please check!")
       used.meta <- all.meta
     } else {
-      used.meta <- all.meta %>% dplyr::filter(Species %in% valid.specie)
+      used.meta <- all.meta %>% dplyr::filter(Species %in% valid.species)
     }
   } else {
     used.meta <- all.meta
@@ -113,7 +113,7 @@ ExtractPanglaoDBMeta <- function(specie = NULL, protocol = NULL, tissue = NULL, 
 #' @export
 #'
 #' @examples
-#' # hsa.meta = ExtractPanglaoDBMeta(specie = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"),
+#' # hsa.meta = ExtractPanglaoDBMeta(species = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"),
 #' #                                 show.cell.type = TRUE, cell.num = c(1000,2000))
 #' # hsa.seu = ParsePanglaoDB(hsa.meta, merge = TRUE)
 ParsePanglaoDB <- function(meta, cell.type = "All", include.gene = NA, exclude.gene = NA, merge = FALSE) {

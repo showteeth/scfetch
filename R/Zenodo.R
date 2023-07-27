@@ -74,8 +74,8 @@ ExtractZenodoMeta <- function(doi, file.ext = c("rdata", "h5ad")) {
 #' @export
 #'
 #' @examples
-#' # zebrafish.seu = ParseZenodo(doi = c("1111", "10.5281/zenodo.7243603", "10.5281/zenodo.7244441"), file.ext = c("rdata", "rds"),
-#' #                             out.folder = "/path/to/outfoder")
+#' # zebrafish.dois = ParseZenodo(doi = c("1111", "10.5281/zenodo.7243603", "10.5281/zenodo.7244441"), file.ext = c("rdata", "rds"),
+#' #                              out.folder = "/path/to/outfoder")
 ParseZenodo <- function(doi = NULL, file.ext = c("rdata", "rds", "h5ad"), doi.df = NULL, out.folder = NULL, timeout = 1000,
                         quiet = FALSE, parallel = TRUE) {
   if (!is.null(doi.df)) {

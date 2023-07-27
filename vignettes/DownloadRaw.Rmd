@@ -1,0 +1,157 @@
+---
+title: "DownloadRaw"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{DownloadRaw}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Introduction
+
+A common situation is that we need to use a unified software version (e.g. CellRanger) to obtain the count matrix, in order to better integrate and compare multiple datasets. Here, we will use `scfetch` to download fastq and bam files. With bam files, `scfetch` also provides function for user to convert the bam to fastq.
+
+<hr />
+
+## Download fastq
+
+### Prepare run number
+
+For fastq files stored in SRA, `scfetch` can extract sample information and run number with GEO accession number or users can also provide a dataframe contains the run number of interested samples.
+
+Extract all samples under `GSE130636` and the platform is `GPL20301` (use `platform = NULL` for all platforms):
+```{r prepare_run}
+GSE130636.runs <- ExtractRun(acce = "GSE130636", platform = "GPL20301")
+head(GSE130636.runs)
+```
+
+<hr />
+
+### Download sra
+
+With the dataframe contains gsm and run number, `scfetch` will download sra files using `prefetch`:
+```{r dwonload_sra, eval=FALSE}
+# a small test
+GSE130636.runs <- GSE130636.runs[GSE130636.runs$run %in% c("SRR9004346", "SRR9004351"), ]
+# download
+GSE130636.down <- DownloadSRA(
+  gsm.df = GSE130636.runs,
+  prefetch.path = "/Users/soyabean/software/sratoolkit.3.0.6-mac64/bin/prefetch",
+  out.folder = "/Users/soyabean/Desktop/tmp/scdown/download_fastq"
+)
+# GSE130636.down is null or dataframe contains failed runs
+```
+
+The `out.folder` structure will be: `gsm_number/run_number`.
+
+<hr />
+
+### Split fastq
+
+After obtaining the sra files, `scfetch` provides function `SplitSRA` to split sra files to fastq files using `parallel-fastq-dump` (parallel, fastest and gzip output), `fasterq-dump` (parallel, fast but unzipped output) and `fastq-dump` (slowest and gzip output).
+
+For fastqs generated with 10x Genomics, `SplitSRA` can identify read1, read2 and index files and format the read1 and read2 to 10x required format (`sample1_S1_L001_R1_001.fastq.gz` and `sample1_S1_L001_R2_001.fastq.gz`). In detail, the file with read length 26 or 28 is considered as read1, the files with read length 8 or 10 are considered as index files and the remain file is considered as read2. The read length rules is from [Sequencing Requirements for Single Cell 3'](https://www.10xgenomics.com/cn/support/single-cell-gene-expression/documentation/steps/sequencing/sequencing-requirements-for-single-cell-3) and [Sequencing Requirements for Single Cell V(D)J](https://www.10xgenomics.com/cn/support/single-cell-immune-profiling/documentation/steps/sequencing/sequencing-requirements-for-single-cell-v-d-j).
+
+```{r split_sra, eval=FALSE}
+# parallel-fastq-dump requires sratools.path
+GSE130636.split <- SplitSRA(
+  sra.folder = "/Users/soyabean/Desktop/tmp/scdown/download_fastq",
+  split.cmd.path = "/Applications/anaconda3/bin/parallel-fastq-dump",
+  sratools.path = "/usr/local/bin", split.cmd.paras = "--split-files --gzip",
+  split.cmd.threads = 4
+)
+```
+
+The final `out.folder` structure will be: 
+```{bash split_structure}
+tree /Users/soyabean/Desktop/tmp/scdown/download_fastq
+```
+
+<hr />
+
+## Download bam
+
+### Prepare run number
+
+`scfetch` can extract sample information and run number with GEO accession number or users can also provide a dataframe contains the run number of interested samples.
+
+```{r prepare_run_bam}
+GSE138266.runs <- ExtractRun(acce = "GSE138266", platform = "GPL18573")
+head(GSE138266.runs)
+```
+
+<hr />
+
+### Download bam
+
+With the dataframe contains gsm and run number, `scfetch` provides `DownloadBam` to download bam files using `prefetch`. It suooorts 10x generated bam files and normal bam files.
+
+* 10x generated bam: While bam files generated from 10x softwares (e.g. CellRanger) contain custom tags which are not kept when using default parameters of `prefetch`, `scfetch` adds `--type TenX` to make sure the downloaded bam files contain these tags. 
+* normal bam: For normal bam files, `DownloadBam` will download sra files first and then convert sra files to bam files with `sam-dump`. After testing the efficiency of `prefetch` + `sam-dump` and `sam-dump`, the former is much faster than the latter (52G sra and 72G bam files):
+```{bash test_downbam_efficiency}
+# # use prefetch to download sra file
+# prefetch -X 60G SRR1976036
+# # real	117m26.334s
+# # user	16m42.062s
+# # sys	3m28.295s
+
+# # use sam-dump to convert sra to bam
+# time (sam-dump SRR1976036.sra | samtools view -bS - -o SRR1976036.bam)
+# # real	536m2.721s
+# # user	749m41.421s
+# # sys	20m49.069s
+
+
+# use sam-dump to download bam directly
+# time (sam-dump SRR1976036 | samtools view -bS - -o SRR1976036.bam)
+# # more than 36hrs only get ~3G bam files, too slow
+```
+
+This is an example to download 10x generated bam file:
+
+```{r dwonload_bam, eval=FALSE}
+# a small test
+GSE138266.runs <- GSE138266.runs[GSE138266.runs$run %in% c("SRR10211566"), ]
+# download
+GSE138266.down <- DownloadBam(
+  gsm.df = GSE138266.runs,
+  prefetch.path = "/Users/soyabean/software/sratoolkit.3.0.6-mac64/bin/prefetch",
+  out.folder = "/Users/soyabean/Desktop/tmp/scdown/download_bam"
+)
+# GSE138266.down is null or dataframe contains failed runs
+```
+
+The `out.folder` structure will be: `gsm_number/run_number`.
+
+<hr />
+
+### Convert bam to fastq
+
+With downloaded bam files, `scfetch` provides function `Bam2Fastq` to convert bam files to fastq files. For bam files generated from 10x softwares, `Bam2Fastq` utilizes `bamtofastq` tool developed by 10x Genomics.
+
+```{r convert_bam_fastq, eval=FALSE}
+GSE138266.convert <- Bam2Fastq(
+  bam.folder = "/Users/soyabean/Desktop/tmp/scdown/download_bam",
+  bamtofastq.path = "/Users/soyabean/software/bamtofastq_macos",
+  bamtofastq.paras = "--nthreads 4"
+)
+```
+
+The final `out.folder` structure will be: 
+```{bash convert_structure}
+tree /Users/soyabean/Desktop/tmp/scdown/download_bam
+```
+
+<hr />
+
+
+
+
+
