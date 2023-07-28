@@ -1,6 +1,6 @@
-#' Prepare Dataframe with Zenodo DOI.
+#' Prepare Dataframe with Zenodo DOIs.
 #'
-#' @param doi Zenodo DOI, should start with "10.5281/zenodo.".
+#' @param doi A vector of Zenodo DOIs, should start with "10.5281/zenodo.".
 #' @param file.ext The valid file extension for download. When NULL, use all files. Default: c("rdata", "h5ad").
 #'
 #' @return Dataframe contains files with valid extension in given Zenodo DOI.
@@ -13,7 +13,28 @@
 #' @examples
 #' # zebrafish.df = ExtractZenodoMeta(doi = "10.5281/zenodo.7243603")
 #' # ExtractZenodoMeta(doi = "10.5281/zenodo.48065") # Restricted Access
+#' # # vector of dois
+#' # multi.dois = ExtractZenodoMeta(doi = c("1111", "10.5281/zenodo.7243603", "10.5281/zenodo.7244441"))
 ExtractZenodoMeta <- function(doi, file.ext = c("rdata", "h5ad")) {
+  # check doi
+  doi.status <- startsWith(x = doi, prefix = "10.5281/zenodo.")
+  if (!all(doi.status)) {
+    wrong.doi <- doi[!doi.status]
+    message(paste0(wrong.doi, collapse = ", "), " are not valid dois, please check!")
+    doi <- doi[doi.status]
+  }
+  # file extension to lower
+  file.ext <- tolower(file.ext)
+  # prepare data frame
+  doi.list <- lapply(doi, function(x) {
+    ExtractZenodoMetaSingle(doi = x, file.ext = file.ext)
+  })
+  doi.df <- do.call(rbind, doi.list)
+  return(doi.df)
+}
+
+# extract single doi metadata
+ExtractZenodoMetaSingle <- function(doi, file.ext = c("rdata", "h5ad")) {
   # prepare link
   record.id <- gsub(pattern = "10.5281/zenodo.", replacement = "", x = doi, fixed = TRUE)
   record.api <- paste0("https://zenodo.org/api/records/", record.id)
@@ -74,27 +95,14 @@ ExtractZenodoMeta <- function(doi, file.ext = c("rdata", "h5ad")) {
 #' @export
 #'
 #' @examples
-#' # zebrafish.dois = ParseZenodo(doi = c("1111", "10.5281/zenodo.7243603", "10.5281/zenodo.7244441"), file.ext = c("rdata", "rds"),
-#' #                              out.folder = "/path/to/outfoder")
+#' # multi.dois.parse = ParseZenodo(doi = c("1111", "10.5281/zenodo.7243603", "10.5281/zenodo.7244441"), file.ext = c("rdata", "rds"),
+#' #                                out.folder = "/path/to/outfoder")
 ParseZenodo <- function(doi = NULL, file.ext = c("rdata", "rds", "h5ad"), doi.df = NULL, out.folder = NULL, timeout = 1000,
                         quiet = FALSE, parallel = TRUE) {
   if (!is.null(doi.df)) {
     doi.df <- doi.df
   } else if (!is.null(doi)) {
-    # check doi
-    doi.status <- startsWith(x = doi, prefix = "10.5281/zenodo.")
-    if (!all(doi.status)) {
-      wrong.doi <- doi[!doi.status]
-      message(paste0(wrong.doi, collapse = ", "), " are not valid dois, please check!")
-      doi <- doi[doi.status]
-    }
-    # file extension to lower
-    file.ext <- tolower(file.ext)
-    # prepare data frame
-    doi.list <- lapply(doi, function(x) {
-      ExtractZenodoMeta(doi = x, file.ext = file.ext)
-    })
-    doi.df <- do.call(rbind, doi.list)
+    doi.df <- ExtractZenodoMeta(doi = doi, file.ext = file.ext)
   } else {
     stop("Please provide either doi or doi.df!")
   }

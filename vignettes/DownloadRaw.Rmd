@@ -36,7 +36,8 @@ head(GSE130636.runs)
 
 ### Download sra
 
-With the dataframe contains gsm and run number, `scfetch` will download sra files using `prefetch`:
+With the dataframe contains gsm and run number, `scfetch` will download sra files using `prefetch`. The returned result is a dataframe contains failed runs. If not `NULL`, users can re-run `DownloadSRA` by setting `gsm.df` to the returned result.
+
 ```{r dwonload_sra, eval=FALSE}
 # a small test
 GSE130636.runs <- GSE130636.runs[GSE130636.runs$run %in% c("SRR9004346", "SRR9004351"), ]
@@ -58,6 +59,8 @@ The `out.folder` structure will be: `gsm_number/run_number`.
 After obtaining the sra files, `scfetch` provides function `SplitSRA` to split sra files to fastq files using `parallel-fastq-dump` (parallel, fastest and gzip output), `fasterq-dump` (parallel, fast but unzipped output) and `fastq-dump` (slowest and gzip output).
 
 For fastqs generated with 10x Genomics, `SplitSRA` can identify read1, read2 and index files and format the read1 and read2 to 10x required format (`sample1_S1_L001_R1_001.fastq.gz` and `sample1_S1_L001_R2_001.fastq.gz`). In detail, the file with read length 26 or 28 is considered as read1, the files with read length 8 or 10 are considered as index files and the remain file is considered as read2. The read length rules is from [Sequencing Requirements for Single Cell 3'](https://www.10xgenomics.com/cn/support/single-cell-gene-expression/documentation/steps/sequencing/sequencing-requirements-for-single-cell-3) and [Sequencing Requirements for Single Cell V(D)J](https://www.10xgenomics.com/cn/support/single-cell-immune-profiling/documentation/steps/sequencing/sequencing-requirements-for-single-cell-v-d-j).
+
+The returned result is a vector of failed sra files. If not `NULL`, users can re-run `SplitSRA` by setting `sra.path` to the returned result.
 
 ```{r split_sra, eval=FALSE}
 # parallel-fastq-dump requires sratools.path
@@ -114,7 +117,7 @@ With the dataframe contains gsm and run number, `scfetch` provides `DownloadBam`
 # # more than 36hrs only get ~3G bam files, too slow
 ```
 
-This is an example to download 10x generated bam file:
+The returned result is a dataframe containing failed runs (either failed to download sra files or failed to convert to bam files for normal bam; failed to download bam files for 10x generated bam). If not `NULL`, users can re-run `DownloadBam` by setting `gsm.df` to the returned result. The following is an example to download 10x generated bam file:
 
 ```{r dwonload_bam, eval=FALSE}
 # a small test
@@ -135,6 +138,8 @@ The `out.folder` structure will be: `gsm_number/run_number`.
 ### Convert bam to fastq
 
 With downloaded bam files, `scfetch` provides function `Bam2Fastq` to convert bam files to fastq files. For bam files generated from 10x softwares, `Bam2Fastq` utilizes `bamtofastq` tool developed by 10x Genomics.
+
+The returned result is a vector of bam files failed to convert to fastq files. If not `NULL`, users can re-run `Bam2Fastq` by setting `bam.path` to the returned result.
 
 ```{r convert_bam_fastq, eval=FALSE}
 GSE138266.convert <- Bam2Fastq(
