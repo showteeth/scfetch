@@ -10,7 +10,7 @@ Authors@R:
 Maintainer: Yabing Song <songyb0519@gmail.com>
 Description: The goal of 'scfetch' is to access and format scRNA-seq datasets. It can be used to download scRNA-seq 
     datasets from widely used public resources, including GEO, Zenodo, PanglaoDB and UCSC Cell Browser. And, it can also be 
-    used to perform data format conversion between SeuratObject, loom,  h5ad, SingleCellExperiment and cell_data_set.
+    used to perform object conversion between SeuratObject, loom,  h5ad, SingleCellExperiment and cell_data_set.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
