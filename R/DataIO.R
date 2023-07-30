@@ -17,6 +17,7 @@
 #' @importFrom sceasy convertFormat
 #' @importFrom SeuratDisk SaveLoom
 #' @importFrom SeuratWrappers as.cell_data_set
+#' @importFrom reticulate use_condaenv
 #'
 ExportSeurat <- function(seu.obj, assay = NULL, reduction = NULL,
                          to = c("SCE", "AnnData", "CellDataSet", "cell_data_set", "loom"),
@@ -109,6 +110,7 @@ ExportSeurat <- function(seu.obj, assay = NULL, reduction = NULL,
 #' @importFrom Seurat as.Seurat
 #' @importFrom sceasy convertFormat
 #' @importFrom SeuratDisk Connect
+#' @importFrom reticulate use_condaenv
 #' @export
 #'
 #' @examples
@@ -275,7 +277,6 @@ SCEAnnData <- function(from = c("SingleCellExperiment", "AnnData"),
 #' @return NULL or SingleCellExperiment.
 #' @importFrom LoomExperiment SingleCellLoomExperiment export import
 #' @importFrom SummarizedExperiment assayNames
-#' @importFrom reticulate use_condaenv
 #' @export
 #'
 #' @examples

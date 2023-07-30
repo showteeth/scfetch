@@ -59,9 +59,9 @@ Until now, the public resources supported and the returned results:
 
 ```{r geo_meta}
 # extract metadata of specified platform
-GSE200257.meta = ExtractGEOMeta(acce = "GSE200257", platform = "GPL24676")
+GSE200257.meta <- ExtractGEOMeta(acce = "GSE200257", platform = "GPL24676")
 # extract metadata of all platforms
-GSE94820.meta = ExtractGEOMeta(acce = "GSE94820", platform = NULL)
+GSE94820.meta <- ExtractGEOMeta(acce = "GSE94820", platform = NULL)
 head(GSE94820.meta)
 ```
 
@@ -77,10 +77,12 @@ With the count matrix, `ParseGEO` will load the matrix to Seurat automatically. 
 
 ```{r geo_parse, eval=FALSE}
 # for cellranger output
-GSE200257.seu = ParseGEO(acce = "GSE200257", platform = NULL, supp.idx = 1, down.supp = TRUE, supp.type = "10x",
-                         out.folder = "/Users/soyabean/Desktop/tmp/scdown/dwonload_geo")
+GSE200257.seu <- ParseGEO(
+  acce = "GSE200257", platform = NULL, supp.idx = 1, down.supp = TRUE, supp.type = "10x",
+  out.folder = "/Users/soyabean/Desktop/tmp/scdown/dwonload_geo"
+)
 # for count matrix, no need to specify out.folder, download count matrix to tmp folder
-GSE94820.seu = ParseGEO(acce = "GSE94820", platform = NULL, supp.idx = 1, down.supp = TRUE, supp.type = "count")
+GSE94820.seu <- ParseGEO(acce = "GSE94820", platform = NULL, supp.idx = 1, down.supp = TRUE, supp.type = "count")
 ```
 
 The structure of downloaded matrix for 10x:
@@ -100,11 +102,11 @@ Different from [GEO](https://www.ncbi.nlm.nih.gov/geo/) which mainly contains co
 
 ```{r zenodo_meta}
 # single doi
-zebrafish.df = ExtractZenodoMeta(doi = "10.5281/zenodo.7243603")
+zebrafish.df <- ExtractZenodoMeta(doi = "10.5281/zenodo.7243603")
 head(zebrafish.df)
 
 # vector dois
-multi.dois = ExtractZenodoMeta(doi = c("1111", "10.5281/zenodo.7243603", "10.5281/zenodo.7244441"))
+multi.dois <- ExtractZenodoMeta(doi = c("1111", "10.5281/zenodo.7243603", "10.5281/zenodo.7244441"))
 head(multi.dois)
 ```
 
@@ -117,8 +119,10 @@ After manually check the extracted metadata, users can **download the specified 
 The returned result is a dataframe containing failed objects. If not `NULL`, users can re-run `ParseZenodo` by setting `doi` to the returned result.
 
 ```{r zenodo_parse, eval=FALSE}
-multi.dois.parse = ParseZenodo(doi = c("1111", "10.5281/zenodo.7243603", "10.5281/zenodo.7244441"),
-                               file.ext = c("rdata", "rds"), out.folder = "/Users/soyabean/Desktop/tmp/scdown/download_zenodo")
+multi.dois.parse <- ParseZenodo(
+  doi = c("1111", "10.5281/zenodo.7243603", "10.5281/zenodo.7244441"),
+  file.ext = c("rdata", "rds"), out.folder = "/Users/soyabean/Desktop/tmp/scdown/download_zenodo"
+)
 ```
 
 The structure of downloaded objects:
@@ -137,7 +141,7 @@ tree /Users/soyabean/Desktop/tmp/scdown/download_zenodo
 `scfetch` provides `ExtractPanglaoDBMeta` to show all available datasets or select interested datasets with specified species, protocol, tissue and cell number. User can also choose to whether to add cell type annotation to every dataset with `show.cell.type`.
 
 ```{r panglaodb_meta}
-hsa.meta = ExtractPanglaoDBMeta(species = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"), show.cell.type = TRUE, cell.num = c(1000,2000))
+hsa.meta <- ExtractPanglaoDBMeta(species = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"), show.cell.type = TRUE, cell.num = c(1000, 2000))
 head(hsa.meta)
 ```
 
@@ -150,7 +154,7 @@ After manually check the extracted metadata, `scfetch` provides `ParsePanglaoDB`
 With the count matrix, `ParsePanglaoDB` will load the matrix to Seurat automatically. If multiple samples available, users can choose to merge the SeuratObject with `merge`.
 
 ```{r panglaodb_parse, eval=FALSE}
-hsa.seu = ParsePanglaoDB(hsa.meta, merge = TRUE)
+hsa.seu <- ParsePanglaoDB(hsa.meta, merge = TRUE)
 ```
 
 <hr />
@@ -168,7 +172,7 @@ The [UCSC Cell Browser](https://cells.ucsc.edu/?#) is a web-based tool that allo
 # ucsc.cb.samples = ShowCBDatasets(lazy = TRUE, json.folder = "/Users/soyabean/Desktop/tmp/scdown/cell_browser/json", update = TRUE)
 
 # second time run, load the downloaded json files
-ucsc.cb.samples = ShowCBDatasets(lazy = TRUE, json.folder = "/Users/soyabean/Desktop/tmp/scdown/cell_browser/json", update = FALSE)
+ucsc.cb.samples <- ShowCBDatasets(lazy = TRUE, json.folder = "/Users/soyabean/Desktop/tmp/scdown/cell_browser/json", update = FALSE)
 head(ucsc.cb.samples)
 
 # always read online
@@ -182,7 +186,7 @@ The number of datasets and all available species:
 nrow(ucsc.cb.samples)
 
 # available species
-unique(unlist(sapply(unique(gsub(pattern = "\\|parent", replacement = "", x = ucsc.cb.samples$organisms)), function(x){
+unique(unlist(sapply(unique(gsub(pattern = "\\|parent", replacement = "", x = ucsc.cb.samples$organisms)), function(x) {
   unlist(strsplit(x = x, split = ", "))
 })))
 ```
@@ -194,7 +198,7 @@ unique(unlist(sapply(unique(gsub(pattern = "\\|parent", replacement = "", x = uc
 `scfetch` provides `ExtractCBDatasets` to extract metadata with collection, sub-collection, organ, disease status, organism, project and cell number. All attributes except cell number support fuzzy match with `fuzzy.match`, this is useful when selecting datasets.
 
 ```{r cb_extract}
-hbb.sample.df = ExtractCBDatasets(all.samples.df = ucsc.cb.samples, organ = c("brain", "blood"), organism = "Human (H. sapiens)", cell.num = c(1000,2000))
+hbb.sample.df <- ExtractCBDatasets(all.samples.df = ucsc.cb.samples, organ = c("brain", "blood"), organism = "Human (H. sapiens)", cell.num = c(1000, 2000))
 head(hbb.sample.df)
 ```
 
@@ -205,7 +209,7 @@ head(hbb.sample.df)
 `scfetch` provides `ExtractCBComposition` to extract cell type annotation and composition.
 
 ```{r cb_celltype}
-hbb.sample.ct = ExtractCBComposition(json.folder = "/Users/soyabean/Desktop/tmp/scdown/cell_browser/json", sample.df = hbb.sample.df)
+hbb.sample.ct <- ExtractCBComposition(json.folder = "/Users/soyabean/Desktop/tmp/scdown/cell_browser/json", sample.df = hbb.sample.df)
 head(hbb.sample.ct)
 ```
 
@@ -216,7 +220,7 @@ head(hbb.sample.ct)
 After manually check the extracted metadata, `scfetch` provides `ParseCBDatasets` to **load the online count matrix** to Seurat. All the attributes available in `ExtractCBDatasets` are also same here. Please note that the loading process provided by `ParseCBDatasets` will load the online count matrix instead of downloading it to local. If multiple samples available, users can choose to merge the SeuratObject with `merge`.
 
 ```{r cb_parse, eval=FALSE}
-hbb.sample.seu = ParseCBDatasets(sample.df = hbb.sample.df)
+hbb.sample.seu <- ParseCBDatasets(sample.df = hbb.sample.df)
 ```
 
 <hr />

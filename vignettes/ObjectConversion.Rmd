@@ -1,0 +1,213 @@
+---
+title: "ObjectConversion"
+output: html_document
+date: "2023-07-30"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+There are many tools have been developed to process scRNA-seq data, such as [Scanpy](https://scanpy.readthedocs.io/en/stable/), [Seurat](https://satijalab.org/seurat/), [scran](https://bioconductor.org/packages/release/bioc/html/scran.html) and [Monocle](http://cole-trapnell-lab.github.io/monocle-release/). These tools have their own objects, such as `Anndata` of `Scanpy`, `SeuratObject` of `Seurat`, `SingleCellExperiment` of `scran` and `CellDataSet`/`cell_data_set` of `Monocle2`/`Monocle3`. There are also some file format designed for large omics datasets, such as [loom](http://loompy.org/). To perform a comprehensive scRNA-seq data analysis, we usually need to combine multiple tools, which means we need to perform object conversion frequently. To facilitate user analysis of scRNA-seq data, `scfetch` provides multiple functions to perform object conversion between widely used tools and formats. The object conversion implemented in `scfetch` has two main advantages: 
+
+* **one-step conversion between different objects**. There will be no conversion to intermediate objects, thus preventing unnecessary information loss.
+* **tools used for object conversion are developed by the team of the source/destination object as far as possible**. For example, we use `SeuratDisk` to convert SeuratObject to loom, use `zellkonverter` to perform conversion between `SingleCellExperiment` and `Anndata`. When there is no such tools, we use `sceasy` to perform conversion.
+
+<hr />
+
+## Test data
+
+```{r test_data}
+library(Seurat) # pbmc_small
+library(scRNAseq) # seger
+```
+
+`SeuratObject`:
+
+```{r test_seurat}
+# object
+pbmc_small
+# metadata
+head(pbmc_small@meta.data)
+```
+
+`SingleCellExperiment`:
+```{r testsce}
+seger <- scRNAseq::SegerstolpePancreasData()
+seger
+```
+
+<hr />
+
+## Convert SeuratObject to other objects
+
+Here, we will convert SeuratObject to `SingleCellExperiment`, `CellDataSet`/`cell_data_set`, `Anndata`, `loom`.
+
+### SeuratObject to SingleCellExperiment
+
+The conversion is performed with functions implemented in `Seurat`:
+```{r seu2sce}
+sce.obj = ExportSeurat(seu.obj = pbmc_small, assay = "RNA",to = "SCE")
+sce.obj
+```
+
+<hr />
+
+### SeuratObject to CellDataSet/cell_data_set
+
+To `CellDataSet` (The conversion is performed with functions implemented in `Seurat`):
+
+```{r seu2cds1}
+# BiocManager::install("monocle") # reuqire monocle
+cds.obj = ExportSeurat(seu.obj = pbmc_small, assay = "RNA", reduction = "tsne", to = "CellDataSet")
+cds.obj
+```
+
+To `cell_data_set` (The conversion is performed with functions implemented in `SeuratWrappers`):
+
+```{r seu2cds2}
+# remotes::install_github('cole-trapnell-lab/monocle3') # reuqire monocle3
+cds3.obj = ExportSeurat(seu.obj = pbmc_small, assay = "RNA", to = "cell_data_set")
+cds3.obj
+```
+
+<hr />
+
+### SeuratObject to AnnData
+
+`AnnData` is a Python object, `reticulate` is used to communicate between Python and R. User should create a Python environment which contains `anndata` package and specify the environment path with `conda.path` to ensure the exact usage of this environment.
+
+The conversion is performed with functions implemented in `sceasy`:
+```{r seu2anndata, eval=FALSE}
+# remove pbmc_small.h5ad first
+ExportSeurat(seu.obj = pbmc_small, assay = "RNA",to = "AnnData", conda.path = "/Applications/anaconda3",
+             anndata.file = "/Users/soyabean/Desktop/tmp/scdown/conversion/pbmc_small.h5ad")
+```
+
+<hr />
+
+### SeuratObject to loom
+
+The conversion is performed with functions implemented in `SeuratDisk`:
+```{r seu2loom, eval=FALSE}
+ExportSeurat(seu.obj = pbmc_small, assay = "RNA",to = "loom", 
+             loom.file = "/Users/soyabean/Desktop/tmp/scdown/conversion/pbmc_small.loom")
+```
+
+<hr />
+
+## Convert other objects to SeuratObject
+
+### SingleCellExperiment to SeuratObject
+
+The conversion is performed with functions implemented in `Seurat`:
+```{r sce2seu}
+seu.obj.sce = ImportSeurat(obj=sce.obj, from="SCE", count.assay="counts", data.assay="logcounts", assay="RNA")
+seu.obj.sce
+```
+
+<hr />
+
+### CellDataSet/cell_data_set to SeuratObject
+
+`CellDataSet` to `SeuratObject` (The conversion is performed with functions implemented in `Seurat`):
+```{r cds2seu1}
+seu.obj.cds = ImportSeurat(obj=cds.obj, from="CellDataSet", count.assay="counts", assay = "RNA")
+seu.obj.cds
+```
+
+`cell_data_set` to `SeuratObject` (The conversion is performed with functions implemented in `Seurat`):
+```{r cds2seu2}
+seu.obj.cds3 = ImportSeurat(obj=cds3.obj, from="cell_data_set", count.assay="counts", data.assay="logcounts", assay="RNA")
+seu.obj.cds3
+```
+
+<hr />
+
+### AnnData to SeuratObject
+
+`AnnData` is a Python object, `reticulate` is used to communicate between Python and R. User should create a Python environment which contains `anndata` package and specify the environment path with `conda.path` to ensure the exact usage of this environment.
+
+The conversion is performed with functions implemented in `sceasy`:
+```{r anndata2seu}
+seu.obj.h5ad = ImportSeurat(anndata.file = "/Users/soyabean/Desktop/tmp/scdown/conversion/pbmc_small.h5ad", 
+                            from="AnnData", assay = "RNA")
+seu.obj.h5ad
+```
+
+<hr />
+
+### loom to SeuratObject
+
+The conversion is performed with functions implemented in `SeuratDisk` and `Seurat`:
+
+```{r loom2seu}
+# loom will lose reduction
+seu.obj.loom = ImportSeurat(loom.file = '/Users/soyabean/Desktop/tmp/scdown/conversion/pbmc_small.loom', from="loom")
+seu.obj.loom
+```
+
+<hr />
+
+## Conversion between SingleCellExperiment and AnnData
+
+The conversion is performed with functions implemented in `zellkonverter`.
+
+### SingleCellExperiment to AnnData
+
+```{r sce2anndata, eval=FALSE}
+# remove seger.h5ad first
+SCEAnnData(from = "SingleCellExperiment", to = "AnnData", sce = seger, X_name = "counts",
+           anndata.file = "/Users/soyabean/Desktop/tmp/scdown/conversion/seger.h5ad")
+```
+
+<hr />
+
+### AnnData to SingleCellExperiment
+
+```{r anndata2sce}
+seger.anndata = SCEAnnData(from = "AnnData", to = "SingleCellExperiment",
+                           anndata.file = "/Users/soyabean/Desktop/tmp/scdown/conversion/seger.h5ad")
+seger.anndata
+```
+
+<hr />
+
+## Conversion between SingleCellExperiment and loom
+
+The conversion is performed with functions implemented in `LoomExperiment`.
+
+### SingleCellExperiment to loom
+
+```{r sce2loom, eval=FALSE}
+# remove seger.loom first
+SCELoom(from = "SingleCellExperiment", to = "loom",sce = seger,
+        loom.file = "/Users/soyabean/Desktop/tmp/scdown/conversion/seger.loom")
+```
+
+<hr />
+
+### loom to SingleCellExperiment
+
+```{r loom2sce}
+seger.loom = SCELoom(from = "loom", to = "SingleCellExperiment",
+                     loom.file = "/Users/soyabean/Desktop/tmp/scdown/conversion/seger.loom")
+seger.loom
+```
+
+<hr />
+
+
+
+
+
+
+
+
+
+
+
+
+

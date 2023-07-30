@@ -7,9 +7,11 @@
 
 `scfetch` is designed to accelerate users download and prepare single-cell datasets from public resources. It can be used to:
 
-* **Download fastq files** or **bam files** from `GEO/SRA`, **foramt fastq files** to standard style that can be identified by 10x softwares (e.g. CellRanger), **convert bam files to fastq files**.
-* Download scRNA-seq **matrix** and **annotation (e.g. cell type)** information from `GEO`, `Zenodo`, `PanglanDB` and `UCSC Cell Browser`, **load the downnloaded matrix to `Seurat`**.
-* **Format conversion between widely used single cell object** (`SeuratObject`, `AnnData`, `SingleCellExperiment`, `CellDataSet/cell_data_set` and `loom`).
+* **Download fastq files** from `GEO/SRA`, **foramt fastq files** to standard style that can be identified by 10x softwares (e.g. CellRanger).
+* **Download bam files** from `GEO/SRA`, support **downloading original 10x generated bam files (with custom tags) and normal bam files**, and **convert bam files to fastq files**.
+* Download scRNA-seq **matrix** and **annotation (e.g. cell type)** information from `GEO`, `PanglanDB` and `UCSC Cell Browser`, **load the downnloaded matrix to `Seurat`**.
+* Download processed objects from `Zeenodo`.
+* **Object conversion between widely used single cell objects** (`SeuratObject`, `AnnData`, `SingleCellExperiment`, `CellDataSet/cell_data_set` and `loom`).
 
 <hr />
 
@@ -64,7 +66,7 @@ Detailed usage is available in [website](https://showteeth.github.io/scfetch/).
     <td>Convert bam files to fastq files</td>
   </tr>
   <tr>
-    <td rowspan="10">Download matrix/rds/h5ad and load matix to Seurat </td>
+    <td rowspan="8">Download matrix and load to Seurat </td>
     <td>ExtractGEOMeta</td>
     <td>Extract sample metadata from GEO</td>
   </tr>
@@ -73,16 +75,8 @@ Detailed usage is available in [website](https://showteeth.github.io/scfetch/).
     <td>Download matrix from GEO and load to Seurat</td>
   </tr>
   <tr>
-    <td>ExtractZenodoMeta</td>
-    <td>Extract sample metadata from Zenodo with DOIs</td>
-  </tr>
-  <tr>
-    <td>ParseZenodo</td>
-    <td>Download rds/rdata/h5ad/matrix from Zenodo with DOIs</td>
-  </tr>
-  <tr>
     <td>ExtractPanglaoDBMeta</td>
-    <td>Extract sample metadata and cell type annotation from PandlaoDB</td>
+    <td>Extract sample metadata from PandlaoDB</td>
   </tr>
   <tr>
     <td>ParsePanglaoDB</td>
@@ -102,7 +96,16 @@ Detailed usage is available in [website](https://showteeth.github.io/scfetch/).
   </tr>
   <tr>
     <td>ParseCBDatasets</td>
-    <td>Load the online UCSC Cell Browser datasets to Seurat</td>
+    <td>Download UCSC Cell Browser datasets and load to Seurat</td>
+  </tr>
+  <tr>
+    <td rowspan="2">Download objects</td>
+    <td>ExtractZenodoMeta</td>
+    <td>Extract sample metadata from Zenodo with DOIs</td>
+  </tr>
+  <tr>
+    <td>ParseZenodo</td>
+    <td>Download rds/rdata/h5ad/matrix from Zenodo with DOIs</td>
   </tr>
   <tr>
     <td rowspan="4">Convert between different single-cell objects</td>
