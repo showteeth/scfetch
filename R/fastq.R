@@ -154,10 +154,29 @@ RunPrefetch <- function(sra, prefetch.path, out.folder, prefetch.paras) {
 #' # GSE186003.split = SplitSRA(sra.folder = "/path/to/output", split.cmd.path = "/path/to/parallel-fastq-dump",
 #' #                            sratools.path = "/path/to/sra/bin", fastq.type = "10x",
 #' #                            split.cmd.threads = 4)
-SplitSRA <- function(sra.folder = NULL, sra.path = NULL, fastq.type = c("10x", "other"), split.cmd.path = NULL, sratools.path = NULL, split.cmd.paras = NULL,
-                     split.cmd.threads = NULL, format.10x = TRUE, remove.raw = FALSE) {
+SplitSRA <- function(sra.folder = NULL, sra.path = NULL, fastq.type = c("10x", "other"), split.cmd.path = NULL, sratools.path = NULL,
+                     split.cmd.paras = NULL, split.cmd.threads = NULL, format.10x = TRUE, remove.raw = FALSE) {
   # check parameters
   fastq.type <- match.arg(arg = fastq.type)
+
+  # check split.cmd.paras
+  if (!is.null(split.cmd.paras)) {
+    split.cmd.paras.sep <- unlist(strsplit(split.cmd.paras, split = "[[:space:]]+"))
+    # invalid scp
+    invalid.scp <- c(
+      "--gzip", "--bzip2", "--split-files", "--split-3", "--split-spot",
+      "-s", "-S", "-3", "--outdir", "-O", "-Z", "--stdout", "-e", "--threads",
+      "--sra-id"
+    )
+    # removed split.cmd.paras
+    split.cmd.paras.remove <- intersect(split.cmd.paras.sep, invalid.scp)
+    if (length(split.cmd.paras.remove) > 0) {
+      message("The split.cmd.paras you proided should not contain: ", paste(invalid.scp, collapse = ", "), ". Please check!")
+    }
+    # valid split.cmd.paras
+    split.cmd.paras.sep <- setdiff(split.cmd.paras.sep, invalid.scp)
+    split.cmd.paras <- paste(split.cmd.paras.sep, collapse = " ")
+  }
 
   # get fastq-dump/fasterq-dump/parallel-fastq-dump path
   if (is.null(split.cmd.path)) {

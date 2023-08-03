@@ -16,6 +16,7 @@
 * Supported downloadding normal (non-10x) bam file in `DownloadBam`.
 * `ExtractZenodoMeta` supported a vector of Zenodo dois.
 * Added `fastq.type` in `SplitSRA` to deal with fastq files from 10x, other scRNA-seq protocols and bulk RNA-seq.
+* Added check for `split.cmd.paras` in `SplitSRA`.
 
 -------------------
 
