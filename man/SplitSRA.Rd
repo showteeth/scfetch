@@ -7,6 +7,7 @@
 SplitSRA(
   sra.folder = NULL,
   sra.path = NULL,
+  fastq.type = c("10x", "other"),
   split.cmd.path = NULL,
   sratools.path = NULL,
   split.cmd.paras = NULL,
@@ -19,6 +20,9 @@ SplitSRA(
 \item{sra.folder}{Folder contains all sras, obtained from \code{DownloadSRA}. Default: NULL.}
 
 \item{sra.path}{Paths of sras. \code{sra.folder} and \code{sra.path} cannot be both NULL. Default: NULL.}
+
+\item{fastq.type}{The source of fastq files, choose from 10x (use \code{--split-files} to split sra) or
+other (use \code{--split-3} to split sra). Default: 10x.}
 
 \item{split.cmd.path}{The full command path used to split, can be path to parallel-fastq-dump,
 fasterq-dump and fastq-dump. Default: NULL (conduct automatic detection).}
@@ -46,6 +50,6 @@ Split SRA to fastq Files and Format to 10x Standard Style.
 # GSE186003.down = DownloadSRA(gsm.df = GSE186003.runs, prefetch.path = "/path/to/prefetch",
 #                              out.folder = "/path/to/output")
 # GSE186003.split = SplitSRA(sra.folder = "/path/to/output", split.cmd.path = "/path/to/parallel-fastq-dump",
-#                            sratools.path = "/path/to/sra/bin", split.cmd.paras = "--split-files --gzip",
+#                            sratools.path = "/path/to/sra/bin", fastq.type = "10x",
 #                            split.cmd.threads = 4)
 }

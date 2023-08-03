@@ -66,9 +66,9 @@ The returned result is a vector of failed sra files. If not `NULL`, users can re
 # parallel-fastq-dump requires sratools.path
 GSE130636.split <- SplitSRA(
   sra.folder = "/Users/soyabean/Desktop/tmp/scdown/download_fastq",
+  fastq.type = "10x",
   split.cmd.path = "/Applications/anaconda3/bin/parallel-fastq-dump",
-  sratools.path = "/usr/local/bin", split.cmd.paras = "--split-files --gzip",
-  split.cmd.threads = 4
+  sratools.path = "/usr/local/bin", split.cmd.threads = 4
 )
 ```
 

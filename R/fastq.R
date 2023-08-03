@@ -131,6 +131,8 @@ RunPrefetch <- function(sra, prefetch.path, out.folder, prefetch.paras) {
 #'
 #' @param sra.folder Folder contains all sras, obtained from \code{DownloadSRA}. Default: NULL.
 #' @param sra.path Paths of sras. \code{sra.folder} and \code{sra.path} cannot be both NULL. Default: NULL.
+#' @param fastq.type The source of fastq files, choose from 10x (use \code{--split-files} to split sra) or
+#' other (use \code{--split-3} to split sra). Default: 10x.
 #' @param split.cmd.path The full command path used to split, can be path to parallel-fastq-dump,
 #' fasterq-dump and fastq-dump. Default: NULL (conduct automatic detection).
 #' @param sratools.path Path to sratoolkit bin. When \code{split.cmd.path} is path to parallel-fastq-dump,
@@ -150,10 +152,13 @@ RunPrefetch <- function(sra, prefetch.path, out.folder, prefetch.paras) {
 #' # GSE186003.down = DownloadSRA(gsm.df = GSE186003.runs, prefetch.path = "/path/to/prefetch",
 #' #                              out.folder = "/path/to/output")
 #' # GSE186003.split = SplitSRA(sra.folder = "/path/to/output", split.cmd.path = "/path/to/parallel-fastq-dump",
-#' #                            sratools.path = "/path/to/sra/bin", split.cmd.paras = "--split-files --gzip",
+#' #                            sratools.path = "/path/to/sra/bin", fastq.type = "10x",
 #' #                            split.cmd.threads = 4)
-SplitSRA <- function(sra.folder = NULL, sra.path = NULL, split.cmd.path = NULL, sratools.path = NULL, split.cmd.paras = NULL,
+SplitSRA <- function(sra.folder = NULL, sra.path = NULL, fastq.type = c("10x", "other"), split.cmd.path = NULL, sratools.path = NULL, split.cmd.paras = NULL,
                      split.cmd.threads = NULL, format.10x = TRUE, remove.raw = FALSE) {
+  # check parameters
+  fastq.type <- match.arg(arg = fastq.type)
+
   # get fastq-dump/fasterq-dump/parallel-fastq-dump path
   if (is.null(split.cmd.path)) {
     # specify prefetch path
@@ -200,7 +205,7 @@ SplitSRA <- function(sra.folder = NULL, sra.path = NULL, split.cmd.path = NULL, 
   # run split
   all.sras.split <- sapply(all.sras, function(x) {
     RunSplit(
-      sra.path = x, split.cmd.path = split.cmd.path, sratools.path = sratools.path,
+      sra.path = x, fastq.type = fastq.type, split.cmd.path = split.cmd.path, sratools.path = sratools.path,
       split.cmd.paras = split.cmd.paras, split.cmd.threads = split.cmd.threads
     )
   })
@@ -232,25 +237,31 @@ SplitSRA <- function(sra.folder = NULL, sra.path = NULL, split.cmd.path = NULL, 
 }
 
 # split single sra file
-RunSplit <- function(sra.path, split.cmd.path, sratools.path, split.cmd.paras, split.cmd.threads) {
+RunSplit <- function(sra.path, fastq.type, split.cmd.path, sratools.path, split.cmd.paras, split.cmd.threads) {
   # prepare output folder
   out.folder <- dirname(sra.path)
+  # check the fastq type
+  if (fastq.type == "10x") {
+    sp <- "--split-files"
+  } else if (fastq.type == "other") {
+    sp <- "--split-3"
+  }
   # get cmd used
   split.name <- basename(split.cmd.path)
   # split command
   if (split.name == "parallel-fastq-dump") {
     split.cmd <- paste(
-      split.cmd.path, split.cmd.paras, "-O", out.folder,
+      split.cmd.path, split.cmd.paras, sp, "--gzip", "-O", out.folder,
       "--sra-id", sra.path, "--threads", split.cmd.threads
     )
     split.cmd <- paste0("export PATH=", sratools.path, ":$PATH;", split.cmd)
   } else if (split.name == "fasterq-dump") {
     split.cmd <- paste(
-      split.cmd.path, split.cmd.paras, "-O", out.folder,
+      split.cmd.path, split.cmd.paras, sp, "-O", out.folder,
       "--threads", split.cmd.threads, sra.path
     )
   } else {
-    split.cmd <- paste(split.cmd.path, split.cmd.paras, "-O", out.folder, sra.path)
+    split.cmd <- paste(split.cmd.path, split.cmd.paras, sp, "--gzip", "-O", out.folder, sra.path)
   }
   # run command
   message(paste("Calling", split.name, ": ", split.cmd))

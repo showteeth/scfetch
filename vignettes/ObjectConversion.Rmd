@@ -49,7 +49,7 @@ Here, we will convert SeuratObject to `SingleCellExperiment`, `CellDataSet`/`cel
 
 The conversion is performed with functions implemented in `Seurat`:
 ```{r seu2sce}
-sce.obj = ExportSeurat(seu.obj = pbmc_small, assay = "RNA",to = "SCE")
+sce.obj <- ExportSeurat(seu.obj = pbmc_small, assay = "RNA", to = "SCE")
 sce.obj
 ```
 
@@ -61,7 +61,7 @@ To `CellDataSet` (The conversion is performed with functions implemented in `Seu
 
 ```{r seu2cds1}
 # BiocManager::install("monocle") # reuqire monocle
-cds.obj = ExportSeurat(seu.obj = pbmc_small, assay = "RNA", reduction = "tsne", to = "CellDataSet")
+cds.obj <- ExportSeurat(seu.obj = pbmc_small, assay = "RNA", reduction = "tsne", to = "CellDataSet")
 cds.obj
 ```
 
@@ -69,7 +69,7 @@ To `cell_data_set` (The conversion is performed with functions implemented in `S
 
 ```{r seu2cds2}
 # remotes::install_github('cole-trapnell-lab/monocle3') # reuqire monocle3
-cds3.obj = ExportSeurat(seu.obj = pbmc_small, assay = "RNA", to = "cell_data_set")
+cds3.obj <- ExportSeurat(seu.obj = pbmc_small, assay = "RNA", to = "cell_data_set")
 cds3.obj
 ```
 
@@ -82,8 +82,10 @@ cds3.obj
 The conversion is performed with functions implemented in `sceasy`:
 ```{r seu2anndata, eval=FALSE}
 # remove pbmc_small.h5ad first
-ExportSeurat(seu.obj = pbmc_small, assay = "RNA",to = "AnnData", conda.path = "/Applications/anaconda3",
-             anndata.file = "/Users/soyabean/Desktop/tmp/scdown/conversion/pbmc_small.h5ad")
+ExportSeurat(
+  seu.obj = pbmc_small, assay = "RNA", to = "AnnData", conda.path = "/Applications/anaconda3",
+  anndata.file = "/Users/soyabean/Desktop/tmp/scdown/conversion/pbmc_small.h5ad"
+)
 ```
 
 <hr />
@@ -92,8 +94,10 @@ ExportSeurat(seu.obj = pbmc_small, assay = "RNA",to = "AnnData", conda.path = "/
 
 The conversion is performed with functions implemented in `SeuratDisk`:
 ```{r seu2loom, eval=FALSE}
-ExportSeurat(seu.obj = pbmc_small, assay = "RNA",to = "loom", 
-             loom.file = "/Users/soyabean/Desktop/tmp/scdown/conversion/pbmc_small.loom")
+ExportSeurat(
+  seu.obj = pbmc_small, assay = "RNA", to = "loom",
+  loom.file = "/Users/soyabean/Desktop/tmp/scdown/conversion/pbmc_small.loom"
+)
 ```
 
 <hr />
@@ -104,7 +108,7 @@ ExportSeurat(seu.obj = pbmc_small, assay = "RNA",to = "loom",
 
 The conversion is performed with functions implemented in `Seurat`:
 ```{r sce2seu}
-seu.obj.sce = ImportSeurat(obj=sce.obj, from="SCE", count.assay="counts", data.assay="logcounts", assay="RNA")
+seu.obj.sce <- ImportSeurat(obj = sce.obj, from = "SCE", count.assay = "counts", data.assay = "logcounts", assay = "RNA")
 seu.obj.sce
 ```
 
@@ -114,13 +118,13 @@ seu.obj.sce
 
 `CellDataSet` to `SeuratObject` (The conversion is performed with functions implemented in `Seurat`):
 ```{r cds2seu1}
-seu.obj.cds = ImportSeurat(obj=cds.obj, from="CellDataSet", count.assay="counts", assay = "RNA")
+seu.obj.cds <- ImportSeurat(obj = cds.obj, from = "CellDataSet", count.assay = "counts", assay = "RNA")
 seu.obj.cds
 ```
 
 `cell_data_set` to `SeuratObject` (The conversion is performed with functions implemented in `Seurat`):
 ```{r cds2seu2}
-seu.obj.cds3 = ImportSeurat(obj=cds3.obj, from="cell_data_set", count.assay="counts", data.assay="logcounts", assay="RNA")
+seu.obj.cds3 <- ImportSeurat(obj = cds3.obj, from = "cell_data_set", count.assay = "counts", data.assay = "logcounts", assay = "RNA")
 seu.obj.cds3
 ```
 
@@ -132,8 +136,10 @@ seu.obj.cds3
 
 The conversion is performed with functions implemented in `sceasy`:
 ```{r anndata2seu}
-seu.obj.h5ad = ImportSeurat(anndata.file = "/Users/soyabean/Desktop/tmp/scdown/conversion/pbmc_small.h5ad", 
-                            from="AnnData", assay = "RNA")
+seu.obj.h5ad <- ImportSeurat(
+  anndata.file = "/Users/soyabean/Desktop/tmp/scdown/conversion/pbmc_small.h5ad",
+  from = "AnnData", assay = "RNA"
+)
 seu.obj.h5ad
 ```
 
@@ -145,7 +151,7 @@ The conversion is performed with functions implemented in `SeuratDisk` and `Seur
 
 ```{r loom2seu}
 # loom will lose reduction
-seu.obj.loom = ImportSeurat(loom.file = '/Users/soyabean/Desktop/tmp/scdown/conversion/pbmc_small.loom', from="loom")
+seu.obj.loom <- ImportSeurat(loom.file = "/Users/soyabean/Desktop/tmp/scdown/conversion/pbmc_small.loom", from = "loom")
 seu.obj.loom
 ```
 
@@ -159,8 +165,10 @@ The conversion is performed with functions implemented in `zellkonverter`.
 
 ```{r sce2anndata, eval=FALSE}
 # remove seger.h5ad first
-SCEAnnData(from = "SingleCellExperiment", to = "AnnData", sce = seger, X_name = "counts",
-           anndata.file = "/Users/soyabean/Desktop/tmp/scdown/conversion/seger.h5ad")
+SCEAnnData(
+  from = "SingleCellExperiment", to = "AnnData", sce = seger, X_name = "counts",
+  anndata.file = "/Users/soyabean/Desktop/tmp/scdown/conversion/seger.h5ad"
+)
 ```
 
 <hr />
@@ -168,8 +176,10 @@ SCEAnnData(from = "SingleCellExperiment", to = "AnnData", sce = seger, X_name = 
 ### AnnData to SingleCellExperiment
 
 ```{r anndata2sce}
-seger.anndata = SCEAnnData(from = "AnnData", to = "SingleCellExperiment",
-                           anndata.file = "/Users/soyabean/Desktop/tmp/scdown/conversion/seger.h5ad")
+seger.anndata <- SCEAnnData(
+  from = "AnnData", to = "SingleCellExperiment",
+  anndata.file = "/Users/soyabean/Desktop/tmp/scdown/conversion/seger.h5ad"
+)
 seger.anndata
 ```
 
@@ -183,8 +193,10 @@ The conversion is performed with functions implemented in `LoomExperiment`.
 
 ```{r sce2loom, eval=FALSE}
 # remove seger.loom first
-SCELoom(from = "SingleCellExperiment", to = "loom",sce = seger,
-        loom.file = "/Users/soyabean/Desktop/tmp/scdown/conversion/seger.loom")
+SCELoom(
+  from = "SingleCellExperiment", to = "loom", sce = seger,
+  loom.file = "/Users/soyabean/Desktop/tmp/scdown/conversion/seger.loom"
+)
 ```
 
 <hr />
@@ -192,8 +204,10 @@ SCELoom(from = "SingleCellExperiment", to = "loom",sce = seger,
 ### loom to SingleCellExperiment
 
 ```{r loom2sce}
-seger.loom = SCELoom(from = "loom", to = "SingleCellExperiment",
-                     loom.file = "/Users/soyabean/Desktop/tmp/scdown/conversion/seger.loom")
+seger.loom <- SCELoom(
+  from = "loom", to = "SingleCellExperiment",
+  loom.file = "/Users/soyabean/Desktop/tmp/scdown/conversion/seger.loom"
+)
 seger.loom
 ```
 
