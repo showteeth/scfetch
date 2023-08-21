@@ -15,6 +15,14 @@
 
 <hr />
 
+## Framework
+
+<div align="center">
+<img src="man/figures/scfetch_workflow.png"  title="scfetch_framework"  alt="scfetch_framework" />
+</div>
+
+<hr />
+
 ## Installation
 
 You can install the development version of `scfetch` from [GitHub](https://github.com/showteeth/scfetch) with:
