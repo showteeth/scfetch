@@ -74,7 +74,7 @@ Detailed usage is available in [website](https://showteeth.github.io/scfetch/).
     <td>Convert bam files to fastq files</td>
   </tr>
   <tr>
-    <td rowspan="8">Download matrix and load to Seurat </td>
+    <td rowspan="9">Download matrix and load to Seurat </td>
     <td>ExtractGEOMeta</td>
     <td>Extract sample metadata from GEO</td>
   </tr>
@@ -85,6 +85,10 @@ Detailed usage is available in [website](https://showteeth.github.io/scfetch/).
   <tr>
     <td>ExtractPanglaoDBMeta</td>
     <td>Extract sample metadata from PandlaoDB</td>
+  </tr>
+  <tr>
+    <td>ExtractPanglaoDBComposition</td>
+    <td>Extract cell type composition of PanglaoDB datasets</td>
   </tr>
   <tr>
     <td>ParsePanglaoDB</td>

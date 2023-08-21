@@ -147,6 +147,17 @@ head(hsa.meta)
 
 <hr />
 
+### Extract cell type composition
+
+`scfetch` provides `ExtractPanglaoDBComposition` to extract cell type annotation and composition.
+
+```{r panglaodb_celltype}
+hsa.composition <- ExtractPanglaoDBComposition(species = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"))
+head(hsa.composition)
+```
+
+<hr />
+
 ### Download matrix and load to Seurat
 
 After manually check the extracted metadata, `scfetch` provides `ParsePanglaoDB` to **download count matrix** and **load the count matrix** to Seurat. With available cell type annotation, uses can filter samples without specified cell type with `cell.type`. Users can also include/exclude cells expressing specified genes with `include.gene`/`exclude.gene`. 

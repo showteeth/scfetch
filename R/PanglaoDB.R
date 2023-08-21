@@ -93,6 +93,42 @@ ExtractPanglaoDBMeta <- function(species = NULL, protocol = NULL, tissue = NULL,
   return(used.meta)
 }
 
+#' Extract Cell Type Composition of PanglaoDB Datasets.
+#'
+#' @param sra The SRA identifier of the datasets. Default: NULL (All).
+#' @param srs The SRS identifier of the datasets. Default: NULL (All).
+#' @param species The species of the datasets, choose from "Homo sapiens", "Mus musculus", one or multiple value. Default: NULL (All).
+#' @param protocol Protocol used to generate the datasets, choose from "10x chromium", "drop-seq", "microwell-seq",
+#' "C1 Fluidigm", "inDrops", "Smart-seq2", "CEL-seq", one or multiple value. Default: NULL (All).
+#' @param tissue The tissue of the datasets. Default: NULL (All).
+#'
+#' @return Dataframe contains sample metadata, cluster, cell number and cell type information.
+#' @importFrom rPanglaoDB getSampleComposition
+#' @export
+#'
+#' @examples
+#' # human.composition = ExtractPanglaoDBComposition(species = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"))
+ExtractPanglaoDBComposition <- function(sra = NULL, srs = NULL, species = NULL, protocol = NULL, tissue = NULL) {
+  # prepare paras
+  if (is.null(sra)) sra <- "All"
+  if (is.null(srs)) srs <- "All"
+  if (is.null(species)) species <- "All"
+  if (is.null(tissue)) tissue <- "All"
+  if (is.null(protocol)) {
+    protocol <- "All"
+  } else if ("Smart-seq2" %in% protocol) {
+    protocol <- c(protocol, "SMART-seq2")
+  }
+  # get composition
+  select.compos <- rPanglaoDB::getSampleComposition(
+    sra = sra, srs = srs, tissue = tissue,
+    protocol = protocol, specie = species, verbose = FALSE
+  )
+  # modify SMART-seq2 to Smart-seq2
+  select.compos$Protocol <- gsub(pattern = "SMART-seq2", replacement = "Smart-seq2", x = select.compos$Protocol)
+  return(select.compos)
+}
+
 #' Parse PanglaoDB Data.
 #'
 #' @param meta Metadata contains "SRA", "SRS", "Tissue", "Protocol", "Species", can be obtained with \code{ExtractPanglaoDBMeta}.

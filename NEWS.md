@@ -5,6 +5,7 @@
 * Added `ImportSeurat` to convert other scRNA-seq formats to SeuratObject.
 * Added `SCEaAnnData` to perform data format conversion between SingleCellExperiment and AnnData.
 * Added `SCELoom` to perform data format conversion between SingleCellExperiment and loom.
+* Added `ExtractPanglaoDBComposition` to extract cell type composition of PanglaoDB datasets.
 
 -------------------
 

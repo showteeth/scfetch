@@ -3,3 +3,5 @@ inst/doc
 .Rbuildignore
 .Rproj*
 .Rproj.user
+.DS_Store
+man/.DS_Store
