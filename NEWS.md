@@ -18,6 +18,7 @@
 * `ExtractZenodoMeta` supported a vector of Zenodo dois.
 * Added `fastq.type` in `SplitSRA` to deal with fastq files from 10x, other scRNA-seq protocols and bulk RNA-seq.
 * Added check for `split.cmd.paras` in `SplitSRA`.
+* Added `local.data` in `ExtractPanglaoDBMeta` and `ExtractPanglaoDBComposition` to use cached sample metadata and composition.
 
 -------------------
 

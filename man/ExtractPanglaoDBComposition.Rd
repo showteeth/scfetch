@@ -9,7 +9,8 @@ ExtractPanglaoDBComposition(
   srs = NULL,
   species = NULL,
   protocol = NULL,
-  tissue = NULL
+  tissue = NULL,
+  local.data = TRUE
 )
 }
 \arguments{
@@ -23,6 +24,8 @@ ExtractPanglaoDBComposition(
 "C1 Fluidigm", "inDrops", "Smart-seq2", "CEL-seq", one or multiple value. Default: NULL (All).}
 
 \item{tissue}{The tissue of the datasets. Default: NULL (All).}
+
+\item{local.data}{Logical value, whether to use local data (PanglaoDB is no longer maintained). Default: TRUE.}
 }
 \value{
 Dataframe contains sample metadata, cluster, cell number and cell type information.

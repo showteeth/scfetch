@@ -140,6 +140,8 @@ tree /Users/soyabean/Desktop/tmp/scdown/download_zenodo
 
 `scfetch` provides `ExtractPanglaoDBMeta` to show all available datasets or select interested datasets with specified species, protocol, tissue and cell number. User can also choose to whether to add cell type annotation to every dataset with `show.cell.type`.
 
+Since [PanglaoDB](https://panglaodb.se/about.html) is no longer maintained, `scfetch` has cached all metadata and sample composition and use these cached data by default to accelerate, users can change this by setting `local.data = FALSE`.
+
 ```{r panglaodb_meta}
 hsa.meta <- ExtractPanglaoDBMeta(species = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"), show.cell.type = TRUE, cell.num = c(1000, 2000))
 head(hsa.meta)
@@ -149,7 +151,7 @@ head(hsa.meta)
 
 ### Extract cell type composition
 
-`scfetch` provides `ExtractPanglaoDBComposition` to extract cell type annotation and composition.
+`scfetch` provides `ExtractPanglaoDBComposition` to extract cell type annotation and composition (use cached data by default to accelerate, users can change this by setting `local.data = FALSE`).
 
 ```{r panglaodb_celltype}
 hsa.composition <- ExtractPanglaoDBComposition(species = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"))

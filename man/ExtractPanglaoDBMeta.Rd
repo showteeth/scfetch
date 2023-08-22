@@ -9,7 +9,8 @@ ExtractPanglaoDBMeta(
   protocol = NULL,
   tissue = NULL,
   cell.num = NULL,
-  show.cell.type = TRUE
+  show.cell.type = TRUE,
+  local.data = TRUE
 )
 }
 \arguments{
@@ -23,6 +24,8 @@ ExtractPanglaoDBMeta(
 \item{cell.num}{Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter. Deault: NULL.}
 
 \item{show.cell.type}{Logical value, whether to show inferred cell type. Default: TRUE.}
+
+\item{local.data}{Logical value, whether to use local data (PanglaoDB is no longer maintained). Default: TRUE.}
 }
 \value{
 Dataframe contains SRA, SRS, Tissue, Protocol, Species, Cells, CellType (inferred).

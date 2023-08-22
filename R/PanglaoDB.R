@@ -6,6 +6,7 @@
 #' @param tissue The tissue of the datasets. Default: NULL (All).
 #' @param cell.num Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter. Deault: NULL.
 #' @param show.cell.type Logical value, whether to show inferred cell type. Default: TRUE.
+#' @param local.data Logical value, whether to use local data (PanglaoDB is no longer maintained). Default: TRUE.
 #'
 #' @return Dataframe contains SRA, SRS, Tissue, Protocol, Species, Cells, CellType (inferred).
 #' @importFrom magrittr %>%
@@ -15,9 +16,13 @@
 #'
 #' @examples
 #' # human.meta = ExtractPanglaoDBMeta(species = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"), cell.num = c(1000,2000))
-ExtractPanglaoDBMeta <- function(species = NULL, protocol = NULL, tissue = NULL, cell.num = NULL, show.cell.type = TRUE) {
+ExtractPanglaoDBMeta <- function(species = NULL, protocol = NULL, tissue = NULL, cell.num = NULL, show.cell.type = TRUE, local.data = TRUE) {
   # get all sample metadata
-  all.meta <- rPanglaoDB::getSampleList()
+  if (local.data) {
+    all.meta <- PanglaoDBMeta
+  } else {
+    all.meta <- rPanglaoDB::getSampleList()
+  }
   # modify SMART-seq2 to Smart-seq2
   all.meta$Protocol <- gsub(pattern = "SMART-seq2", replacement = "Smart-seq2", x = all.meta$Protocol)
 
@@ -67,29 +72,30 @@ ExtractPanglaoDBMeta <- function(species = NULL, protocol = NULL, tissue = NULL,
       dplyr::filter(CellNum < as.numeric(cell.num[2]))
   }
   # get sample cell type
-  if (show.cell.type) {
-    if (nrow(used.meta) > 0) {
-      used.meta.ct <- sapply(used.meta$SRS, function(x) {
-        tryCatch(
-          {
-            x.com <- rPanglaoDB::getSampleComposition(srs = x, verbose = FALSE)
-            paste(unique(x.com[["Cell Type"]]), collapse = ", ")
-          },
-          error = function(e) {
-            message("This is an error when obtaining inferred cell types of ", x)
-            "None"
-          }
-        )
-      })
-      used.meta.ct.df <- as.data.frame(used.meta.ct)
-      colnames(used.meta.ct.df) <- "CellType"
-      used.meta <- merge(used.meta, used.meta.ct.df, by.x = "SRS", by.y = 0, all.x = TRUE)
-      used.meta <- used.meta[c("SRA", "SRS", "Tissue", "Protocol", "Species", "Cells", "CellType")]
+  if (!local.data) {
+    if (show.cell.type) {
+      if (nrow(used.meta) > 0) {
+        used.meta.ct <- sapply(used.meta$SRS, function(x) {
+          tryCatch(
+            {
+              x.com <- rPanglaoDB::getSampleComposition(srs = x, verbose = FALSE)
+              paste(unique(x.com[["Cell Type"]]), collapse = ", ")
+            },
+            error = function(e) {
+              message("This is an error when obtaining inferred cell types of ", x)
+              "None"
+            }
+          )
+        })
+        used.meta.ct.df <- as.data.frame(used.meta.ct)
+        colnames(used.meta.ct.df) <- "CellType"
+        used.meta <- merge(used.meta, used.meta.ct.df, by.x = "SRS", by.y = 0, all.x = TRUE)
+        used.meta <- used.meta[c("SRA", "SRS", "Tissue", "Protocol", "Species", "Cells", "CellType")]
+      }
     }
+    # replace srs with '=' with notused
+    used.meta$SRS <- gsub(pattern = "nSRS=[0-9]*", replacement = "notused", x = used.meta$SRS)
   }
-  # replace srs with '=' with notused
-  used.meta$SRS <- gsub(pattern = "nSRS=[0-9]*", replacement = "notused", x = used.meta$SRS)
-
   return(used.meta)
 }
 
@@ -101,6 +107,7 @@ ExtractPanglaoDBMeta <- function(species = NULL, protocol = NULL, tissue = NULL,
 #' @param protocol Protocol used to generate the datasets, choose from "10x chromium", "drop-seq", "microwell-seq",
 #' "C1 Fluidigm", "inDrops", "Smart-seq2", "CEL-seq", one or multiple value. Default: NULL (All).
 #' @param tissue The tissue of the datasets. Default: NULL (All).
+#' @param local.data Logical value, whether to use local data (PanglaoDB is no longer maintained). Default: TRUE.
 #'
 #' @return Dataframe contains sample metadata, cluster, cell number and cell type information.
 #' @importFrom rPanglaoDB getSampleComposition
@@ -108,22 +115,39 @@ ExtractPanglaoDBMeta <- function(species = NULL, protocol = NULL, tissue = NULL,
 #'
 #' @examples
 #' # human.composition = ExtractPanglaoDBComposition(species = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"))
-ExtractPanglaoDBComposition <- function(sra = NULL, srs = NULL, species = NULL, protocol = NULL, tissue = NULL) {
-  # prepare paras
-  if (is.null(sra)) sra <- "All"
-  if (is.null(srs)) srs <- "All"
-  if (is.null(species)) species <- "All"
-  if (is.null(tissue)) tissue <- "All"
-  if (is.null(protocol)) {
-    protocol <- "All"
-  } else if ("Smart-seq2" %in% protocol) {
-    protocol <- c(protocol, "SMART-seq2")
+ExtractPanglaoDBComposition <- function(sra = NULL, srs = NULL, species = NULL, protocol = NULL, tissue = NULL, local.data = TRUE) {
+  if (local.data) {
+    select.compos <- PanglaoDBComposition
+    # prepare paras
+    if (is.null(sra)) sra <- unique(select.compos$SRA)
+    if (is.null(srs)) srs <- unique(select.compos$SRS)
+    if (is.null(species)) species <- unique(select.compos$Species)
+    if (is.null(tissue)) tissue <- unique(select.compos$Tissue)
+    if (is.null(protocol)) {
+      protocol <- unique(select.compos$Protocol)
+    } else if ("Smart-seq2" %in% protocol) {
+      protocol <- c(protocol, "SMART-seq2")
+    }
+    select.compos <- select.compos[(select.compos$SRA %in% sra) & (select.compos$SRS %in% srs) &
+      (select.compos$Tissue %in% tissue) & (select.compos$Species %in% species) &
+      (select.compos$Protocol %in% protocol), ]
+  } else {
+    # prepare paras
+    if (is.null(sra)) sra <- "All"
+    if (is.null(srs)) srs <- "All"
+    if (is.null(species)) species <- "All"
+    if (is.null(tissue)) tissue <- "All"
+    if (is.null(protocol)) {
+      protocol <- "All"
+    } else if ("Smart-seq2" %in% protocol) {
+      protocol <- c(protocol, "SMART-seq2")
+    }
+    # get composition
+    select.compos <- rPanglaoDB::getSampleComposition(
+      sra = sra, srs = srs, tissue = tissue,
+      protocol = protocol, specie = species, verbose = FALSE
+    )
   }
-  # get composition
-  select.compos <- rPanglaoDB::getSampleComposition(
-    sra = sra, srs = srs, tissue = tissue,
-    protocol = protocol, specie = species, verbose = FALSE
-  )
   # modify SMART-seq2 to Smart-seq2
   select.compos$Protocol <- gsub(pattern = "SMART-seq2", replacement = "Smart-seq2", x = select.compos$Protocol)
   return(select.compos)

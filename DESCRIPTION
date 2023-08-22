@@ -44,3 +44,5 @@ Suggests:
     rmarkdown,
     scRNAseq
 VignetteBuilder: knitr
+Depends: 
+    R (>= 2.10)
