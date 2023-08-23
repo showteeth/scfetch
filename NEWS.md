@@ -5,6 +5,11 @@
 
 -------------------
 
+## Minor changes
+* Added filters to `ExtractCELLxGENEMeta`.
+
+-------------------
+
 # scfetch 0.4.0
 
 ## New features

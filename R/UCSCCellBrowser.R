@@ -153,7 +153,8 @@ ShowCBDatasets <- function(lazy = TRUE, json.folder = NULL, update = FALSE, quie
 #' @param project The project of the datasets, corresponds to \code{projects} column
 #' of \code{ShowCBDatasets}. Default: NULL (without filtering).
 #' @param fuzzy.match Logical value, whether to perform fuzzy match with provided attribute values. Default: TRUE.
-#' @param cell.num Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter. Deault: NULL.
+#' @param cell.num Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter.
+#' Deault: NULL(without filtering).
 #'
 #' @return Dataframe contains filtered datasets.
 #' @export

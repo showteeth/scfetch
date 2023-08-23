@@ -39,7 +39,8 @@ of \code{ShowCBDatasets}. Default: NULL (without filtering).}
 
 \item{fuzzy.match}{Logical value, whether to perform fuzzy match with provided attribute values. Default: TRUE.}
 
-\item{cell.num}{Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter. Deault: NULL.}
+\item{cell.num}{Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter.
+Deault: NULL(without filtering).}
 }
 \value{
 Dataframe contains filtered datasets.

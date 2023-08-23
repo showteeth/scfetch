@@ -2,15 +2,54 @@
 % Please edit documentation in R/cellxgene.R
 \name{ExtractCELLxGENEMeta}
 \alias{ExtractCELLxGENEMeta}
-\title{Extract Metadata of CELLxGENE Datasets.}
+\title{Extract Metadata of CELLxGENE Datasets with Attributes.}
 \usage{
-ExtractCELLxGENEMeta()
+ExtractCELLxGENEMeta(
+  organism = NULL,
+  ethnicity = NULL,
+  sex = NULL,
+  tissue = NULL,
+  disease = NULL,
+  assay = NULL,
+  suspension.type = NULL,
+  cell.type = NULL,
+  cell.num = NULL
+)
+}
+\arguments{
+\item{organism}{The organism of the datasets, choose from "Homo sapiens", "Mus musculus", "Callithrix jacchus",
+"Macaca mulatta", "Sus scrofa domesticus", one or multiple value. Default: NULL (All).}
+
+\item{ethnicity}{The ethnicity of the datasets, choose from "Asian", "European", "unknown", "na", "African", "Bangladeshi",
+"British", "Irish", "East Asian", "African American", "Hispanic or Latin American", "African American or Afro-Caribbean",
+"European American", "Finnish", "Indian", "Japanese", "Korean", "Malaysian", "Singaporean Chinese", "American", "Pacific Islander",
+"admixed ancestry", "Eskimo", "Han Chinese", "Greater Middle Eastern  (Middle Eastern, North African or Persian)", "multiethnic",
+"Jewish Israeli", "South Asian", "Oceanian", "Chinese", one or multiple value. Default: NULL (All).}
+
+\item{sex}{The sex of the datasets, choose from "female", "male", "unknown", one or multiple value. Default: NULL (All).}
+
+\item{tissue}{The tissue of the datasets. One or multiple value. Default: NULL (All).}
+
+\item{disease}{The disease of the datasets. One or multiple value. Default: NULL (All).}
+
+\item{assay}{The assay of the datasets, choose from "10x 3' v1", "10x 3' v2", "10x 3' v3", "10x 3' transcription profiling",
+"10x 5' v1", "10x 5' v2", "10x 5' transcription profiling", "10x multiome", "10x scATAC-seq", "sci-RNA-seq", "Drop-seq",
+"Smart-seq", "Smart-seq2", "Smart-seq v4", "snmC-Seq2", "Visium Spatial Gene Expression", "Seq-Well", "Seq-Well S3", "Patch-seq",
+"sci-Plex", "BD Rhapsody Targeted mRNA", "BD Rhapsody Whole Transcriptome Analysis", "Slide-seqV2", "GEXSCOPE technology", "inDrop",
+"microwell-seq", "CEL-seq2", "STRT-seq", "DroNc-seq", "MERFISH", "scATAC-seq", "MARS-seq", "TruDrop", one or multiple value. Default: NULL (All).}
+
+\item{suspension.type}{The suspension type of the datasets, choose from "nucleus", "cell", "na", one or multiple value. Default: NULL (All).}
+
+\item{cell.type}{The cell type of the datasets. One or multiple value. Default: NULL (All).}
+
+\item{cell.num}{Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter.
+Deault: NULL(without filtering).}
 }
 \value{
-Dataframe contains all available datasets.
+Dataframe contains filtered datasets.
 }
 \description{
-Extract Metadata of CELLxGENE Datasets.
+Extract Metadata of CELLxGENE Datasets with Attributes.
 }
 \examples{
 # # all available datasets

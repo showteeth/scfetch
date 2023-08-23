@@ -348,3 +348,40 @@ PasteAttrCXG <- function(df, attr, col) {
   }
   return(df)
 }
+
+# used in cellxgene, filter datasets
+cellxgeneAttrFilter <- function(df, attr, attr.value) {
+  if (is.null(attr.value)) {
+    message("Use all ", attr, " as input!")
+    # return row index
+    value <- 1:nrow(df)
+  } else {
+    all.values <- df[[attr]]
+    # value contains dot
+    value.list <- list()
+    for (pv in attr.value) {
+      pv.vec <- c()
+      for (avi in 1:length(all.values)) {
+        av <- all.values[avi]
+        av.vec <- strsplit(x = av, split = ", ")[[1]]
+        if (pv %in% av.vec) {
+          pv.vec <- c(pv.vec, avi)
+        }
+      }
+      value.list[[pv]] <- pv.vec
+    }
+    # get invalid value
+    invalid.value <- setdiff(attr.value, names(value.list))
+    value <- unique(unlist(value.list))
+    # print invalid value
+    if (length(invalid.value) > 0) {
+      message(paste0(invalid.value, collapse = ", "), " are not valid for ", attr)
+    }
+    # deal with empty value
+    if (length(value) == 0) {
+      warning("There is no valid value under ", paste(attr.value, collapse = ", "), " in ", attr, ". This filter is invalid!")
+      value <- 1:nrow(df)
+    }
+  }
+  return(value)
+}

@@ -1,6 +1,26 @@
-#' Extract Metadata of CELLxGENE Datasets.
+#' Extract Metadata of CELLxGENE Datasets with Attributes.
 #'
-#' @return Dataframe contains all available datasets.
+#' @param organism The organism of the datasets, choose from "Homo sapiens", "Mus musculus", "Callithrix jacchus",
+#' "Macaca mulatta", "Sus scrofa domesticus", one or multiple value. Default: NULL (All).
+#' @param ethnicity The ethnicity of the datasets, choose from "Asian", "European", "unknown", "na", "African", "Bangladeshi",
+#' "British", "Irish", "East Asian", "African American", "Hispanic or Latin American", "African American or Afro-Caribbean",
+#' "European American", "Finnish", "Indian", "Japanese", "Korean", "Malaysian", "Singaporean Chinese", "American", "Pacific Islander",
+#' "admixed ancestry", "Eskimo", "Han Chinese", "Greater Middle Eastern  (Middle Eastern, North African or Persian)", "multiethnic",
+#' "Jewish Israeli", "South Asian", "Oceanian", "Chinese", one or multiple value. Default: NULL (All).
+#' @param sex The sex of the datasets, choose from "female", "male", "unknown", one or multiple value. Default: NULL (All).
+#' @param tissue The tissue of the datasets. One or multiple value. Default: NULL (All).
+#' @param disease The disease of the datasets. One or multiple value. Default: NULL (All).
+#' @param assay The assay of the datasets, choose from "10x 3' v1", "10x 3' v2", "10x 3' v3", "10x 3' transcription profiling",
+#' "10x 5' v1", "10x 5' v2", "10x 5' transcription profiling", "10x multiome", "10x scATAC-seq", "sci-RNA-seq", "Drop-seq",
+#' "Smart-seq", "Smart-seq2", "Smart-seq v4", "snmC-Seq2", "Visium Spatial Gene Expression", "Seq-Well", "Seq-Well S3", "Patch-seq",
+#' "sci-Plex", "BD Rhapsody Targeted mRNA", "BD Rhapsody Whole Transcriptome Analysis", "Slide-seqV2", "GEXSCOPE technology", "inDrop",
+#' "microwell-seq", "CEL-seq2", "STRT-seq", "DroNc-seq", "MERFISH", "scATAC-seq", "MARS-seq", "TruDrop", one or multiple value. Default: NULL (All).
+#' @param suspension.type The suspension type of the datasets, choose from "nucleus", "cell", "na", one or multiple value. Default: NULL (All).
+#' @param cell.type The cell type of the datasets. One or multiple value. Default: NULL (All).
+#' @param cell.num Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter.
+#' Deault: NULL(without filtering).
+#'
+#' @return Dataframe contains filtered datasets.
 #' @importFrom magrittr %>%
 #' @importFrom curl curl_fetch_memory
 #' @importFrom jsonlite fromJSON flatten
@@ -10,7 +30,8 @@
 #' @examples
 #' # # all available datasets
 #' # cellxgene.meta = ExtractCELLxGENEMeta()
-ExtractCELLxGENEMeta <- function() {
+ExtractCELLxGENEMeta <- function(organism = NULL, ethnicity = NULL, sex = NULL, tissue = NULL, disease = NULL,
+                                 assay = NULL, suspension.type = NULL, cell.type = NULL, cell.num = NULL) {
   # urls
   cellxgene.base.url <- "https://api.cellxgene.cziscience.com/dp/v1/"
   cellxgene.collections.url <- paste0(cellxgene.base.url, "collections/")
@@ -89,5 +110,28 @@ ExtractCELLxGENEMeta <- function() {
   # final dataframe
   cellxgene.collections.datasets.final <- data.table::rbindlist(cellxgene.collections.datasets.list, fill = TRUE) %>%
     as.data.frame()
-  return(cellxgene.collections.datasets.final)
+  # extract row index under different filter
+  organism.idx <- cellxgeneAttrFilter(df = cellxgene.collections.datasets.final, attr = "organism", attr.value = organism)
+  ethnicity.idx <- cellxgeneAttrFilter(df = cellxgene.collections.datasets.final, attr = "self_reported_ethnicity", attr.value = ethnicity)
+  sex.idx <- cellxgeneAttrFilter(df = cellxgene.collections.datasets.final, attr = "sex", attr.value = sex)
+  tissue.idx <- cellxgeneAttrFilter(df = cellxgene.collections.datasets.final, attr = "tissue", attr.value = tissue)
+  disease.idx <- cellxgeneAttrFilter(df = cellxgene.collections.datasets.final, attr = "disease", attr.value = disease)
+  assay.idx <- cellxgeneAttrFilter(df = cellxgene.collections.datasets.final, attr = "assay", attr.value = assay)
+  suspension.type.idx <- cellxgeneAttrFilter(df = cellxgene.collections.datasets.final, attr = "suspension_type", attr.value = suspension.type)
+  cell.type.idx <- cellxgeneAttrFilter(df = cellxgene.collections.datasets.final, attr = "cell_type", attr.value = cell.type)
+  if (is.null(cell.num)) {
+    cnum.idx <- 1:nrow(cellxgene.collections.datasets.final)
+  } else if (length(cell.num) == 1) {
+    cnum.idx <- which(cellxgene.collections.datasets.final$cell_count > as.numeric(cell.num))
+  } else {
+    cnum.idx <- which(cellxgene.collections.datasets.final$cell_count > as.numeric(cell.num[1]) &
+      cellxgene.collections.datasets.final$cell_count < as.numeric(cell.num[2]))
+  }
+  # filter on the whole dataset
+  valid.idx <- Reduce(intersect, list(
+    organism.idx, ethnicity.idx, sex.idx, tissue.idx, disease.idx, assay.idx,
+    suspension.type.idx, cell.type.idx, cnum.idx
+  ))
+  used.sample.df <- cellxgene.collections.datasets.final[valid.idx, ]
+  return(used.sample.df)
 }
