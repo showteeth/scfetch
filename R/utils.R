@@ -16,7 +16,7 @@ CheckColumns <- function(df, columns) {
   }
 }
 
-# used in UCSCCellBrowser, merge multiple attributes
+# used in UCSCCellBrowser and cellxgene, merge multiple attributes
 PasteAttr <- function(df, attr) {
   for (at in attr) {
     df[[at]] <- sapply(df[[at]], function(x) {
@@ -330,4 +330,21 @@ CheckBam <- function(bam, samtools.path) {
   } else if (samtools.status > 0) {
     return(TRUE)
   }
+}
+
+# used in cellxxgene, extract content from url
+URLRetrieval <- function(url) {
+  url.page <- curl::curl_fetch_memory(url)
+  url.content <- jsonlite::fromJSON(rawToChar(url.page$content))
+  return(url.content)
+}
+
+# used in cellxgene, merge multiple attributes
+PasteAttrCXG <- function(df, attr, col) {
+  for (at in attr) {
+    df[[at]] <- sapply(df[[at]], function(x) {
+      paste0(x[[col]], collapse = ", ")
+    })
+  }
+  return(df)
 }

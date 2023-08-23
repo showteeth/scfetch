@@ -1,3 +1,10 @@
+# scfetch 0.5.0
+
+## New features
+* Added `ExtractCELLxGENEMeta` to extract metadata of CELLxGENE datasets.
+
+-------------------
+
 # scfetch 0.4.0
 
 ## New features
