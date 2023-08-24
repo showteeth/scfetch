@@ -7,6 +7,7 @@
 #' download supplementary files automatically). Default: FALSE.
 #' @param supp.idx The index of supplementary files to download. This should be consistent with \code{platform}. Default: 1.
 #' @param timeout Timeout for \code{\link{download.file}}. Default: 3600.
+#' @param data.type The data type of the dataset, choose from "sc" (single-cell) and "bulk" (bulk). Default: "sc".
 #' @param supp.type The type of downloaded supplementary files, choose from count (count matrix file or single count matrix file)
 #' and 10x (cellranger output files, contains barcodes, genes/features and matrix). Default: count.
 #' @param out.folder Output folder to save 10x files. Default: NULL (current working directory).
@@ -14,7 +15,8 @@
 #' @param merge Logical value, whether to merge Seurat list when there are multiple 10x files (\code{supp.type} is 10x). Default: FALSE.
 #' @param ... Parameters for \code{\link{getGEO}}.
 #'
-#' @return Seurat object (if \code{merge} is TRUE) or Seurat object list (if \code{merge} is FALSE).
+#' @return If \code{data.type} is "sc", return Seurat object (if \code{merge} is TRUE) or Seurat object list (if \code{merge} is FALSE).
+#' If \code{data.type} is "bulk", return count matrix.
 #' @importFrom magrittr %>%
 #' @importFrom GEOquery getGEO getGEOSuppFiles gunzip
 #' @importFrom Biobase annotation experimentData pData phenoData notes sampleNames exprs
@@ -31,9 +33,10 @@
 #' # # the supp files are cellranger output files: barcodes, genes/features and matrix
 #' # GSE200257.seu = ParseGEO(acce = "GSE200257", down.supp = TRUE, supp.idx = 1, supp.type = "10x",
 #' #                          out.folder = "/path/to/output/folder")
-ParseGEO <- function(acce, platform = NULL, down.supp = FALSE, supp.idx = 1, timeout = 3600,
+ParseGEO <- function(acce, platform = NULL, down.supp = FALSE, supp.idx = 1, timeout = 3600, data.type = c("sc", "bulk"),
                      supp.type = c("count", "10x"), out.folder = NULL, gene2feature = TRUE, merge = TRUE, ...) {
   # check parameters
+  data.type <- match.arg(arg = data.type)
   supp.type <- match.arg(arg = supp.type)
   # check platform
   if (down.supp) {
@@ -47,35 +50,43 @@ ParseGEO <- function(acce, platform = NULL, down.supp = FALSE, supp.idx = 1, tim
     # get GEO object
     pf.obj <- GEOobj(acce = acce, platform = platform, ...)
   }
+  # change supp type to count when bulk
+  if (data.type == "bulk") {
+    supp.type <- "count"
+  }
   # extract counts matrix
   pf.count <- ExtractGEOExp(
     pf.obj = pf.obj, acce = acce, supp.idx = supp.idx, down.supp = down.supp,
     timeout = timeout, supp.type = supp.type, out.folder = out.folder, gene2feature = gene2feature
   )
-  # load seurat
-  if (is.null(pf.count) && supp.type == "10x") {
-    message("Loading data to Seurat!")
-    all.samples.folder <- dir(out.folder, full.names = TRUE)
-    # check file
-    valid.samples.folder <- Check10XFiles(folders = all.samples.folder, gene2feature = gene2feature)
-    if (length(valid.samples.folder) == 0) {
-      stop("No valid sample folder detected under ", out.folder, ". Please check!")
+  if (data.type == "bulk") {
+    return(pf.count)
+  } else if (data.type == "sc") {
+    # load seurat
+    if (is.null(pf.count) && supp.type == "10x") {
+      message("Loading data to Seurat!")
+      all.samples.folder <- dir(out.folder, full.names = TRUE)
+      # check file
+      valid.samples.folder <- Check10XFiles(folders = all.samples.folder, gene2feature = gene2feature)
+      if (length(valid.samples.folder) == 0) {
+        stop("No valid sample folder detected under ", out.folder, ". Please check!")
+      }
+      # load to seurat
+      seu.list <- sapply(valid.samples.folder, function(x) {
+        x.mat <- Seurat::Read10X(data.dir = x)
+        seu.obj <- Seurat::CreateSeuratObject(counts = x.mat, project = basename(x))
+        seu.obj
+      })
+      if (isTRUE(merge)) {
+        seu.obj <- mergeExperiments(seu.list)
+      } else {
+        seu.obj <- seu.list
+      }
+    } else if (!is.null(pf.count) && supp.type == "count") {
+      seu.obj <- Seurat::CreateSeuratObject(counts = pf.count, project = acce)
     }
-    # load to seurat
-    seu.list <- sapply(valid.samples.folder, function(x) {
-      x.mat <- Seurat::Read10X(data.dir = x)
-      seu.obj <- Seurat::CreateSeuratObject(counts = x.mat, project = basename(x))
-      seu.obj
-    })
-    if (isTRUE(merge)) {
-      seu.obj <- mergeExperiments(seu.list)
-    } else {
-      seu.obj <- seu.list
-    }
-  } else if (!is.null(pf.count) && supp.type == "count") {
-    seu.obj <- Seurat::CreateSeuratObject(counts = pf.count, project = acce)
+    return(seu.obj)
   }
-  return(seu.obj)
 }
 
 #' Extract Sample Metadata from GEO.

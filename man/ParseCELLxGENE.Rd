@@ -40,3 +40,6 @@ Download CELLxGENE Datasets.
 # # download
 # ParseCELLxGENE(meta = human.10x.cellxgene.meta, out.folder = "/path/to/output")
 }
+\references{
+https://gist.github.com/ivirshup/f1a1603db69de3888eacb4bdb6a9317a
+}

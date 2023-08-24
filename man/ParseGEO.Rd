@@ -10,6 +10,7 @@ ParseGEO(
   down.supp = FALSE,
   supp.idx = 1,
   timeout = 3600,
+  data.type = c("sc", "bulk"),
   supp.type = c("count", "10x"),
   out.folder = NULL,
   gene2feature = TRUE,
@@ -30,6 +31,8 @@ download supplementary files automatically). Default: FALSE.}
 
 \item{timeout}{Timeout for \code{\link{download.file}}. Default: 3600.}
 
+\item{data.type}{The data type of the dataset, choose from "sc" (single-cell) and "bulk" (bulk). Default: "sc".}
+
 \item{supp.type}{The type of downloaded supplementary files, choose from count (count matrix file or single count matrix file)
 and 10x (cellranger output files, contains barcodes, genes/features and matrix). Default: count.}
 
@@ -42,7 +45,8 @@ and 10x (cellranger output files, contains barcodes, genes/features and matrix).
 \item{...}{Parameters for \code{\link{getGEO}}.}
 }
 \value{
-Seurat object (if \code{merge} is TRUE) or Seurat object list (if \code{merge} is FALSE).
+If \code{data.type} is "sc", return Seurat object (if \code{merge} is TRUE) or Seurat object list (if \code{merge} is FALSE).
+If \code{data.type} is "bulk", return count matrix.
 }
 \description{
 Download Matrix from GEO and Load to Seurat.

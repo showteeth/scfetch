@@ -8,6 +8,7 @@
 
 ## Minor changes
 * Added filters to `ExtractCELLxGENEMeta`.
+* Added `data.type` in `ParseGEO` to return count matrix for bulk RNA-seq.
 
 -------------------
 

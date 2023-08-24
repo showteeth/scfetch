@@ -26,6 +26,7 @@
 #' @importFrom jsonlite fromJSON flatten
 #' @importFrom data.table rbindlist
 #' @export
+#' @references https://gist.github.com/ivirshup/f1a1603db69de3888eacb4bdb6a9317a
 #'
 #' @examples
 #' # # all available datasets
@@ -155,6 +156,7 @@ ExtractCELLxGENEMeta <- function(organism = NULL, ethnicity = NULL, sex = NULL, 
 #' @importFrom parallel detectCores mclapply
 #' @importFrom utils download.file
 #' @export
+#' @references https://gist.github.com/ivirshup/f1a1603db69de3888eacb4bdb6a9317a
 #'
 #' @examples
 #' # # human 10x v2 and v3 datasets

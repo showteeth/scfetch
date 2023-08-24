@@ -398,6 +398,7 @@ PostDatasetURL <- function(url) {
 }
 
 # used in cellxgene, prepare download urls with metadata
+# reference: https://gist.github.com/ivirshup/f1a1603db69de3888eacb4bdb6a9317a
 PrepareCELLxGENEUrls <- function(df, fe) {
   # urls
   cellxgene.base.url <- "https://api.cellxgene.cziscience.com/dp/v1/"
