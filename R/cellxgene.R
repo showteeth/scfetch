@@ -30,6 +30,8 @@
 #' @examples
 #' # # all available datasets
 #' # cellxgene.meta = ExtractCELLxGENEMeta()
+#' # # human 10x v2 and v3 datasets
+#' # human.10x.cellxgene.meta = ExtractCELLxGENEMeta(assay = c("10x 3' v2", "10x 3' v3"), organism = "Homo sapiens")
 ExtractCELLxGENEMeta <- function(organism = NULL, ethnicity = NULL, sex = NULL, tissue = NULL, disease = NULL,
                                  assay = NULL, suspension.type = NULL, cell.type = NULL, cell.num = NULL) {
   # urls
@@ -134,4 +136,75 @@ ExtractCELLxGENEMeta <- function(organism = NULL, ethnicity = NULL, sex = NULL, 
   ))
   used.sample.df <- cellxgene.collections.datasets.final[valid.idx, ]
   return(used.sample.df)
+}
+
+#' Download CELLxGENE Datasets.
+#'
+#' @param meta Metadata used to download, can be from \code{ExtractCELLxGENEMeta},
+#' should contain dataset_id, rds_id/h5ad_id (depend on \code{file.ext}) and name columns.
+#' @param file.ext The valid file extension for download. When NULL, use "rds" and "h5ad". Default: c("rds", "h5ad").
+#' @param out.folder The output folder. Default: NULL (current working directory).
+#' @param timeout Maximum request time. Default: 3600.
+#' @param quiet Logical value, whether to show downloading progress. Default: FALSE (show).
+#' @param parallel Logical value, whether to download parallelly. Default: TRUE. When "libcurl" is available for \code{download.file},
+#' the parallel is done by default (\code{parallel} can be FALSE).
+#'
+#' @return NULL.
+#' @importFrom httr POST stop_for_status content
+#' @importFrom jsonlite fromJSON
+#' @importFrom parallel detectCores mclapply
+#' @importFrom utils download.file
+#' @export
+#'
+#' @examples
+#' # # human 10x v2 and v3 datasets
+#' # human.10x.cellxgene.meta = ExtractCELLxGENEMeta(assay = c("10x 3' v2", "10x 3' v3"), organism = "Homo sapiens")
+#' # # download
+#' # ParseCELLxGENE(meta = human.10x.cellxgene.meta, out.folder = "/path/to/output")
+ParseCELLxGENE <- function(meta, file.ext = c("rds", "h5ad"), out.folder = NULL,
+                           timeout = 3600, quiet = FALSE, parallel = TRUE) {
+  # check file extension
+  if (is.null(file.ext)) {
+    warning("There is no file extension provided, use rds and h5ad.")
+    file.ext <- c("rds", "h5ad")
+  }
+  file.ext <- intersect(file.ext, c("rds", "h5ad"))
+  if (length(file.ext) == 0) {
+    stop("Please provide valid file extension: rds, h5ad.")
+  }
+  # prepare download urls
+  download.urls <- c()
+  # prepare rds
+  if ("rds" %in% file.ext) {
+    rds.urls <- PrepareCELLxGENEUrls(df = meta, fe = "rds")
+    download.urls <- c(download.urls, rds.urls)
+  }
+  # prepare h5ad
+  if ("h5ad" %in% file.ext) {
+    h5ad.urls <- PrepareCELLxGENEUrls(df = meta, fe = "h5ad")
+    download.urls <- c(download.urls, h5ad.urls)
+  }
+  # prepare output folder
+  if (is.null(out.folder)) {
+    out.folder <- getwd()
+  }
+  names(download.urls) <- file.path(out.folder, names(download.urls))
+  # download urls
+  # set timeout
+  env.timeout <- getOption("timeout")
+  options(timeout = timeout)
+  message("Start downloading!")
+  if (isTRUE(parallel)) {
+    # prepare cores
+    cores.used <- min(parallel::detectCores(), length(download.urls))
+    down.status <- parallel::mclapply(X = 1:length(download.urls), FUN = function(x) {
+      utils::download.file(url = download.urls, destfile = names(download.urls), quiet = quiet, mode = "wb")
+    }, mc.cores = cores.used)
+  } else {
+    down.status <- utils::download.file(url = download.urls, destfile = names(download.urls), quiet = quiet, mode = "wb")
+  }
+  message("Finish downloading!")
+  # restore timeout
+  options(timeout = env.timeout)
+  return(NULL)
 }

@@ -2,6 +2,7 @@
 
 ## New features
 * Added `ExtractCELLxGENEMeta` to extract metadata of CELLxGENE datasets.
+* Added `ParseCELLxGENE` to download objects from CELLxGENE.
 
 -------------------
 

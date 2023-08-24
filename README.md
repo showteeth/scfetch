@@ -10,7 +10,7 @@
 * **Download fastq files** from `GEO/SRA`, **foramt fastq files** to standard style that can be identified by 10x softwares (e.g. CellRanger).
 * **Download bam files** from `GEO/SRA`, support **downloading original 10x generated bam files (with custom tags) and normal bam files**, and **convert bam files to fastq files**.
 * Download scRNA-seq **matrix** and **annotation (e.g. cell type)** information from `GEO`, `PanglanDB` and `UCSC Cell Browser`, **load the downnloaded matrix to `Seurat`**.
-* Download processed objects from `Zeenodo`.
+* Download processed objects from `Zeenodo` and `CELLxGENE`.
 * **Object conversion between widely used single cell objects** (`SeuratObject`, `AnnData`, `SingleCellExperiment`, `CellDataSet/cell_data_set` and `loom`).
 
 <hr />
@@ -111,13 +111,21 @@ Detailed usage is available in [website](https://showteeth.github.io/scfetch/).
     <td>Download UCSC Cell Browser datasets and load to Seurat</td>
   </tr>
   <tr>
-    <td rowspan="2">Download objects</td>
+    <td rowspan="4">Download objects</td>
     <td>ExtractZenodoMeta</td>
     <td>Extract sample metadata from Zenodo with DOIs</td>
   </tr>
   <tr>
     <td>ParseZenodo</td>
     <td>Download rds/rdata/h5ad/matrix from Zenodo with DOIs</td>
+  </tr>
+  <tr>
+    <td>ExtractCELLxGENEMeta</td>
+    <td>Extract metadata of CELLxGENE datasets with attributes</td>
+  </tr>
+  <tr>
+    <td>ParseCELLxGENE</td>
+    <td>Download rds/h5ad from CELLxGENE</td>
   </tr>
   <tr>
     <td rowspan="4">Convert between different single-cell objects</td>
