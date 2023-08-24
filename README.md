@@ -32,6 +32,15 @@ You can install the development version of `scfetch` from [GitHub](https://githu
 devtools::install_github("showteeth/scfetch")
 ```
 
+For data structures conversion, `scfetch` requires several python pcakages, you can install with:
+
+``` bash
+# install python packages
+conda install -c bioconda loompy anndata
+# or
+pip install anndata loompy
+```
+
 <hr />
 
 ## Usage

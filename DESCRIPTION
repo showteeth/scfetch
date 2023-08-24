@@ -30,6 +30,7 @@ Imports:
     pbapply,
     purrr,
     rPanglaoDB,
+    reticulate,
     Seurat,
     tibble,
     tools,
