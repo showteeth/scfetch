@@ -1,6 +1,24 @@
-#' Extract Metadata of Human Cell Atlas Projects.
+#' Extract Metadata of Human Cell Atlas Projects with Attributes.
 #'
-#' @return Dataframe contains all available projects.
+#' @param organism The organism of the projects, choose from "Homo sapiens", "Mus musculus",
+#' "Macaca mulatta", "canis lupus familiaris", one or multiple value. Default: NULL (All).
+#' @param sex The sex of the projects, choose from "female", "male", "mixed", "unknown",
+#' one or multiple value. Default: NULL (All).
+#' @param organ The organ of the projects (e.g. brain), one or multiple value. Default: NULL (All).
+#' @param organ.part The organ part of the projects (e.g. cortex), one or multiple value. Default: NULL (All).
+#' @param disease The disease of the projects (e.g. normal), one or multiple value. Default: NULL (All).
+#' @param sample.type The sex of the projects, choose from "specimens", "organoids", "cellLines",
+#' one or multiple value. Default: NULL (All).
+#' @param preservation.method The preservation method of the projects (e.g. fresh), one or multiple value. Default: NULL (All).
+#' @param protocol The protocol of the projects (e.g. 10x 3' v2), one or multiple value. Default: NULL (All).
+#' @param suspension.type The suspension type of the projects, choose from "single cell", "single nucleus", "bulk cell", "bulk nuclei",
+#' one or multiple value. Default: NULL (All).
+#' @param cell.type The cell type of the projects (e.g. neuron), one or multiple value. Default: NULL (All).
+#' @param cell.num Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter.
+#' Deault: NULL(without filtering).
+#' @param sequencing.type The sequencing instrument type of the projects (e.g. illumina hiseq 2500), one or multiple value. Default: NULL (All).
+#'
+#' @return Dataframe contains filtered projects.
 #' @importFrom magrittr %>%
 #' @importFrom curl curl_fetch_memory
 #' @importFrom jsonlite fromJSON
@@ -11,7 +29,13 @@
 #' @examples
 #' # # all available projects
 #' # all.hca.projects = ExtractHCAMeta()
-ExtractHCAMeta <- function() {
+#' # # all human projects
+#' # all.human.projects = ExtractHCAMeta(organism = "Homo sapiens")
+#' # # all human and 10x 3' v2
+#' # all.human.10x.projects = ExtractHCAMeta(organism = "Homo sapiens", protocol = c("10x 3' v2", "10x 3' v3"))
+ExtractHCAMeta <- function(organism = NULL, sex = NULL, organ = NULL, organ.part = NULL, disease = NULL,
+                           sample.type = NULL, preservation.method = NULL, protocol = NULL,
+                           suspension.type = NULL, cell.type = NULL, cell.num = NULL, sequencing.type = NULL) {
   # base urls
   hca.base.url <- "https://service.azul.data.humancellatlas.org"
   # get all catalogs
@@ -29,7 +53,6 @@ ExtractHCAMeta <- function() {
   hca.projects.df <- data.table::rbindlist(hca.projects.list, fill = TRUE) %>% as.data.frame()
   # get project detail information
   hca.projects.detail.list <- lapply(1:nrow(hca.projects.df), function(x) {
-    message(x)
     x.df <- hca.projects.df[x, ]
     # procotol information
     x.df.protocol <- x.df$protocols[[1]]
@@ -86,7 +109,7 @@ ExtractHCAMeta <- function() {
     organoidsmodelOrganPart <- HCAPasteCol(df = x.df.organoids, col = "modelOrganPart")
 
     # cellSuspensions
-    x.df.cellSuspensions <- x.df$cellSuspensions
+    x.df.cellSuspensions <- x.df$cellSuspensions[[1]]
     selectedCellType <- HCAPasteCol(df = x.df.cellSuspensions, col = "selectedCellType")
 
     # date
@@ -110,5 +133,32 @@ ExtractHCAMeta <- function() {
     )
   })
   hca.projects.detail.df <- data.table::rbindlist(hca.projects.detail.list, fill = TRUE) %>% as.data.frame()
-  return(hca.projects.detail.df)
+
+  # extract row index under different filter
+  organism.idx <- HCAAttrFilter(df = hca.projects.detail.df, attr = "genusSpecies", attr.value = organism)
+  sex.idx <- HCAAttrFilter(df = hca.projects.detail.df, attr = "biologicalSex", attr.value = sex)
+  organ.idx <- HCAAttrFilter(df = hca.projects.detail.df, attr = "organ", attr.value = organ)
+  organ.part.idx <- HCAAttrFilter(df = hca.projects.detail.df, attr = "organPart", attr.value = organ.part)
+  disease.idx <- HCAAttrFilter(df = hca.projects.detail.df, attr = "disease", attr.value = disease)
+  sample.type.idx <- HCAAttrFilter(df = hca.projects.detail.df, attr = "sampleEntityType", attr.value = sample.type)
+  preservation.method.idx <- HCAAttrFilter(df = hca.projects.detail.df, attr = "preservationMethod", attr.value = preservation.method)
+  protocol.idx <- HCAAttrFilter(df = hca.projects.detail.df, attr = "libraryConstructionApproach", attr.value = protocol)
+  suspension.type.idx <- HCAAttrFilter(df = hca.projects.detail.df, attr = "nucleicAcidSource", attr.value = suspension.type)
+  cell.type.idx <- HCAAttrFilter(df = hca.projects.detail.df, attr = "selectedCellType", attr.value = cell.type)
+  sequencing.type.idx <- HCAAttrFilter(df = hca.projects.detail.df, attr = "instrumentManufacturerModel", attr.value = sequencing.type)
+  if (is.null(cell.num)) {
+    cnum.idx <- 1:nrow(hca.projects.detail.df)
+  } else if (length(cell.num) == 1) {
+    cnum.idx <- which(hca.projects.detail.df$estimatedCellCount > as.numeric(cell.num))
+  } else {
+    cnum.idx <- which(hca.projects.detail.df$estimatedCellCount > as.numeric(cell.num[1]) &
+      hca.projects.detail.df$estimatedCellCount < as.numeric(cell.num[2]))
+  }
+  # filter on the whole dataset
+  valid.idx <- Reduce(intersect, list(
+    organism.idx, sex.idx, organ.idx, organ.part.idx, disease.idx, sample.type.idx,
+    preservation.method.idx, protocol.idx, suspension.type.idx, cell.type.idx, sequencing.type.idx, cnum.idx
+  ))
+  used.sample.df <- hca.projects.detail.df[valid.idx, ]
+  return(used.sample.df)
 }

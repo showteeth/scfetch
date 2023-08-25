@@ -2,19 +2,66 @@
 % Please edit documentation in R/hca.R
 \name{ExtractHCAMeta}
 \alias{ExtractHCAMeta}
-\title{Extract Metadata of Human Cell Atlas Projects.}
+\title{Extract Metadata of Human Cell Atlas Projects with Attributes.}
 \usage{
-ExtractHCAMeta()
+ExtractHCAMeta(
+  organism = NULL,
+  sex = NULL,
+  organ = NULL,
+  organ.part = NULL,
+  disease = NULL,
+  sample.type = NULL,
+  preservation.method = NULL,
+  protocol = NULL,
+  suspension.type = NULL,
+  cell.type = NULL,
+  cell.num = NULL,
+  sequencing.type = NULL
+)
+}
+\arguments{
+\item{organism}{The organism of the projects, choose from "Homo sapiens", "Mus musculus",
+"Macaca mulatta", "canis lupus familiaris", one or multiple value. Default: NULL (All).}
+
+\item{sex}{The sex of the projects, choose from "female", "male", "mixed", "unknown",
+one or multiple value. Default: NULL (All).}
+
+\item{organ}{The organ of the projects (e.g. brain), one or multiple value. Default: NULL (All).}
+
+\item{organ.part}{The organ part of the projects (e.g. cortex), one or multiple value. Default: NULL (All).}
+
+\item{disease}{The disease of the projects (e.g. normal), one or multiple value. Default: NULL (All).}
+
+\item{sample.type}{The sex of the projects, choose from "specimens", "organoids", "cellLines",
+one or multiple value. Default: NULL (All).}
+
+\item{preservation.method}{The preservation method of the projects (e.g. fresh), one or multiple value. Default: NULL (All).}
+
+\item{protocol}{The protocol of the projects (e.g. 10x 3' v2), one or multiple value. Default: NULL (All).}
+
+\item{suspension.type}{The suspension type of the projects, choose from "single cell", "single nucleus", "bulk cell", "bulk nuclei",
+one or multiple value. Default: NULL (All).}
+
+\item{cell.type}{The cell type of the projects (e.g. neuron), one or multiple value. Default: NULL (All).}
+
+\item{cell.num}{Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter.
+Deault: NULL(without filtering).}
+
+\item{sequencing.type}{The sequencing instrument type of the projects (e.g. illumina hiseq 2500), one or multiple value. Default: NULL (All).}
 }
 \value{
-Dataframe contains all available projects.
+Dataframe contains filtered projects.
 }
 \description{
-Extract Metadata of Human Cell Atlas Projects.
+Extract Metadata of Human Cell Atlas Projects with Attributes.
 }
 \examples{
 # # all available projects
 # all.hca.projects = ExtractHCAMeta()
+# # all human projects
+# all.human.projects = ExtractHCAMeta(organism = "Homo sapiens")
+# # all human and 10x 3' v2
+# all.human.10x.projects = ExtractHCAMeta(organism = "Homo sapiens", protocol = c("10x 3' v2", "10x 3' v3"))
 }
 \references{
 https://bioconductor.org/packages/release/bioc/html/hca.html
