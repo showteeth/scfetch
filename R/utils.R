@@ -416,3 +416,42 @@ PrepareCELLxGENEUrls <- function(df, fe) {
   names(valid.urls) <- valid.filenames
   return(valid.urls)
 }
+
+# used in hca, recursively extract projects (limit size to 100, get all projects when the size is greater than 100)
+# reference: https://bioconductor.org/packages/release/bioc/html/hca.html
+RecurURLRetrieval <- function(url) {
+  url.content <- URLRetrieval(url)
+  next.url <- url.content$pagination$`next`
+  if (!is.null(next.url)) {
+    # return(c(url.content, RecurURLRetrieval(next.url)))
+    return(data.table::rbindlist(list(url.content$hits, RecurURLRetrieval(next.url)), fill = TRUE))
+  } else {
+    return(url.content$hits)
+  }
+}
+
+# used in hca, two-level list, final is vector
+HCAPasteCol <- function(df, col) {
+  if (col %in% colnames(df)) {
+    col.value <- paste0(sapply(
+      df[[col]],
+      function(x) {
+        ifelse(is.null(x), "",
+          paste0(x, collapse = "|")
+        )
+      }
+    ), collapse = ", ")
+  } else {
+    col.value <- ""
+  }
+  return(col.value)
+}
+
+# used in hca, dataframe, check column exists
+HCAPasteColdf <- function(df, col = NULL) {
+  if (col %in% colnames(df)) {
+    return(paste0(df[[col]], collapse = ", "))
+  } else {
+    return("")
+  }
+}
