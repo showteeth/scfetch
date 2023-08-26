@@ -4,6 +4,8 @@
 * Added `ExtractCELLxGENEMeta` to extract metadata of CELLxGENE datasets.
 * Added `ParseCELLxGENE` to download objects from CELLxGENE.
 * Added `ExtractHCAMeta` to extract metadata of Human Cell Atlas projects.
+* Added `ShowHCAProjects` to show all available Human Cell Atlas projects.
+* Added `ShowCELLxGENEDatasets` to show all available CELLxGENE datasets.
 
 -------------------
 

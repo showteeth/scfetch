@@ -5,6 +5,7 @@
 \title{Extract Metadata of Human Cell Atlas Projects with Attributes.}
 \usage{
 ExtractHCAMeta(
+  all.projects.df,
   organism = NULL,
   sex = NULL,
   organ = NULL,
@@ -20,6 +21,8 @@ ExtractHCAMeta(
 )
 }
 \arguments{
+\item{all.projects.df}{All detail information of HCA projects, obtained with \code{ShowHCAProjects}.}
+
 \item{organism}{The organism of the projects, choose from "Homo sapiens", "Mus musculus",
 "Macaca mulatta", "canis lupus familiaris", one or multiple value. Default: NULL (All).}
 
@@ -57,11 +60,12 @@ Extract Metadata of Human Cell Atlas Projects with Attributes.
 }
 \examples{
 # # all available projects
-# all.hca.projects = ExtractHCAMeta()
+# all.hca.projects = ShowHCAProjects()
 # # all human projects
-# all.human.projects = ExtractHCAMeta(organism = "Homo sapiens")
+# all.human.projects = ExtractHCAMeta(all.projects.df = all.hca.projects, organism = "Homo sapiens")
 # # all human and 10x 3' v2
-# all.human.10x.projects = ExtractHCAMeta(organism = "Homo sapiens", protocol = c("10x 3' v2", "10x 3' v3"))
+# all.human.10x.projects = ExtractHCAMeta(all.projects.df = all.hca.projects,  organism = "Homo sapiens",
+#                                         protocol = c("10x 3' v2", "10x 3' v3"))
 }
 \references{
 https://bioconductor.org/packages/release/bioc/html/hca.html

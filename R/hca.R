@@ -1,41 +1,5 @@
-#' Extract Metadata of Human Cell Atlas Projects with Attributes.
-#'
-#' @param organism The organism of the projects, choose from "Homo sapiens", "Mus musculus",
-#' "Macaca mulatta", "canis lupus familiaris", one or multiple value. Default: NULL (All).
-#' @param sex The sex of the projects, choose from "female", "male", "mixed", "unknown",
-#' one or multiple value. Default: NULL (All).
-#' @param organ The organ of the projects (e.g. brain), one or multiple value. Default: NULL (All).
-#' @param organ.part The organ part of the projects (e.g. cortex), one or multiple value. Default: NULL (All).
-#' @param disease The disease of the projects (e.g. normal), one or multiple value. Default: NULL (All).
-#' @param sample.type The sex of the projects, choose from "specimens", "organoids", "cellLines",
-#' one or multiple value. Default: NULL (All).
-#' @param preservation.method The preservation method of the projects (e.g. fresh), one or multiple value. Default: NULL (All).
-#' @param protocol The protocol of the projects (e.g. 10x 3' v2), one or multiple value. Default: NULL (All).
-#' @param suspension.type The suspension type of the projects, choose from "single cell", "single nucleus", "bulk cell", "bulk nuclei",
-#' one or multiple value. Default: NULL (All).
-#' @param cell.type The cell type of the projects (e.g. neuron), one or multiple value. Default: NULL (All).
-#' @param cell.num Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter.
-#' Deault: NULL(without filtering).
-#' @param sequencing.type The sequencing instrument type of the projects (e.g. illumina hiseq 2500), one or multiple value. Default: NULL (All).
-#'
-#' @return Dataframe contains filtered projects.
-#' @importFrom magrittr %>%
-#' @importFrom curl curl_fetch_memory
-#' @importFrom jsonlite fromJSON
-#' @importFrom data.table rbindlist
-#' @export
-#' @references https://bioconductor.org/packages/release/bioc/html/hca.html
-#'
-#' @examples
-#' # # all available projects
-#' # all.hca.projects = ExtractHCAMeta()
-#' # # all human projects
-#' # all.human.projects = ExtractHCAMeta(organism = "Homo sapiens")
-#' # # all human and 10x 3' v2
-#' # all.human.10x.projects = ExtractHCAMeta(organism = "Homo sapiens", protocol = c("10x 3' v2", "10x 3' v3"))
-ExtractHCAMeta <- function(organism = NULL, sex = NULL, organ = NULL, organ.part = NULL, disease = NULL,
-                           sample.type = NULL, preservation.method = NULL, protocol = NULL,
-                           suspension.type = NULL, cell.type = NULL, cell.num = NULL, sequencing.type = NULL) {
+# extract all projects
+ExtractHCAProjects <- function() {
   # base urls
   hca.base.url <- "https://service.azul.data.humancellatlas.org"
   # get all catalogs
@@ -51,6 +15,24 @@ ExtractHCAMeta <- function(organism = NULL, sex = NULL, organ = NULL, organ.part
   })
   # get catalog project df
   hca.projects.df <- data.table::rbindlist(hca.projects.list, fill = TRUE) %>% as.data.frame()
+  return(hca.projects.df)
+}
+
+#' Show All Available Projects in Human Cell Atlas.
+#'
+#' @return Dataframe contains all available projects.
+#' @importFrom magrittr %>%
+#' @importFrom curl curl_fetch_memory
+#' @importFrom jsonlite fromJSON
+#' @importFrom data.table rbindlist
+#' @export
+#'
+#' @examples
+#' # # all available projects
+#' # all.hca.projects = ShowHCAProjects()
+ShowHCAProjects <- function() {
+  # get all projects information
+  hca.projects.df <- ExtractHCAProjects()
   # get project detail information
   hca.projects.detail.list <- lapply(1:nrow(hca.projects.df), function(x) {
     x.df <- hca.projects.df[x, ]
@@ -133,7 +115,51 @@ ExtractHCAMeta <- function(organism = NULL, sex = NULL, organ = NULL, organ.part
     )
   })
   hca.projects.detail.df <- data.table::rbindlist(hca.projects.detail.list, fill = TRUE) %>% as.data.frame()
+  return(hca.projects.detail.df)
+}
 
+#' Extract Metadata of Human Cell Atlas Projects with Attributes.
+#'
+#' @param all.projects.df All detail information of HCA projects, obtained with \code{ShowHCAProjects}.
+#' @param organism The organism of the projects, choose from "Homo sapiens", "Mus musculus",
+#' "Macaca mulatta", "canis lupus familiaris", one or multiple value. Default: NULL (All).
+#' @param sex The sex of the projects, choose from "female", "male", "mixed", "unknown",
+#' one or multiple value. Default: NULL (All).
+#' @param organ The organ of the projects (e.g. brain), one or multiple value. Default: NULL (All).
+#' @param organ.part The organ part of the projects (e.g. cortex), one or multiple value. Default: NULL (All).
+#' @param disease The disease of the projects (e.g. normal), one or multiple value. Default: NULL (All).
+#' @param sample.type The sex of the projects, choose from "specimens", "organoids", "cellLines",
+#' one or multiple value. Default: NULL (All).
+#' @param preservation.method The preservation method of the projects (e.g. fresh), one or multiple value. Default: NULL (All).
+#' @param protocol The protocol of the projects (e.g. 10x 3' v2), one or multiple value. Default: NULL (All).
+#' @param suspension.type The suspension type of the projects, choose from "single cell", "single nucleus", "bulk cell", "bulk nuclei",
+#' one or multiple value. Default: NULL (All).
+#' @param cell.type The cell type of the projects (e.g. neuron), one or multiple value. Default: NULL (All).
+#' @param cell.num Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter.
+#' Deault: NULL(without filtering).
+#' @param sequencing.type The sequencing instrument type of the projects (e.g. illumina hiseq 2500), one or multiple value. Default: NULL (All).
+#'
+#' @return Dataframe contains filtered projects.
+#' @importFrom magrittr %>%
+#' @importFrom curl curl_fetch_memory
+#' @importFrom jsonlite fromJSON
+#' @importFrom data.table rbindlist
+#' @export
+#' @references https://bioconductor.org/packages/release/bioc/html/hca.html
+#'
+#' @examples
+#' # # all available projects
+#' # all.hca.projects = ShowHCAProjects()
+#' # # all human projects
+#' # all.human.projects = ExtractHCAMeta(all.projects.df = all.hca.projects, organism = "Homo sapiens")
+#' # # all human and 10x 3' v2
+#' # all.human.10x.projects = ExtractHCAMeta(all.projects.df = all.hca.projects,  organism = "Homo sapiens",
+#' #                                         protocol = c("10x 3' v2", "10x 3' v3"))
+ExtractHCAMeta <- function(all.projects.df, organism = NULL, sex = NULL, organ = NULL, organ.part = NULL, disease = NULL,
+                           sample.type = NULL, preservation.method = NULL, protocol = NULL,
+                           suspension.type = NULL, cell.type = NULL, cell.num = NULL, sequencing.type = NULL) {
+  # all projects detail dataframe
+  hca.projects.detail.df <- all.projects.df
   # extract row index under different filter
   organism.idx <- HCAAttrFilter(df = hca.projects.detail.df, attr = "genusSpecies", attr.value = organism)
   sex.idx <- HCAAttrFilter(df = hca.projects.detail.df, attr = "biologicalSex", attr.value = sex)

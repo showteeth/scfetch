@@ -1,26 +1,6 @@
-#' Extract Metadata of CELLxGENE Datasets with Attributes.
+#' Show All Available Datasets in CELLxGENE.
 #'
-#' @param organism The organism of the datasets, choose from "Homo sapiens", "Mus musculus", "Callithrix jacchus",
-#' "Macaca mulatta", "Sus scrofa domesticus", one or multiple value. Default: NULL (All).
-#' @param ethnicity The ethnicity of the datasets, choose from "Asian", "European", "unknown", "na", "African", "Bangladeshi",
-#' "British", "Irish", "East Asian", "African American", "Hispanic or Latin American", "African American or Afro-Caribbean",
-#' "European American", "Finnish", "Indian", "Japanese", "Korean", "Malaysian", "Singaporean Chinese", "American", "Pacific Islander",
-#' "admixed ancestry", "Eskimo", "Han Chinese", "Greater Middle Eastern  (Middle Eastern, North African or Persian)", "multiethnic",
-#' "Jewish Israeli", "South Asian", "Oceanian", "Chinese", one or multiple value. Default: NULL (All).
-#' @param sex The sex of the datasets, choose from "female", "male", "unknown", one or multiple value. Default: NULL (All).
-#' @param tissue The tissue of the datasets. One or multiple value. Default: NULL (All).
-#' @param disease The disease of the datasets. One or multiple value. Default: NULL (All).
-#' @param assay The assay of the datasets, choose from "10x 3' v1", "10x 3' v2", "10x 3' v3", "10x 3' transcription profiling",
-#' "10x 5' v1", "10x 5' v2", "10x 5' transcription profiling", "10x multiome", "10x scATAC-seq", "sci-RNA-seq", "Drop-seq",
-#' "Smart-seq", "Smart-seq2", "Smart-seq v4", "snmC-Seq2", "Visium Spatial Gene Expression", "Seq-Well", "Seq-Well S3", "Patch-seq",
-#' "sci-Plex", "BD Rhapsody Targeted mRNA", "BD Rhapsody Whole Transcriptome Analysis", "Slide-seqV2", "GEXSCOPE technology", "inDrop",
-#' "microwell-seq", "CEL-seq2", "STRT-seq", "DroNc-seq", "MERFISH", "scATAC-seq", "MARS-seq", "TruDrop", one or multiple value. Default: NULL (All).
-#' @param suspension.type The suspension type of the datasets, choose from "nucleus", "cell", "na", one or multiple value. Default: NULL (All).
-#' @param cell.type The cell type of the datasets. One or multiple value. Default: NULL (All).
-#' @param cell.num Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter.
-#' Deault: NULL(without filtering).
-#'
-#' @return Dataframe contains filtered datasets.
+#' @return Dataframe contains all available datasets.
 #' @importFrom magrittr %>%
 #' @importFrom curl curl_fetch_memory
 #' @importFrom jsonlite fromJSON flatten
@@ -30,11 +10,8 @@
 #'
 #' @examples
 #' # # all available datasets
-#' # cellxgene.meta = ExtractCELLxGENEMeta()
-#' # # human 10x v2 and v3 datasets
-#' # human.10x.cellxgene.meta = ExtractCELLxGENEMeta(assay = c("10x 3' v2", "10x 3' v3"), organism = "Homo sapiens")
-ExtractCELLxGENEMeta <- function(organism = NULL, ethnicity = NULL, sex = NULL, tissue = NULL, disease = NULL,
-                                 assay = NULL, suspension.type = NULL, cell.type = NULL, cell.num = NULL) {
+#' # all.cellxgene.datasets = ShowCELLxGENEDatasets()
+ShowCELLxGENEDatasets <- function() {
   # urls
   cellxgene.base.url <- "https://api.cellxgene.cziscience.com/dp/v1/"
   cellxgene.collections.url <- paste0(cellxgene.base.url, "collections/")
@@ -113,6 +90,50 @@ ExtractCELLxGENEMeta <- function(organism = NULL, ethnicity = NULL, sex = NULL, 
   # final dataframe
   cellxgene.collections.datasets.final <- data.table::rbindlist(cellxgene.collections.datasets.list, fill = TRUE) %>%
     as.data.frame()
+  return(cellxgene.collections.datasets.final)
+}
+
+#' Extract Metadata of CELLxGENE Datasets with Attributes.
+#'
+#' @param all.samples.df All detail information of CELLxGENE datasets, obtained with \code{ShowCELLxGENEDatasets}.
+#' @param organism The organism of the datasets, choose from "Homo sapiens", "Mus musculus", "Callithrix jacchus",
+#' "Macaca mulatta", "Sus scrofa domesticus", one or multiple value. Default: NULL (All).
+#' @param ethnicity The ethnicity of the datasets, choose from "Asian", "European", "unknown", "na", "African", "Bangladeshi",
+#' "British", "Irish", "East Asian", "African American", "Hispanic or Latin American", "African American or Afro-Caribbean",
+#' "European American", "Finnish", "Indian", "Japanese", "Korean", "Malaysian", "Singaporean Chinese", "American", "Pacific Islander",
+#' "admixed ancestry", "Eskimo", "Han Chinese", "Greater Middle Eastern  (Middle Eastern, North African or Persian)", "multiethnic",
+#' "Jewish Israeli", "South Asian", "Oceanian", "Chinese", one or multiple value. Default: NULL (All).
+#' @param sex The sex of the datasets, choose from "female", "male", "unknown", one or multiple value. Default: NULL (All).
+#' @param tissue The tissue of the datasets. One or multiple value. Default: NULL (All).
+#' @param disease The disease of the datasets. One or multiple value. Default: NULL (All).
+#' @param assay The assay of the datasets, choose from "10x 3' v1", "10x 3' v2", "10x 3' v3", "10x 3' transcription profiling",
+#' "10x 5' v1", "10x 5' v2", "10x 5' transcription profiling", "10x multiome", "10x scATAC-seq", "sci-RNA-seq", "Drop-seq",
+#' "Smart-seq", "Smart-seq2", "Smart-seq v4", "snmC-Seq2", "Visium Spatial Gene Expression", "Seq-Well", "Seq-Well S3", "Patch-seq",
+#' "sci-Plex", "BD Rhapsody Targeted mRNA", "BD Rhapsody Whole Transcriptome Analysis", "Slide-seqV2", "GEXSCOPE technology", "inDrop",
+#' "microwell-seq", "CEL-seq2", "STRT-seq", "DroNc-seq", "MERFISH", "scATAC-seq", "MARS-seq", "TruDrop", one or multiple value. Default: NULL (All).
+#' @param suspension.type The suspension type of the datasets, choose from "nucleus", "cell", "na", one or multiple value. Default: NULL (All).
+#' @param cell.type The cell type of the datasets. One or multiple value. Default: NULL (All).
+#' @param cell.num Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter.
+#' Deault: NULL(without filtering).
+#'
+#' @return Dataframe contains filtered datasets.
+#' @importFrom magrittr %>%
+#' @importFrom curl curl_fetch_memory
+#' @importFrom jsonlite fromJSON flatten
+#' @importFrom data.table rbindlist
+#' @export
+#' @references https://gist.github.com/ivirshup/f1a1603db69de3888eacb4bdb6a9317a
+#'
+#' @examples
+#' # # all available datasets
+#' # all.cellxgene.datasets = ShowCELLxGENEDatasets()
+#' # # human 10x v2 and v3 datasets
+#' # human.10x.cellxgene.meta = ExtractCELLxGENEMeta(all.samples.df = all.cellxgene.datasets, assay = c("10x 3' v2", "10x 3' v3"),
+#' #                                                 organism = "Homo sapiens")
+ExtractCELLxGENEMeta <- function(all.samples.df, organism = NULL, ethnicity = NULL, sex = NULL, tissue = NULL, disease = NULL,
+                                 assay = NULL, suspension.type = NULL, cell.type = NULL, cell.num = NULL) {
+  # all datasets information
+  cellxgene.collections.datasets.final <- all.samples.df
   # extract row index under different filter
   organism.idx <- cellxgeneAttrFilter(df = cellxgene.collections.datasets.final, attr = "organism", attr.value = organism)
   ethnicity.idx <- cellxgeneAttrFilter(df = cellxgene.collections.datasets.final, attr = "self_reported_ethnicity", attr.value = ethnicity)

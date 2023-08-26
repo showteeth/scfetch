@@ -185,7 +185,7 @@ unique(unlist(sapply(unique(gsub(pattern = "\\|parent", replacement = "", x = uc
 
 #### Extract metadata
 
-`scfetch` provides `ExtractCBDatasets` to extract metadata with collection, sub-collection, organ, disease status, organism, project and cell number. All attributes except cell number support fuzzy match with `fuzzy.match`, this is useful when selecting datasets.
+`scfetch` provides `ExtractCBDatasets` to filter metadata with collection, sub-collection, organ, disease status, organism, project and cell number. All attributes except cell number support fuzzy match with `fuzzy.match`, this is useful when selecting datasets.
 
 ```{r cb_extract}
 hbb.sample.df <- ExtractCBDatasets(all.samples.df = ucsc.cb.samples, organ = c("brain", "blood"), organism = "Human (H. sapiens)", cell.num = c(1000, 2000))
@@ -261,17 +261,27 @@ tree /Users/soyabean/Desktop/tmp/scdown/download_zenodo
 
 The [CELLxGENE](https://cellxgene.cziscience.com/) is a web server contains **910** single-cell datasets, users can explore, download and upload own datasets. The downloaded datasets provided by [CELLxGENE](https://cellxgene.cziscience.com/) have two formats: `h5ad (AnnData v0.8)` and `rds (Seurat v4)`.
 
+#### Show available datasets
+
+`scfetch` provides `ShowCELLxGENEDatasets` to extract sample metadata, including sample title, description, contact, organism, ethnicity, sex, tissue, disease, assay, suspension type, cell type, et al.
+
+```{r cellxgene_all}
+# all available datasets
+all.cellxgene.datasets <- ShowCELLxGENEDatasets()
+```
+
+<hr />
+
 #### Extract metadata
 
-`scfetch` provides `ExtractCELLxGENEMeta` to extract sample metadata, including sample title, description, contact, organism, ethnicity, sex, tissue, disease, assay, suspension type, cell type, et al.
+`scfetch` provides `ExtractCELLxGENEMeta` to filter sample metadata:
 
 ```{r cellxgene_meta}
-# all available datasets
-cellxgene.meta <- ExtractCELLxGENEMeta()
-head(cellxgene.meta)
-
 # human 10x v2 and v3 datasets
-human.10x.cellxgene.meta <- ExtractCELLxGENEMeta(assay = c("10x 3' v2", "10x 3' v3"), organism = "Homo sapiens")
+human.10x.cellxgene.meta <- ExtractCELLxGENEMeta(
+  all.samples.df = all.cellxgene.datasets,
+  assay = c("10x 3' v2", "10x 3' v3"), organism = "Homo sapiens"
+)
 head(human.10x.cellxgene.meta)
 ```
 

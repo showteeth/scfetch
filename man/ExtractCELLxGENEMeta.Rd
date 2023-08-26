@@ -5,6 +5,7 @@
 \title{Extract Metadata of CELLxGENE Datasets with Attributes.}
 \usage{
 ExtractCELLxGENEMeta(
+  all.samples.df,
   organism = NULL,
   ethnicity = NULL,
   sex = NULL,
@@ -17,6 +18,8 @@ ExtractCELLxGENEMeta(
 )
 }
 \arguments{
+\item{all.samples.df}{All detail information of CELLxGENE datasets, obtained with \code{ShowCELLxGENEDatasets}.}
+
 \item{organism}{The organism of the datasets, choose from "Homo sapiens", "Mus musculus", "Callithrix jacchus",
 "Macaca mulatta", "Sus scrofa domesticus", one or multiple value. Default: NULL (All).}
 
@@ -53,9 +56,10 @@ Extract Metadata of CELLxGENE Datasets with Attributes.
 }
 \examples{
 # # all available datasets
-# cellxgene.meta = ExtractCELLxGENEMeta()
+# all.cellxgene.datasets = ShowCELLxGENEDatasets()
 # # human 10x v2 and v3 datasets
-# human.10x.cellxgene.meta = ExtractCELLxGENEMeta(assay = c("10x 3' v2", "10x 3' v3"), organism = "Homo sapiens")
+# human.10x.cellxgene.meta = ExtractCELLxGENEMeta(all.samples.df = all.cellxgene.datasets, assay = c("10x 3' v2", "10x 3' v3"),
+#                                                 organism = "Homo sapiens")
 }
 \references{
 https://gist.github.com/ivirshup/f1a1603db69de3888eacb4bdb6a9317a
