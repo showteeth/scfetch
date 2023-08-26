@@ -13,6 +13,7 @@
 * Added filters to `ExtractCELLxGENEMeta`.
 * Added `data.type` in `ParseGEO` to return count matrix for bulk RNA-seq.
 * Added filters to `ExtractHCAMeta`.
+* Added `catalog` in `ShowHCAProjects`.
 
 -------------------
 

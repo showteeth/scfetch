@@ -1,5 +1,5 @@
 # extract all projects
-ExtractHCAProjects <- function() {
+ExtractHCAProjects <- function(catalog = NULL) {
   # base urls
   hca.base.url <- "https://service.azul.data.humancellatlas.org"
   # get all catalogs
@@ -8,34 +8,54 @@ ExtractHCAProjects <- function() {
   catalog.vec <- sapply(names(catalog.content$catalogs), function(x) {
     if (!catalog.content$catalogs[[x]]$internal) x
   }) %>% unlist()
+  if (!is.null(catalog)) {
+    catalog.vec <- intersect(catalog, catalog.vec)
+    if (length(catalog.vec) == 0) {
+      stop("Please check catalog you proided, choose from: dcp29, dcp30, dcp1, lm2, lm3.")
+    }
+  }
   # get catalog project list
   hca.projects.list <- lapply(catalog.vec, function(x) {
     cat.prj.url <- paste0(hca.base.url, "/index/projects?catalog=", x, "&size=100")
-    RecurURLRetrieval(cat.prj.url)
+    cat.prj <- RecurURLRetrieval(cat.prj.url) %>% as.data.frame()
+    cat.prj$catalog <- x
+    return(cat.prj)
   })
   # get catalog project df
   hca.projects.df <- data.table::rbindlist(hca.projects.list, fill = TRUE) %>% as.data.frame()
+  # remove duplicated projects in different catalogs
+  hca.projects.df <- hca.projects.df %>% dplyr::distinct(.data[["entryId"]], .keep_all = TRUE)
   return(hca.projects.df)
 }
 
 #' Show All Available Projects in Human Cell Atlas.
+#'
+#' @param catalog The catalog of the projects. Different catalogs may share some projects. Choose from "dcp29",
+#' "dcp30", "dcp1", "lm2", "lm3", one or multiple values. Default: NULL (all catalogs, remove duplicated projects).
 #'
 #' @return Dataframe contains all available projects.
 #' @importFrom magrittr %>%
 #' @importFrom curl curl_fetch_memory
 #' @importFrom jsonlite fromJSON
 #' @importFrom data.table rbindlist
+#' @importFrom dplyr distinct
+#' @importFrom rlang .data
 #' @export
 #'
 #' @examples
 #' # # all available projects
 #' # all.hca.projects = ShowHCAProjects()
-ShowHCAProjects <- function() {
+ShowHCAProjects <- function(catalog = NULL) {
   # get all projects information
-  hca.projects.df <- ExtractHCAProjects()
+  hca.projects.df <- ExtractHCAProjects(catalog = catalog)
   # get project detail information
   hca.projects.detail.list <- lapply(1:nrow(hca.projects.df), function(x) {
     x.df <- hca.projects.df[x, ]
+
+    # entryid and catalog
+    entryId <- x.df$entryId
+    catalog <- x.df$catalog
+
     # procotol information
     x.df.protocol <- x.df$protocols[[1]]
     workflow <- HCAPasteCol(x.df.protocol, col = "workflow")
@@ -106,8 +126,8 @@ ShowHCAProjects <- function() {
       sampleEntityType = sampleEntityType, organ = organ, organPart = organPart, sampleID = sampleID,
       disease = disease, preservationMethod = preservationMethod, donorCount = donorCount,
       developmentStage = developmentStage, genusSpecies = genusSpecies, biologicalSex = biologicalSex,
-      selectedCellType = selectedCellType, sourceId = sourceId, sourceSpec = sourceSpec, workflow = workflow,
-      libraryConstructionApproach = libraryConstructionApproach, nucleicAcidSource = nucleicAcidSource,
+      selectedCellType = selectedCellType, catalog = catalog, entryId = entryId, sourceId = sourceId, sourceSpec = sourceSpec,
+      workflow = workflow, libraryConstructionApproach = libraryConstructionApproach, nucleicAcidSource = nucleicAcidSource,
       instrumentManufacturerModel = instrumentManufacturerModel, pairedEnd = pairedEnd, cellLineID = cellLineID,
       cellLineType = cellLineType, cellLinemodelOrgan = cellLinemodelOrgan, organoidsID = organoidsID,
       organoidsmodelOrgan = organoidsmodelOrgan, organoidsmodelOrganPart = organoidsmodelOrganPart,
@@ -122,22 +142,22 @@ ShowHCAProjects <- function() {
 #'
 #' @param all.projects.df All detail information of HCA projects, obtained with \code{ShowHCAProjects}.
 #' @param organism The organism of the projects, choose from "Homo sapiens", "Mus musculus",
-#' "Macaca mulatta", "canis lupus familiaris", one or multiple value. Default: NULL (All).
+#' "Macaca mulatta", "canis lupus familiaris", one or multiple values. Default: NULL (All).
 #' @param sex The sex of the projects, choose from "female", "male", "mixed", "unknown",
-#' one or multiple value. Default: NULL (All).
-#' @param organ The organ of the projects (e.g. brain), one or multiple value. Default: NULL (All).
-#' @param organ.part The organ part of the projects (e.g. cortex), one or multiple value. Default: NULL (All).
-#' @param disease The disease of the projects (e.g. normal), one or multiple value. Default: NULL (All).
+#' one or multiple values. Default: NULL (All).
+#' @param organ The organ of the projects (e.g. brain), one or multiple values. Default: NULL (All).
+#' @param organ.part The organ part of the projects (e.g. cortex), one or multiple values. Default: NULL (All).
+#' @param disease The disease of the projects (e.g. normal), one or multiple values. Default: NULL (All).
 #' @param sample.type The sex of the projects, choose from "specimens", "organoids", "cellLines",
-#' one or multiple value. Default: NULL (All).
-#' @param preservation.method The preservation method of the projects (e.g. fresh), one or multiple value. Default: NULL (All).
-#' @param protocol The protocol of the projects (e.g. 10x 3' v2), one or multiple value. Default: NULL (All).
+#' one or multiple values. Default: NULL (All).
+#' @param preservation.method The preservation method of the projects (e.g. fresh), one or multiple values. Default: NULL (All).
+#' @param protocol The protocol of the projects (e.g. 10x 3' v2), one or multiple values. Default: NULL (All).
 #' @param suspension.type The suspension type of the projects, choose from "single cell", "single nucleus", "bulk cell", "bulk nuclei",
-#' one or multiple value. Default: NULL (All).
-#' @param cell.type The cell type of the projects (e.g. neuron), one or multiple value. Default: NULL (All).
+#' one or multiple values. Default: NULL (All).
+#' @param cell.type The cell type of the projects (e.g. neuron), one or multiple values. Default: NULL (All).
 #' @param cell.num Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter.
 #' Deault: NULL(without filtering).
-#' @param sequencing.type The sequencing instrument type of the projects (e.g. illumina hiseq 2500), one or multiple value. Default: NULL (All).
+#' @param sequencing.type The sequencing instrument type of the projects (e.g. illumina hiseq 2500), one or multiple values. Default: NULL (All).
 #'
 #' @return Dataframe contains filtered projects.
 #' @importFrom magrittr %>%

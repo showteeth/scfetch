@@ -4,7 +4,11 @@
 \alias{ShowHCAProjects}
 \title{Show All Available Projects in Human Cell Atlas.}
 \usage{
-ShowHCAProjects()
+ShowHCAProjects(catalog = NULL)
+}
+\arguments{
+\item{catalog}{The catalog of the projects. Different catalogs may share some projects. Choose from "dcp29",
+"dcp30", "dcp1", "lm2", "lm3", one or multiple values. Default: NULL (all catalogs, remove duplicated projects).}
 }
 \value{
 Dataframe contains all available projects.

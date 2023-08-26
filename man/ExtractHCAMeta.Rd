@@ -24,33 +24,33 @@ ExtractHCAMeta(
 \item{all.projects.df}{All detail information of HCA projects, obtained with \code{ShowHCAProjects}.}
 
 \item{organism}{The organism of the projects, choose from "Homo sapiens", "Mus musculus",
-"Macaca mulatta", "canis lupus familiaris", one or multiple value. Default: NULL (All).}
+"Macaca mulatta", "canis lupus familiaris", one or multiple values. Default: NULL (All).}
 
 \item{sex}{The sex of the projects, choose from "female", "male", "mixed", "unknown",
-one or multiple value. Default: NULL (All).}
+one or multiple values. Default: NULL (All).}
 
-\item{organ}{The organ of the projects (e.g. brain), one or multiple value. Default: NULL (All).}
+\item{organ}{The organ of the projects (e.g. brain), one or multiple values. Default: NULL (All).}
 
-\item{organ.part}{The organ part of the projects (e.g. cortex), one or multiple value. Default: NULL (All).}
+\item{organ.part}{The organ part of the projects (e.g. cortex), one or multiple values. Default: NULL (All).}
 
-\item{disease}{The disease of the projects (e.g. normal), one or multiple value. Default: NULL (All).}
+\item{disease}{The disease of the projects (e.g. normal), one or multiple values. Default: NULL (All).}
 
 \item{sample.type}{The sex of the projects, choose from "specimens", "organoids", "cellLines",
-one or multiple value. Default: NULL (All).}
+one or multiple values. Default: NULL (All).}
 
-\item{preservation.method}{The preservation method of the projects (e.g. fresh), one or multiple value. Default: NULL (All).}
+\item{preservation.method}{The preservation method of the projects (e.g. fresh), one or multiple values. Default: NULL (All).}
 
-\item{protocol}{The protocol of the projects (e.g. 10x 3' v2), one or multiple value. Default: NULL (All).}
+\item{protocol}{The protocol of the projects (e.g. 10x 3' v2), one or multiple values. Default: NULL (All).}
 
 \item{suspension.type}{The suspension type of the projects, choose from "single cell", "single nucleus", "bulk cell", "bulk nuclei",
-one or multiple value. Default: NULL (All).}
+one or multiple values. Default: NULL (All).}
 
-\item{cell.type}{The cell type of the projects (e.g. neuron), one or multiple value. Default: NULL (All).}
+\item{cell.type}{The cell type of the projects (e.g. neuron), one or multiple values. Default: NULL (All).}
 
 \item{cell.num}{Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter.
 Deault: NULL(without filtering).}
 
-\item{sequencing.type}{The sequencing instrument type of the projects (e.g. illumina hiseq 2500), one or multiple value. Default: NULL (All).}
+\item{sequencing.type}{The sequencing instrument type of the projects (e.g. illumina hiseq 2500), one or multiple values. Default: NULL (All).}
 }
 \value{
 Dataframe contains filtered projects.
