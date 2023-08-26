@@ -80,9 +80,8 @@ ShowHCAProjects <- function(catalog = NULL) {
     publications <- HCAPasteColdf(x.df.projects$publications[[1]], col = "publicationTitle")
     accessions <- HCAPasteColdf(x.df.projects$accessions[[1]], col = "accession")
     accessible <- HCAPasteColdf(x.df.projects, col = "accessible")
-    # 下载链接可以直接从 x.df.projects$matrices 以及 x.df.projects$contributedAnalyses 中提取
 
-    # samples和specimens中的信息重复
+    # sample
     x.df.samples <- x.df$samples[[1]]
     sampleEntityType <- HCAPasteCol(df = x.df.samples, col = "sampleEntityType")
     organ <- HCAPasteCol(df = x.df.samples, col = "effectiveOrgan")
@@ -145,19 +144,26 @@ ShowHCAProjects <- function(catalog = NULL) {
 #' "Macaca mulatta", "canis lupus familiaris", one or multiple values. Default: NULL (All).
 #' @param sex The sex of the projects, choose from "female", "male", "mixed", "unknown",
 #' one or multiple values. Default: NULL (All).
-#' @param organ The organ of the projects (e.g. brain), one or multiple values. Default: NULL (All).
-#' @param organ.part The organ part of the projects (e.g. cortex), one or multiple values. Default: NULL (All).
-#' @param disease The disease of the projects (e.g. normal), one or multiple values. Default: NULL (All).
+#' @param organ The organ of the projects (e.g. brain), obtain available values with \code{StatDBAttribute},
+#' one or multiple values. Default: NULL (All).
+#' @param organ.part The organ part of the projects (e.g. cortex), obtain available values with \code{StatDBAttribute},
+#' one or multiple values. Default: NULL (All).
+#' @param disease The disease of the projects (e.g. normal), obtain available values with \code{StatDBAttribute},
+#' one or multiple values. Default: NULL (All).
 #' @param sample.type The sex of the projects, choose from "specimens", "organoids", "cellLines",
 #' one or multiple values. Default: NULL (All).
-#' @param preservation.method The preservation method of the projects (e.g. fresh), one or multiple values. Default: NULL (All).
-#' @param protocol The protocol of the projects (e.g. 10x 3' v2), one or multiple values. Default: NULL (All).
+#' @param preservation.method The preservation method of the projects (e.g. fresh), obtain available values with \code{StatDBAttribute},
+#' one or multiple values. Default: NULL (All).
+#' @param protocol The protocol of the projects (e.g. 10x 3' v2), obtain available values with \code{StatDBAttribute},
+#' one or multiple values. Default: NULL (All).
 #' @param suspension.type The suspension type of the projects, choose from "single cell", "single nucleus", "bulk cell", "bulk nuclei",
 #' one or multiple values. Default: NULL (All).
-#' @param cell.type The cell type of the projects (e.g. neuron), one or multiple values. Default: NULL (All).
+#' @param cell.type The cell type of the projects (e.g. neuron), obtain available values with \code{StatDBAttribute},
+#' one or multiple values. Default: NULL (All).
 #' @param cell.num Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter.
 #' Deault: NULL(without filtering).
-#' @param sequencing.type The sequencing instrument type of the projects (e.g. illumina hiseq 2500), one or multiple values. Default: NULL (All).
+#' @param sequencing.type The sequencing instrument type of the projects (e.g. illumina hiseq 2500),
+#' obtain available values with \code{StatDBAttribute}, one or multiple values. Default: NULL (All).
 #'
 #' @return Dataframe contains filtered projects.
 #' @importFrom magrittr %>%

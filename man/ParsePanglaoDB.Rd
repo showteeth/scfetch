@@ -16,7 +16,7 @@ ParsePanglaoDB(
 \item{meta}{Metadata contains "SRA", "SRS", "Tissue", "Protocol", "Species", can be obtained with \code{ExtractPanglaoDBMeta}.}
 
 \item{cell.type}{Extract samples with specified cell types. For samples without SRS (notused), this value can only be "All" or "None", or
-these samples will be filtered. Default: "All".}
+these samples will be filtered. Obtain available values with \code{StatDBAttribute}, one or multiple value. Default: "All".}
 
 \item{include.gene}{Include cells expressing the genes. Default: NA.}
 

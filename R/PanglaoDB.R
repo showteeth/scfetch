@@ -3,7 +3,7 @@
 #' @param species The species of the datasets, choose from "Homo sapiens", "Mus musculus", one or multiple value. Default: NULL (All).
 #' @param protocol Protocol used to generate the datasets, choose from "10x chromium", "drop-seq", "microwell-seq",
 #' "C1 Fluidigm", "inDrops", "Smart-seq2", "CEL-seq", one or multiple value. Default: NULL (All).
-#' @param tissue The tissue of the datasets. Default: NULL (All).
+#' @param tissue The tissue of the datasets, obtain available values with \code{StatDBAttribute}. Default: NULL (All).
 #' @param cell.num Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter. Deault: NULL.
 #' @param show.cell.type Logical value, whether to show inferred cell type. Default: TRUE.
 #' @param local.data Logical value, whether to use local data (PanglaoDB is no longer maintained). Default: TRUE.
@@ -101,12 +101,15 @@ ExtractPanglaoDBMeta <- function(species = NULL, protocol = NULL, tissue = NULL,
 
 #' Extract Cell Type Composition of PanglaoDB Datasets.
 #'
-#' @param sra The SRA identifier of the datasets. Default: NULL (All).
-#' @param srs The SRS identifier of the datasets. Default: NULL (All).
+#' @param sra The SRA identifier of the datasets, obtain available values with \code{StatDBAttribute},
+#' one or multiple value. Default: NULL (All).
+#' @param srs The SRS identifier of the datasets, obtain available values with \code{StatDBAttribute},
+#' one or multiple value. Default: NULL (All).
 #' @param species The species of the datasets, choose from "Homo sapiens", "Mus musculus", one or multiple value. Default: NULL (All).
 #' @param protocol Protocol used to generate the datasets, choose from "10x chromium", "drop-seq", "microwell-seq",
 #' "C1 Fluidigm", "inDrops", "Smart-seq2", "CEL-seq", one or multiple value. Default: NULL (All).
-#' @param tissue The tissue of the datasets. Default: NULL (All).
+#' @param tissue The tissue of the datasets, obtain available values with \code{StatDBAttribute},
+#' one or multiple value. Default: NULL (All).
 #' @param local.data Logical value, whether to use local data (PanglaoDB is no longer maintained). Default: TRUE.
 #'
 #' @return Dataframe contains sample metadata, cluster, cell number and cell type information.
@@ -157,7 +160,7 @@ ExtractPanglaoDBComposition <- function(sra = NULL, srs = NULL, species = NULL, 
 #'
 #' @param meta Metadata contains "SRA", "SRS", "Tissue", "Protocol", "Species", can be obtained with \code{ExtractPanglaoDBMeta}.
 #' @param cell.type Extract samples with specified cell types. For samples without SRS (notused), this value can only be "All" or "None", or
-#' these samples will be filtered. Default: "All".
+#' these samples will be filtered. Obtain available values with \code{StatDBAttribute}, one or multiple value. Default: "All".
 #' @param include.gene Include cells expressing the genes. Default: NA.
 #' @param exclude.gene Exclude cells expressing the genes. Default: NA.
 #' @param merge Logical value, whether to merge Seurat list. Default: FALSE.

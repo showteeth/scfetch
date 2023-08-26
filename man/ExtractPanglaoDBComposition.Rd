@@ -14,16 +14,19 @@ ExtractPanglaoDBComposition(
 )
 }
 \arguments{
-\item{sra}{The SRA identifier of the datasets. Default: NULL (All).}
+\item{sra}{The SRA identifier of the datasets, obtain available values with \code{StatDBAttribute},
+one or multiple value. Default: NULL (All).}
 
-\item{srs}{The SRS identifier of the datasets. Default: NULL (All).}
+\item{srs}{The SRS identifier of the datasets, obtain available values with \code{StatDBAttribute},
+one or multiple value. Default: NULL (All).}
 
 \item{species}{The species of the datasets, choose from "Homo sapiens", "Mus musculus", one or multiple value. Default: NULL (All).}
 
 \item{protocol}{Protocol used to generate the datasets, choose from "10x chromium", "drop-seq", "microwell-seq",
 "C1 Fluidigm", "inDrops", "Smart-seq2", "CEL-seq", one or multiple value. Default: NULL (All).}
 
-\item{tissue}{The tissue of the datasets. Default: NULL (All).}
+\item{tissue}{The tissue of the datasets, obtain available values with \code{StatDBAttribute},
+one or multiple value. Default: NULL (All).}
 
 \item{local.data}{Logical value, whether to use local data (PanglaoDB is no longer maintained). Default: TRUE.}
 }

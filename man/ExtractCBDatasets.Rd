@@ -20,22 +20,22 @@ ExtractCBDatasets(
 \item{all.samples.df}{Dataframe contains all samples metadata, obtained with \code{ShowCBDatasets}.}
 
 \item{collection}{The collection of the datasets, corresponds to \code{shortLabel} column
-of \code{ShowCBDatasets}. Default: NULL (without filtering).}
+of \code{ShowCBDatasets}, obtain available values with \code{StatDBAttribute}. Default: NULL (without filtering).}
 
 \item{sub.collection}{The sub-collection of the datasets, corresponds to \code{subLabel} column
-of \code{ShowCBDatasets}. Default: NULL (without filtering).}
+of \code{ShowCBDatasets}, obtain available values with \code{StatDBAttribute}. Default: NULL (without filtering).}
 
 \item{organ}{The organ of the datasets, corresponds to \code{body_parts} column
-of \code{ShowCBDatasets}. Default: NULL (without filtering).}
+of \code{ShowCBDatasets}, obtain available values with \code{StatDBAttribute}. Default: NULL (without filtering).}
 
 \item{disease}{The disease of the datasets, corresponds to \code{diseases} column
-of \code{ShowCBDatasets}. Default: NULL (without filtering).}
+of \code{ShowCBDatasets}, obtain available values with \code{StatDBAttribute}. Default: NULL (without filtering).}
 
 \item{organism}{The specie of the datasets, corresponds to \code{organisms} column
-of \code{ShowCBDatasets}. Default: NULL (without filtering).}
+of \code{ShowCBDatasets}, obtain available values with \code{StatDBAttribute}. Default: NULL (without filtering).}
 
 \item{project}{The project of the datasets, corresponds to \code{projects} column
-of \code{ShowCBDatasets}. Default: NULL (without filtering).}
+of \code{ShowCBDatasets}, obtain available values with \code{StatDBAttribute}. Default: NULL (without filtering).}
 
 \item{fuzzy.match}{Logical value, whether to perform fuzzy match with provided attribute values. Default: TRUE.}
 

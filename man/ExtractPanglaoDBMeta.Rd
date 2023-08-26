@@ -19,7 +19,7 @@ ExtractPanglaoDBMeta(
 \item{protocol}{Protocol used to generate the datasets, choose from "10x chromium", "drop-seq", "microwell-seq",
 "C1 Fluidigm", "inDrops", "Smart-seq2", "CEL-seq", one or multiple value. Default: NULL (All).}
 
-\item{tissue}{The tissue of the datasets. Default: NULL (All).}
+\item{tissue}{The tissue of the datasets, obtain available values with \code{StatDBAttribute}. Default: NULL (All).}
 
 \item{cell.num}{Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter. Deault: NULL.}
 

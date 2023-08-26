@@ -141,17 +141,17 @@ ShowCBDatasets <- function(lazy = TRUE, json.folder = NULL, update = FALSE, quie
 #'
 #' @param all.samples.df Dataframe contains all samples metadata, obtained with \code{ShowCBDatasets}.
 #' @param collection The collection of the datasets, corresponds to \code{shortLabel} column
-#' of \code{ShowCBDatasets}. Default: NULL (without filtering).
+#' of \code{ShowCBDatasets}, obtain available values with \code{StatDBAttribute}. Default: NULL (without filtering).
 #' @param sub.collection The sub-collection of the datasets, corresponds to \code{subLabel} column
-#' of \code{ShowCBDatasets}. Default: NULL (without filtering).
+#' of \code{ShowCBDatasets}, obtain available values with \code{StatDBAttribute}. Default: NULL (without filtering).
 #' @param organ The organ of the datasets, corresponds to \code{body_parts} column
-#' of \code{ShowCBDatasets}. Default: NULL (without filtering).
+#' of \code{ShowCBDatasets}, obtain available values with \code{StatDBAttribute}. Default: NULL (without filtering).
 #' @param disease The disease of the datasets, corresponds to \code{diseases} column
-#' of \code{ShowCBDatasets}. Default: NULL (without filtering).
+#' of \code{ShowCBDatasets}, obtain available values with \code{StatDBAttribute}. Default: NULL (without filtering).
 #' @param organism The specie of the datasets, corresponds to \code{organisms} column
-#' of \code{ShowCBDatasets}. Default: NULL (without filtering).
+#' of \code{ShowCBDatasets}, obtain available values with \code{StatDBAttribute}. Default: NULL (without filtering).
 #' @param project The project of the datasets, corresponds to \code{projects} column
-#' of \code{ShowCBDatasets}. Default: NULL (without filtering).
+#' of \code{ShowCBDatasets}, obtain available values with \code{StatDBAttribute}. Default: NULL (without filtering).
 #' @param fuzzy.match Logical value, whether to perform fuzzy match with provided attribute values. Default: TRUE.
 #' @param cell.num Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter.
 #' Deault: NULL(without filtering).
@@ -195,17 +195,17 @@ ExtractCBDatasets <- function(all.samples.df, collection = NULL, sub.collection 
 #' @param all.samples.df Dataframe contains all samples metadata, obtained with \code{ShowCBDatasets}. Default: NULL.
 #' \code{sample.df} and \code{all.samples.df} cannot be both NULL.
 #' @param collection The collection of the datasets, corresponds to \code{shortLabel} column
-#' of \code{all.samples.df}. Default: NULL (without filtering).
+#' of \code{all.samples.df}, obtain available values with \code{StatDBAttribute}. Default: NULL (without filtering).
 #' @param sub.collection The sub-collection of the datasets, corresponds to \code{subLabel} column
-#' of \code{all.samples.df}. Default: NULL (without filtering).
+#' of \code{all.samples.df}, obtain available values with \code{StatDBAttribute}. Default: NULL (without filtering).
 #' @param organ The organ of the datasets, corresponds to \code{body_parts} column
-#' of \code{all.samples.df}. Default: NULL (without filtering).
+#' of \code{all.samples.df}, obtain available values with \code{StatDBAttribute}. Default: NULL (without filtering).
 #' @param disease The disease of the datasets, corresponds to \code{diseases} column
-#' of \code{all.samples.df}. Default: NULL (without filtering).
+#' of \code{all.samples.df}, obtain available values with \code{StatDBAttribute}. Default: NULL (without filtering).
 #' @param organism The specie of the datasets, corresponds to \code{organisms} column
-#' of \code{all.samples.df}. Default: NULL (without filtering).
+#' of \code{all.samples.df}, obtain available values with \code{StatDBAttribute}. Default: NULL (without filtering).
 #' @param project The project of the datasets, corresponds to \code{projects} column
-#' of \code{all.samples.df}. Default: NULL (without filtering).
+#' of \code{all.samples.df}, obtain available values with \code{StatDBAttribute}. Default: NULL (without filtering).
 #' @param fuzzy.match Logical value, whether to perform fuzzy match with provided attribute values. Default: TRUE.
 #' @param cell.num Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter. Deault: NULL.
 #'
@@ -286,17 +286,17 @@ ExtractCBComposition <- function(json.folder = NULL, sample.df = NULL, all.sampl
 #' @param all.samples.df Dataframe contains all samples metadata, obtained with \code{ShowCBDatasets}. Default: NULL.
 #' \code{sample.df} and \code{all.samples.df} cannot be both NULL.
 #' @param collection The collection of the datasets, corresponds to \code{shortLabel} column
-#' of \code{all.samples.df}. Default: NULL (without filtering).
+#' of \code{all.samples.df}, obtain available values with \code{StatDBAttribute}. Default: NULL (without filtering).
 #' @param sub.collection The sub-collection of the datasets, corresponds to \code{subLabel} column
-#' of \code{all.samples.df}. Default: NULL (without filtering).
+#' of \code{all.samples.df}, obtain available values with \code{StatDBAttribute}. Default: NULL (without filtering).
 #' @param organ The organ of the datasets, corresponds to \code{body_parts} column
-#' of \code{all.samples.df}. Default: NULL (without filtering).
+#' of \code{all.samples.df}, obtain available values with \code{StatDBAttribute}. Default: NULL (without filtering).
 #' @param disease The disease of the datasets, corresponds to \code{diseases} column
-#' of \code{all.samples.df}. Default: NULL (without filtering).
+#' of \code{all.samples.df}, obtain available values with \code{StatDBAttribute}. Default: NULL (without filtering).
 #' @param organism The specie of the datasets, corresponds to \code{organisms} column
-#' of \code{all.samples.df}. Default: NULL (without filtering).
+#' of \code{all.samples.df}, obtain available values with \code{StatDBAttribute}. Default: NULL (without filtering).
 #' @param project The project of the datasets, corresponds to \code{projects} column
-#' of \code{all.samples.df}. Default: NULL (without filtering).
+#' of \code{all.samples.df}, obtain available values with \code{StatDBAttribute}. Default: NULL (without filtering).
 #' @param fuzzy.match Logical value, whether to perform fuzzy match with provided attribute values. Default: TRUE.
 #' @param cell.num Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter. Deault: NULL.
 #' @param timeout Maximum request time when loading data online. Default: 1000.

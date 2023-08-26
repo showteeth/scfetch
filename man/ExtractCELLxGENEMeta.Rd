@@ -31,9 +31,9 @@ ExtractCELLxGENEMeta(
 
 \item{sex}{The sex of the datasets, choose from "female", "male", "unknown", one or multiple values. Default: NULL (All).}
 
-\item{tissue}{The tissue of the datasets. One or multiple values. Default: NULL (All).}
+\item{tissue}{The tissue of the datasets, obtain available values with \code{StatDBAttribute}. One or multiple values. Default: NULL (All).}
 
-\item{disease}{The disease of the datasets. One or multiple values. Default: NULL (All).}
+\item{disease}{The disease of the datasets, obtain available values with \code{StatDBAttribute}. One or multiple values. Default: NULL (All).}
 
 \item{assay}{The assay of the datasets, choose from "10x 3' v1", "10x 3' v2", "10x 3' v3", "10x 3' transcription profiling",
 "10x 5' v1", "10x 5' v2", "10x 5' transcription profiling", "10x multiome", "10x scATAC-seq", "sci-RNA-seq", "Drop-seq",
@@ -43,7 +43,7 @@ ExtractCELLxGENEMeta(
 
 \item{suspension.type}{The suspension type of the datasets, choose from "nucleus", "cell", "na", one or multiple values. Default: NULL (All).}
 
-\item{cell.type}{The cell type of the datasets. One or multiple values. Default: NULL (All).}
+\item{cell.type}{The cell type of the datasets, obtain available values with \code{StatDBAttribute}. One or multiple values. Default: NULL (All).}
 
 \item{cell.num}{Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter.
 Deault: NULL(without filtering).}

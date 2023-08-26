@@ -356,6 +356,8 @@ cellxgeneAttrFilter <- function(df, attr, attr.value) {
     # return row index
     value <- 1:nrow(df)
   } else {
+    # lower case
+    attr.value <- tolower(attr.value)
     all.values <- df[[attr]]
     # value contains dot
     value.list <- list()
@@ -363,7 +365,7 @@ cellxgeneAttrFilter <- function(df, attr, attr.value) {
       pv.vec <- c()
       for (avi in 1:length(all.values)) {
         av <- all.values[avi]
-        av.vec <- strsplit(x = av, split = ", ")[[1]]
+        av.vec <- strsplit(x = av, split = ", ")[[1]] %>% tolower()
         if (pv %in% av.vec) {
           pv.vec <- c(pv.vec, avi)
         }
@@ -495,4 +497,33 @@ HCAAttrFilter <- function(df, attr, attr.value) {
     }
   }
   return(value)
+}
+
+# get filter value for "PanglaoDB", "UCSC", "CELLxGENE", "HCA"
+CheckFilter <- function(df, filter, all.filter, database) {
+  filter.list <- lapply(filter, function(x) {
+    filter.values <- df[[all.filter[x]]]
+    if (database == "UCSC") {
+      filter.values <- gsub("\\|parent$", replacement = "", x = tolower(filter.values))
+    }
+    if (database == "PanglaoDB") {
+      vf.df <- strsplit(x = unlist(strsplit(x = filter.values, split = ", ")), split = "\\|") %>%
+        unlist() %>%
+        table() %>%
+        as.data.frame()
+    } else {
+      vf.df <- strsplit(x = unlist(strsplit(x = filter.values, split = ", ")), split = "\\|") %>%
+        unlist() %>%
+        tolower() %>%
+        table() %>%
+        as.data.frame()
+    }
+    colnames(vf.df) <- c("Value", "Num")
+    vf.df <- vf.df[order(vf.df$Num, decreasing = TRUE), ]
+    vf.df$Key <- x
+    rownames(vf.df) <- NULL
+    return(vf.df)
+  })
+  names(filter.list) <- filter
+  return(filter.list)
 }

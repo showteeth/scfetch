@@ -104,15 +104,15 @@ ShowCELLxGENEDatasets <- function() {
 #' "admixed ancestry", "Eskimo", "Han Chinese", "Greater Middle Eastern  (Middle Eastern, North African or Persian)", "multiethnic",
 #' "Jewish Israeli", "South Asian", "Oceanian", "Chinese", one or multiple values. Default: NULL (All).
 #' @param sex The sex of the datasets, choose from "female", "male", "unknown", one or multiple values. Default: NULL (All).
-#' @param tissue The tissue of the datasets. One or multiple values. Default: NULL (All).
-#' @param disease The disease of the datasets. One or multiple values. Default: NULL (All).
+#' @param tissue The tissue of the datasets, obtain available values with \code{StatDBAttribute}. One or multiple values. Default: NULL (All).
+#' @param disease The disease of the datasets, obtain available values with \code{StatDBAttribute}. One or multiple values. Default: NULL (All).
 #' @param assay The assay of the datasets, choose from "10x 3' v1", "10x 3' v2", "10x 3' v3", "10x 3' transcription profiling",
 #' "10x 5' v1", "10x 5' v2", "10x 5' transcription profiling", "10x multiome", "10x scATAC-seq", "sci-RNA-seq", "Drop-seq",
 #' "Smart-seq", "Smart-seq2", "Smart-seq v4", "snmC-Seq2", "Visium Spatial Gene Expression", "Seq-Well", "Seq-Well S3", "Patch-seq",
 #' "sci-Plex", "BD Rhapsody Targeted mRNA", "BD Rhapsody Whole Transcriptome Analysis", "Slide-seqV2", "GEXSCOPE technology", "inDrop",
 #' "microwell-seq", "CEL-seq2", "STRT-seq", "DroNc-seq", "MERFISH", "scATAC-seq", "MARS-seq", "TruDrop", one or multiple values. Default: NULL (All).
 #' @param suspension.type The suspension type of the datasets, choose from "nucleus", "cell", "na", one or multiple values. Default: NULL (All).
-#' @param cell.type The cell type of the datasets. One or multiple values. Default: NULL (All).
+#' @param cell.type The cell type of the datasets, obtain available values with \code{StatDBAttribute}. One or multiple values. Default: NULL (All).
 #' @param cell.num Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter.
 #' Deault: NULL(without filtering).
 #'
@@ -180,8 +180,11 @@ ExtractCELLxGENEMeta <- function(all.samples.df, organism = NULL, ethnicity = NU
 #' @references https://gist.github.com/ivirshup/f1a1603db69de3888eacb4bdb6a9317a
 #'
 #' @examples
+#' # # all available datasets
+#' # all.cellxgene.datasets = ShowCELLxGENEDatasets()
 #' # # human 10x v2 and v3 datasets
-#' # human.10x.cellxgene.meta = ExtractCELLxGENEMeta(assay = c("10x 3' v2", "10x 3' v3"), organism = "Homo sapiens")
+#' # human.10x.cellxgene.meta = ExtractCELLxGENEMeta(all.samples.df = all.cellxgene.datasets, assay = c("10x 3' v2", "10x 3' v3"),
+#' #                                                 organism = "Homo sapiens")
 #' # # download
 #' # ParseCELLxGENE(meta = human.10x.cellxgene.meta, out.folder = "/path/to/output")
 ParseCELLxGENE <- function(meta, file.ext = c("rds", "h5ad"), out.folder = NULL,
