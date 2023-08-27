@@ -212,5 +212,6 @@ ExtractHCAMeta <- function(all.projects.df, organism = NULL, sex = NULL, organ =
     preservation.method.idx, protocol.idx, suspension.type.idx, cell.type.idx, sequencing.type.idx, cnum.idx
   ))
   used.sample.df <- hca.projects.detail.df[valid.idx, ]
+  rownames(used.sample.df) <- NULL
   return(used.sample.df)
 }

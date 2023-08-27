@@ -184,6 +184,7 @@ ExtractCBDatasets <- function(all.samples.df, collection = NULL, sub.collection 
   # filter on the whole dataset
   valid.idx <- Reduce(intersect, list(collection.idx, sub.collection.idx, organ.idx, disease.idx, organism.idx, project.idx, cnum.idx))
   used.sample.df <- all.samples.df[valid.idx, ]
+  rownames(used.sample.df) <- NULL
   return(used.sample.df)
 }
 

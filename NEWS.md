@@ -15,6 +15,7 @@
 * Added `data.type` in `ParseGEO` to return count matrix for bulk RNA-seq.
 * Added filters to `ExtractHCAMeta`.
 * Added `catalog` in `ShowHCAProjects`.
+* Fixed bug in `ParseCELLxGENE` and returned failed dataframe when downloading error.
 
 -------------------
 

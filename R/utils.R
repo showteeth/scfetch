@@ -413,10 +413,10 @@ PrepareCELLxGENEUrls <- function(df, fe) {
   valid.df <- df[!(is.na(df[[fe.id]]) | is.na(df$dataset_id) | df$dataset_id == "" | df[[fe.id]] == ""), ]
   valid.preurls <- paste(cellxgene.datasets.url, valid.df$dataset_id, "asset", valid.df[[fe.id]], sep = "/")
   valid.urls <- sapply(valid.preurls, function(x) PostDatasetURL(x))
-  valid.names <- make.names(df$name, unique = TRUE)
+  valid.names <- make.names(valid.df$name, unique = TRUE)
   valid.filenames <- paste0(valid.names, ".", fe)
   names(valid.urls) <- valid.filenames
-  return(valid.urls)
+  return(list(df = valid.df, urls = valid.urls))
 }
 
 # used in hca, recursively extract projects (limit size to 100, get all projects when the size is greater than 100)

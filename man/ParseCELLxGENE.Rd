@@ -29,7 +29,7 @@ should contain dataset_id, rds_id/h5ad_id (depend on \code{file.ext}) and name c
 the parallel is done by default (\code{parallel} can be FALSE).}
 }
 \value{
-NULL.
+Dataframe contains failed datasets or NULL.
 }
 \description{
 Download CELLxGENE Datasets.

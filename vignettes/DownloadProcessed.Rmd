@@ -113,11 +113,24 @@ tree /Users/soyabean/Desktop/tmp/scdown/dwonload_geo
 
 [PanglaoDB](https://panglaodb.se/index.html) is a database which contains scRNA-seq datasets from mouse and human. Up to now, it contains **5,586,348 cells** from **1368 datasets (1063 from Mus musculus and 305 from	Homo sapiens)**. It has well organized metadata for every dataset, including tissue, protocol, species, number of cells and cell type annotation (computationally identified). Daniel Osorio has developed [rPanglaoDB](https://github.com/dosorio/rPanglaoDB/) to access [PanglaoDB](https://panglaodb.se/index.html) data, the functions of `scfetch` here are based on [rPanglaoDB](https://github.com/dosorio/rPanglaoDB/).
 
+Since [PanglaoDB](https://panglaodb.se/about.html) is no longer maintained, `scfetch` has cached all metadata and sample composition and use these cached data by default to accelerate, users can access the cached data with `PanglaoDBMeta` (all metadata) and `PanglaoDBComposition` (all sample composition).
+
+#### Summary attributes
+
+`scfetch` provides `StatDBAttribute` to summary attributes of [PanglaoDB](https://panglaodb.se/index.html):
+
+```{r panglaodb_summary}
+# use cached metadata
+StatDBAttribute(df = PanglaoDBMeta, filter = c("species", "protocol"), database = "PanglaoDB")
+```
+
+<hr />
+
 #### Extract metadata
 
-`scfetch` provides `ExtractPanglaoDBMeta` to show all available datasets or select interested datasets with specified species, protocol, tissue and cell number. User can also choose to whether to add cell type annotation to every dataset with `show.cell.type`.
+`scfetch` provides `ExtractPanglaoDBMeta` to select interested datasets with specified **species**, **protocol**, **tissue** and **cell number** (The available values of these attributes can be obtained with `StatDBAttribute`). User can also choose to whether to add cell type annotation to every dataset with `show.cell.type`.
 
-Since [PanglaoDB](https://panglaodb.se/about.html) is no longer maintained, `scfetch` has cached all metadata and sample composition and use these cached data by default to accelerate, users can change this by setting `local.data = FALSE`.
+`scfetch` uses cached metadata and sample composition by default, users can change this by setting `local.data = FALSE`.
 
 ```{r panglaodb_meta}
 hsa.meta <- ExtractPanglaoDBMeta(species = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"), show.cell.type = TRUE, cell.num = c(1000, 2000))
@@ -183,9 +196,19 @@ unique(unlist(sapply(unique(gsub(pattern = "\\|parent", replacement = "", x = uc
 
 <hr />
 
+#### Summary attributes
+
+`scfetch` provides `StatDBAttribute` to summary attributes of [UCSC Cell Browser](https://cells.ucsc.edu/?#):
+
+```{r cb_summary}
+StatDBAttribute(df = ucsc.cb.samples, filter = c("organism", "organ"), database = "UCSC")
+```
+
+<hr />
+
 #### Extract metadata
 
-`scfetch` provides `ExtractCBDatasets` to filter metadata with collection, sub-collection, organ, disease status, organism, project and cell number. All attributes except cell number support fuzzy match with `fuzzy.match`, this is useful when selecting datasets.
+`scfetch` provides `ExtractCBDatasets` to filter metadata with **collection**, **sub-collection**, **organ**, **disease status**, **organism**, **project** and **cell number** (The available values of these attributes can be obtained with `StatDBAttribute` except **cell number**). All attributes except cell number support fuzzy match with `fuzzy.match`, this is useful when selecting datasets.
 
 ```{r cb_extract}
 hbb.sample.df <- ExtractCBDatasets(all.samples.df = ucsc.cb.samples, organ = c("brain", "blood"), organism = "Human (H. sapiens)", cell.num = c(1000, 2000))
@@ -272,9 +295,19 @@ all.cellxgene.datasets <- ShowCELLxGENEDatasets()
 
 <hr />
 
+#### Summary attributes
+
+`scfetch` provides `StatDBAttribute` to summary attributes of [CELLxGENE](https://cellxgene.cziscience.com/):
+
+```{r cellxgene_summary}
+StatDBAttribute(df = all.cellxgene.datasets, filter = c("organism", "sex"), database = "CELLxGENE")
+```
+
+<hr />
+
 #### Extract metadata
 
-`scfetch` provides `ExtractCELLxGENEMeta` to filter sample metadata:
+`scfetch` provides `ExtractCELLxGENEMeta` to filter sample metadata, the available values of attributes can be obtained with `StatDBAttribute` except **cell number**:
 
 ```{r cellxgene_meta}
 # human 10x v2 and v3 datasets

@@ -96,6 +96,7 @@ ExtractPanglaoDBMeta <- function(species = NULL, protocol = NULL, tissue = NULL,
     # replace srs with '=' with notused
     used.meta$SRS <- gsub(pattern = "nSRS=[0-9]*", replacement = "notused", x = used.meta$SRS)
   }
+  rownames(used.meta) <- NULL
   return(used.meta)
 }
 

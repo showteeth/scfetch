@@ -157,6 +157,7 @@ ExtractCELLxGENEMeta <- function(all.samples.df, organism = NULL, ethnicity = NU
     suspension.type.idx, cell.type.idx, cnum.idx
   ))
   used.sample.df <- cellxgene.collections.datasets.final[valid.idx, ]
+  rownames(used.sample.df) <- NULL
   return(used.sample.df)
 }
 
@@ -171,7 +172,7 @@ ExtractCELLxGENEMeta <- function(all.samples.df, organism = NULL, ethnicity = NU
 #' @param parallel Logical value, whether to download parallelly. Default: TRUE. When "libcurl" is available for \code{download.file},
 #' the parallel is done by default (\code{parallel} can be FALSE).
 #'
-#' @return NULL.
+#' @return Dataframe contains failed datasets or NULL.
 #' @importFrom httr POST stop_for_status content
 #' @importFrom jsonlite fromJSON
 #' @importFrom parallel detectCores mclapply
@@ -200,16 +201,22 @@ ParseCELLxGENE <- function(meta, file.ext = c("rds", "h5ad"), out.folder = NULL,
   }
   # prepare download urls
   download.urls <- c()
+  download.df.list <- list()
   # prepare rds
   if ("rds" %in% file.ext) {
-    rds.urls <- PrepareCELLxGENEUrls(df = meta, fe = "rds")
+    rds.urls.list <- PrepareCELLxGENEUrls(df = meta, fe = "rds")
+    rds.urls <- rds.urls.list$urls
+    download.df.list <- c(download.df.list, list(rds.urls.list$df))
     download.urls <- c(download.urls, rds.urls)
   }
   # prepare h5ad
   if ("h5ad" %in% file.ext) {
-    h5ad.urls <- PrepareCELLxGENEUrls(df = meta, fe = "h5ad")
+    h5ad.urls.list <- PrepareCELLxGENEUrls(df = meta, fe = "h5ad")
+    h5ad.urls <- h5ad.urls.list$urls
+    download.df.list <- c(download.df.list, list(h5ad.urls.list$df))
     download.urls <- c(download.urls, h5ad.urls)
   }
+  download.df <- data.table::rbindlist(download.df.list, fill = TRUE) %>% as.data.frame()
   # prepare output folder
   if (is.null(out.folder)) {
     out.folder <- getwd()
@@ -229,8 +236,17 @@ ParseCELLxGENE <- function(meta, file.ext = c("rds", "h5ad"), out.folder = NULL,
   } else {
     down.status <- utils::download.file(url = download.urls, destfile = names(download.urls), quiet = quiet, mode = "wb")
   }
-  message("Finish downloading!")
   # restore timeout
   options(timeout = env.timeout)
-  return(NULL)
+  # process failed datasets
+  down.status <- unlist(down.status)
+  fail.status <- which(down.status != 0)
+  if (length(fail.status) == 0) {
+    message("All datasets downloaded successfully!")
+    return(NULL)
+  } else {
+    fail.datasets.id <- download.df[fail.status, "dataset_id"] %>% unique()
+    fail.meta <- meta[meta$dataset_id %in% fail.datasets.id, ]
+    return(fail.meta)
+  }
 }
