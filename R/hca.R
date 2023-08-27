@@ -215,3 +215,135 @@ ExtractHCAMeta <- function(all.projects.df, organism = NULL, sex = NULL, organ =
   rownames(used.sample.df) <- NULL
   return(used.sample.df)
 }
+
+#' Download Human Cell Atlas Datasets.
+#'
+#' @param meta Metadata used to download, can be from \code{ExtractHCAMeta},
+#' should contain entryId and name catalog.
+#' @param file.ext. The valid file extension for download. When NULL, use "rds", "rdata", "h5", "h5ad", "loom".
+#' Default: c("rds", "rdata", "h5", "h5ad", "loom").
+#' @param out.folder The output folder. Default: NULL (current working directory).
+#' @param timeout Maximum request time. Default: 3600.
+#' @param quiet Logical value, whether to show downloading progress. Default: FALSE (show).
+#' @param parallel Logical value, whether to download parallelly. Default: TRUE. When "libcurl" is available for \code{download.file},
+#' the parallel is done by default (\code{parallel} can be FALSE).
+#'
+#' @return Dataframe contains failed projects or NULL.
+#' @importFrom magrittr %>%
+#' @importFrom curl curl_fetch_memory
+#' @importFrom jsonlite fromJSON
+#' @importFrom data.table rbindlist
+#' @importFrom parallel detectCores mclapply
+#' @importFrom utils download.file
+#' @importFrom tidyr spread
+#' @importFrom dplyr distinct
+#' @importFrom rlang .data
+#' @export
+#'
+#' @examples
+#' # # all available projects
+#' # all.hca.projects = ShowHCAProjects()
+#' # # all human and 10x 3' v2
+#' # all.human.10x.projects = ExtractHCAMeta(all.projects.df = all.hca.projects,  organism = "Homo sapiens",
+#' #                                         protocol = c("10x 3' v2", "10x 3' v3"))
+#' # # download
+#' # ParseHCA(meta = all.human.10x.projects, out.folder = "/path/to/output")
+ParseHCA <- function(meta, file.ext = c("rds", "rdata", "h5", "h5ad", "loom"), out.folder = NULL,
+                     timeout = 3600, quiet = FALSE, parallel = TRUE) {
+  # file.ext: ignore case, tar.gz, gz
+  if (is.null(file.ext)) {
+    warning("There is no file extension provided, use all valid (rds, rdata, h5, h5ad and loom).")
+    file.ext <- c("rds", "rdata", "h5", "h5ad", "loom")
+  }
+  file.ext <- intersect(file.ext, c("rds", "rdata", "h5", "h5ad", "loom"))
+  if (length(file.ext) == 0) {
+    stop("Please provide valid file extension: rds, rdata, h5, h5ad and loom.")
+  }
+  # all available projects
+  hca.projects.df <- ExtractHCAProjects(catalog = NULL)
+  # check entryId exists
+  CheckColumns(df = meta, columns = c("entryId", "catalog"))
+  # filter projects with meta
+  projects.valid <- merge(hca.projects.df, meta[c("entryId", "catalog")], by = c("entryId", "catalog"))
+
+  # extract data
+  # get projects all datasets
+  projects.datasets.list <- lapply(1:nrow(projects.valid), function(x) {
+    x.df <- projects.valid[x, ]
+    # project
+    x.df.projects <- x.df$projects[[1]]
+    x.dataset.df <- data.frame()
+    if (ncol(x.df.projects$matrices) > 0) {
+      x.mat.df <- HCAExtactData(x.df.projects$matrices)
+      x.mat.df$source <- "matrices"
+      x.dataset.df <- data.table::rbindlist(list(x.dataset.df, x.mat.df), fill = TRUE) %>% as.data.frame()
+    }
+    if (ncol(x.df.projects$contributedAnalyses) > 0) {
+      x.ca.df <- HCAExtactData(x.df.projects$contributedAnalyses)
+      x.ca.df$source <- "contributedAnalyses"
+      x.dataset.df <- data.table::rbindlist(list(x.dataset.df, x.ca.df), fill = TRUE) %>% as.data.frame()
+    }
+    if (nrow(x.dataset.df) > 0) {
+      x.dataset.df$entryId <- x.df$entryId
+      x.dataset.df$catalog <- x.df$catalog
+    }
+    return(x.dataset.df)
+  })
+  projects.datasets.df <- data.table::rbindlist(projects.datasets.list, fill = TRUE) %>% as.data.frame()
+  projects.datasets.df$lowerformat <- tolower(projects.datasets.df$format)
+  # filter with file.ext
+  file.ext <- c(file.ext, paste0(file.ext, ".tar.gz"), paste0(file.ext, ".gz"))
+  projects.datasets.valid.df <- projects.datasets.df[projects.datasets.df$lowerformat %in% file.ext, ]
+  projects.datasets.valid.df$lowerformat <- NULL
+  # distinct url
+  projects.datasets.valid.df <- projects.datasets.valid.df %>% dplyr::distinct(.data[["url"]], .keep_all = TRUE)
+  # add name
+  projects.datasets.valid.df$name <- sapply(1:nrow(projects.datasets.valid.df), function(x) {
+    x.pdvd <- projects.datasets.valid.df[x, ]
+    ifelse(is.null(x.pdvd$name),
+      paste0(make.names(x.pdvd$meta), ".", x.pdvd$format),
+      ifelse(is.na(x.pdvd$name),
+        paste0(make.names(x.pdvd$meta), ".", x.pdvd$format),
+        ifelse(x.pdvd$name == "",
+          paste0(make.names(x.pdvd$meta), ".", x.pdvd$format),
+          x.pdvd$name
+        )
+      )
+    )
+  })
+  # prepare download urls
+  download.urls <- projects.datasets.valid.df$url
+  names(download.urls) <- projects.datasets.valid.df$name
+  # prepare output folder
+  if (is.null(out.folder)) {
+    out.folder <- getwd()
+  }
+  names(download.urls) <- file.path(out.folder, names(download.urls))
+  # download urls
+  # set timeout
+  env.timeout <- getOption("timeout")
+  options(timeout = timeout)
+  message("Start downloading!")
+  if (isTRUE(parallel)) {
+    # prepare cores
+    cores.used <- min(parallel::detectCores(), length(download.urls))
+    down.status <- parallel::mclapply(X = 1:length(download.urls), FUN = function(x) {
+      utils::download.file(url = download.urls, destfile = names(download.urls), quiet = quiet, mode = "wb")
+    }, mc.cores = cores.used)
+  } else {
+    down.status <- utils::download.file(url = download.urls, destfile = names(download.urls), quiet = quiet, mode = "wb")
+  }
+  # restore timeout
+  options(timeout = env.timeout)
+  # process failed datasets
+  down.status <- unlist(down.status)
+  fail.status <- which(down.status != 0)
+  if (length(fail.status) == 0) {
+    message("All datasets downloaded successfully!")
+    return(NULL)
+  } else {
+    fail.entry.id <- projects.datasets.valid.df[fail.status, "entryId"] %>% unique()
+    fail.meta <- meta[meta$entryId %in% fail.entry.id, ]
+    return(fail.meta)
+  }
+}

@@ -527,3 +527,26 @@ CheckFilter <- function(df, filter, all.filter, database) {
   names(filter.list) <- filter
   return(filter.list)
 }
+
+# used in hca, extract data information from contributedAnalyses and matrices
+HCAExtactData <- function(df) {
+  # unlist
+  df.vec <- unlist(df)
+  # create dataframe
+  df.unlist <- data.frame(meta = names(df.vec), value = df.vec)
+  rownames(df.unlist) <- NULL
+  # data columns
+  data.cols <- c(
+    "contentDescription", "format", "isIntermediate", "name", "sha256", "size",
+    "fileSource", "uuid", "version", "matrixCellCount", "drs_uri", "url"
+  )
+  data.col.pattern <- paste0(data.cols, collapse = "|")
+  type.pattern <- paste0("(.*)\\.(", data.col.pattern, ")([0-9]*)")
+  # add col
+  df.unlist$type <- gsub(pattern = type.pattern, replacement = "\\2", x = df.unlist$meta)
+  df.unlist$num <- gsub(pattern = type.pattern, replacement = "\\3", x = df.unlist$meta)
+  df.unlist$meta <- gsub(pattern = type.pattern, replacement = "\\1", x = df.unlist$meta)
+  df.unlist$meta <- paste0(df.unlist$meta, ".", df.unlist$num)
+  df.final <- tidyr::spread(data = df.unlist[c("meta", "type", "value")], key = "type", value = "value")
+  return(df.final)
+}
