@@ -10,7 +10,7 @@
 * **Download fastq files** from `GEO/SRA`, **foramt fastq files** to standard style that can be identified by 10x softwares (e.g. CellRanger).
 * **Download bam files** from `GEO/SRA`, support **downloading original 10x generated bam files (with custom tags) and normal bam files**, and **convert bam files to fastq files**.
 * Download scRNA-seq **matrix** and **annotation (e.g. cell type)** information from `GEO`, `PanglanDB` and `UCSC Cell Browser`, **load the downnloaded matrix to `Seurat`**.
-* Download processed objects from `Zeenodo` and `CELLxGENE`.
+* Download processed objects from `Zeenodo`, `CELLxGENE` and `Human Cell Atlas`.
 * **Object conversion between widely used single cell objects** (`SeuratObject`, `AnnData`, `SingleCellExperiment`, `CellDataSet/cell_data_set` and `loom`).
 
 <hr />
@@ -120,13 +120,17 @@ Detailed usage is available in [website](https://showteeth.github.io/scfetch/).
     <td>Download UCSC Cell Browser datasets and load to Seurat</td>
   </tr>
   <tr>
-    <td rowspan="4">Download objects</td>
+    <td rowspan="8">Download objects</td>
     <td>ExtractZenodoMeta</td>
     <td>Extract sample metadata from Zenodo with DOIs</td>
   </tr>
   <tr>
     <td>ParseZenodo</td>
-    <td>Download rds/rdata/h5ad/matrix from Zenodo with DOIs</td>
+    <td>Download rds/rdata/h5ad/loom from Zenodo with DOIs</td>
+  </tr>
+  <tr>
+    <td>ShowCELLxGENEDatasets</td>
+    <td>Show all available datasets in CELLxGENE</td>
   </tr>
   <tr>
     <td>ExtractCELLxGENEMeta</td>
@@ -135,6 +139,18 @@ Detailed usage is available in [website](https://showteeth.github.io/scfetch/).
   <tr>
     <td>ParseCELLxGENE</td>
     <td>Download rds/h5ad from CELLxGENE</td>
+  </tr>
+  <tr>
+    <td>ShowHCAProjects</td>
+    <td>Show all available projects in Human Cell Atlas</td>
+  </tr>
+  <tr>
+    <td>ExtractHCAMeta</td>
+    <td>Extract metadata of Human Cell Atlas projects with attributes</td>
+  </tr>
+  <tr>
+    <td>ParseHCA</td>
+    <td>Download rds/rdata/h5/h5ad/loom from Human Cell Atlas</td>
   </tr>
   <tr>
     <td rowspan="4">Convert between different single-cell objects</td>
@@ -152,6 +168,11 @@ Detailed usage is available in [website](https://showteeth.github.io/scfetch/).
   <tr>
     <td>SCELoom</td>
     <td>Convert between SingleCellExperiment and loom</td>
+  </tr>
+  <tr>
+    <td rowspan="1">Summarize datasets based on attributes</td>
+    <td>StatDBAttribute</td>
+    <td>Summarize datasets in PandlaoDB, UCSC Cell Browser and CELLxGENE based on attributes</td>
   </tr>
 </tbody>
 </table>
