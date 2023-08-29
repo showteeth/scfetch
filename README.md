@@ -11,7 +11,7 @@
 * **Download bam files** from `GEO/SRA`, support **downloading original 10x generated bam files (with custom tags) and normal bam files**, and **convert bam files to fastq files**.
 * Download scRNA-seq **matrix** and **annotation (e.g. cell type)** information from `GEO`, `PanglanDB` and `UCSC Cell Browser`, **load the downnloaded matrix to `Seurat`**.
 * Download processed objects from `Zeenodo`, `CELLxGENE` and `Human Cell Atlas`.
-* **Object conversion between widely used single cell objects** (`SeuratObject`, `AnnData`, `SingleCellExperiment`, `CellDataSet/cell_data_set` and `loom`).
+* **Formats conversion between widely used single cell objects** (`SeuratObject`, `AnnData`, `SingleCellExperiment`, `CellDataSet/cell_data_set` and `loom`).
 
 <hr />
 
