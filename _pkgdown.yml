@@ -1,0 +1,29 @@
+destination: docs
+
+url: https://showteeth.github.io/scfetch/
+
+template:
+  bootstrap: 5
+  bootswatch: flatly
+
+navbar:
+  left:
+    - icon: fa-home fa-lg
+      href: index.html
+    - text: Articles
+      menu:
+      - text: Download fastq/bam files
+        href: articles/DownloadRaw.html
+      - text: Download count matrices
+        href: articles/DownloadMatrices.html
+      - text: Download processed objects
+        href: articles/DownloadObjects.html
+      - text: Convert formats between objects
+        href: articles/ObjectConversion.html
+    - text: Reference
+      href: reference/index.html
+    - text: Change log
+      href: news/index.html
+  right:
+    - icon: fa-github fa-lg
+      href: https://github.com/showteeth/scfetch
