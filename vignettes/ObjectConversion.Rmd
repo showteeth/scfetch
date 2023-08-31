@@ -20,6 +20,8 @@ There are many tools have been developed to process scRNA-seq data, such as [Sca
 ## Test data
 
 ```{r test_data}
+# library
+library(scfetch)
 library(Seurat) # pbmc_small
 library(scRNAseq) # seger
 ```
@@ -138,7 +140,7 @@ The conversion is performed with functions implemented in `sceasy`:
 ```{r anndata2seu}
 seu.obj.h5ad <- ImportSeurat(
   anndata.file = "/Users/soyabean/Desktop/tmp/scdown/conversion/pbmc_small.h5ad",
-  from = "AnnData", assay = "RNA"
+  from = "AnnData", assay = "RNA", conda.path = "/Applications/anaconda3"
 )
 seu.obj.h5ad
 ```

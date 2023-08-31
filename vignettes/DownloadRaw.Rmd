@@ -28,6 +28,9 @@ For fastq files stored in SRA, `scfetch` can extract sample information and run 
 
 Extract all samples under `GSE130636` and the platform is `GPL20301` (use `platform = NULL` for all platforms):
 ```{r prepare_run}
+# library
+library(scfetch)
+
 GSE130636.runs <- ExtractRun(acce = "GSE130636", platform = "GPL20301")
 head(GSE130636.runs)
 ```

@@ -56,6 +56,9 @@ Until now, the public resources supported and the returned results:
 `scfetch` provides `ExtractZenodoMeta` to extract dataset metadata, including dataset title, description, available files and corresponding md5. Please note that when the dataset is restricted access, the returned dataframe will be empty.
 
 ```{r zenodo_meta}
+# library
+library(scfetch)
+
 # single doi
 zebrafish.df <- ExtractZenodoMeta(doi = "10.5281/zenodo.7243603")
 head(zebrafish.df)

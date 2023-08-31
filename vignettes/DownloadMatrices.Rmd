@@ -1,5 +1,5 @@
 ---
-title: "DownloadProcessed"
+title: "DownloadMatrices"
 output: html_document
 date: "2023-07-23"
 ---
@@ -10,14 +10,13 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-`scfetch` provides functions for users to download processed single-cell RNA-seq data, such as **count matrix**, **cell type annotation and composition** and **RDS/RData/h5ad/h5/loom objects**. For count matrix, `scfetch` supports loading to `Seurat` after downloading.
+`scfetch` provides functions for users to download **count matrices** and **annotations** (e.g. cell type annotation and composition) from GEO and some single-cell databases (e.g. [PanglaoDB](https://panglaodb.se/index.html) and [UCSC Cell Browser](https://cells.ucsc.edu/?#)). `scfetch` also supports loading the downloaded data to `Seurat`.
 
 Until now, the public resources supported and the returned results:
 
 <table>
 <thead>
   <tr>
-    <th>Type</th>
     <th>Resources</th>
     <th>URL</th>
     <th>Download Type</th>
@@ -26,7 +25,6 @@ Until now, the public resources supported and the returned results:
 </thead>
 <tbody>
   <tr>
-    <td rowspan="3">Count matrices</td>
     <td>GEO</td>
     <td>https://www.ncbi.nlm.nih.gov/geo/</td>
     <td>count matrix</td>
@@ -44,43 +42,27 @@ Until now, the public resources supported and the returned results:
     <td>count matrix</td>
     <td>SeuratObject</td>
   </tr>
-  <tr>
-    <td rowspan="3">Objects</td>
-    <td>Zenodo</td>
-    <td>https://zenodo.org/</td>
-    <td>count matrix, rds, rdata, h5ad, et al.</td>
-    <td>NULL or failed datasets</td>
-  </tr>
-  <tr>
-    <td>CELLxGENE</td>
-    <td>https://cellxgene.cziscience.com/</td>
-    <td>rds, h5ad</td>
-    <td>NULL or failed datasets</td>
-  </tr>
-  <tr>
-    <td>Human Cell Atlas</td>
-    <td>https://www.humancellatlas.org/</td>
-    <td>rds, rdata, h5, h5ad, loom</td>
-    <td>NULL or failed projects</td>
-  </tr>
 </tbody>
 </table>
 
 <hr />
 
-## Count matrices
-
-### GEO
+## GEO
 
 [GEO is an international public repository that archives and freely distributes microarray, next-generation sequencing, and other forms of high-throughput functional genomics data submitted by the research community.](https://www.ncbi.nlm.nih.gov/geo/info/overview.html) It provides a very convenient way for users to explore and select interested scRNA-seq datasets. 
 
-#### Extract metadata
+### Extract metadata
 
 `scfetch` provides `ExtractGEOMeta` to extract sample metadata, including sample title, source name/tissue, description, cell type, treatment, paper title, paper abstract, organism, protocol, data processing methods, et al.
 
 ```{r geo_meta}
+# library
+library(scfetch)
+
 # extract metadata of specified platform
 GSE200257.meta <- ExtractGEOMeta(acce = "GSE200257", platform = "GPL24676")
+# set VROOM_CONNECTION_SIZE to avoid error: Error: The size of the connection buffer (786432) was not large enough
+Sys.setenv("VROOM_CONNECTION_SIZE"=131072*60)
 # extract metadata of all platforms
 GSE94820.meta <- ExtractGEOMeta(acce = "GSE94820", platform = NULL)
 head(GSE94820.meta)
@@ -88,7 +70,7 @@ head(GSE94820.meta)
 
 <hr />
 
-#### Download matrix and load to Seurat
+### Download matrix and load to Seurat
 
 After manually check the extracted metadata, users can **download count matrix** and **load the count matrix** to Seurat with `ParseGEO`. 
 
@@ -115,13 +97,13 @@ tree /Users/soyabean/Desktop/tmp/scdown/dwonload_geo
 
 <hr />
 
-### PanglaoDB
+## PanglaoDB
 
 [PanglaoDB](https://panglaodb.se/index.html) is a database which contains scRNA-seq datasets from mouse and human. Up to now, it contains **5,586,348 cells** from **1368 datasets (1063 from Mus musculus and 305 from	Homo sapiens)**. It has well organized metadata for every dataset, including tissue, protocol, species, number of cells and cell type annotation (computationally identified). Daniel Osorio has developed [rPanglaoDB](https://github.com/dosorio/rPanglaoDB/) to access [PanglaoDB](https://panglaodb.se/index.html) data, the functions of `scfetch` here are based on [rPanglaoDB](https://github.com/dosorio/rPanglaoDB/).
 
 Since [PanglaoDB](https://panglaodb.se/about.html) is no longer maintained, `scfetch` has cached all metadata and cell type composition and use these cached data by default to accelerate, users can access the cached data with `PanglaoDBMeta` (all metadata) and `PanglaoDBComposition` (all cell type composition).
 
-#### Summary attributes
+### Summary attributes
 
 `scfetch` provides `StatDBAttribute` to summary attributes of [PanglaoDB](https://panglaodb.se/index.html):
 
@@ -132,7 +114,7 @@ StatDBAttribute(df = PanglaoDBMeta, filter = c("species", "protocol"), database 
 
 <hr />
 
-#### Extract metadata
+### Extract metadata
 
 `scfetch` provides `ExtractPanglaoDBMeta` to select interested datasets with specified **species**, **protocol**, **tissue** and **cell number** (The available values of these attributes can be obtained with `StatDBAttribute`). User can also choose to whether to add cell type annotation to every dataset with `show.cell.type`.
 
@@ -145,7 +127,7 @@ head(hsa.meta)
 
 <hr />
 
-#### Extract cell type composition
+### Extract cell type composition
 
 `scfetch` provides `ExtractPanglaoDBComposition` to extract cell type annotation and composition (use cached data by default to accelerate, users can change this by setting `local.data = FALSE`).
 
@@ -156,7 +138,7 @@ head(hsa.composition)
 
 <hr />
 
-#### Download matrix and load to Seurat
+### Download matrix and load to Seurat
 
 After manually check the extracted metadata, `scfetch` provides `ParsePanglaoDB` to **download count matrix** and **load the count matrix** to Seurat. With available cell type annotation, uses can filter datasets without specified cell type with `cell.type`. Users can also include/exclude cells expressing specified genes with `include.gene`/`exclude.gene`. 
 
@@ -168,11 +150,11 @@ hsa.seu <- ParsePanglaoDB(hsa.meta, merge = TRUE)
 
 <hr />
 
-### UCSC Cell Browser
+## UCSC Cell Browser
 
 The [UCSC Cell Browser](https://cells.ucsc.edu/?#) is a web-based tool that allows scientists to interactively visualize scRNA-seq datasets. It contains **1040 single cell datasets** from **17 different species**. And, it is **organized with the hierarchical structure**, which can help users quickly locate the datasets they are interested in.
 
-#### Show available datasets
+### Show available datasets
 
 `scfetch` provides `ShowCBDatasets` to show all available datasets. Due to the large number of datasets, `ShowCBDatasets` enables users to perform *lazy load* of dataset json files instead of downloading the json files online (time-consuming!!!). This *lazy load* requires users to provide `json.folder` to save json files and set `lazy = TRUE` (for the first time of run, `ShowCBDatasets` will download current json files to `json.folder`, for next time of run, with `lazy = TRUE`, `ShowCBDatasets` will load the downloaded json files from `json.folder`.). And, `ShowCBDatasets` supports updating the local datasets with `update = TRUE`.
 
@@ -202,7 +184,7 @@ unique(unlist(sapply(unique(gsub(pattern = "\\|parent", replacement = "", x = uc
 
 <hr />
 
-#### Summary attributes
+### Summary attributes
 
 `scfetch` provides `StatDBAttribute` to summary attributes of [UCSC Cell Browser](https://cells.ucsc.edu/?#):
 
@@ -212,7 +194,7 @@ StatDBAttribute(df = ucsc.cb.samples, filter = c("organism", "organ"), database 
 
 <hr />
 
-#### Extract metadata
+### Extract metadata
 
 `scfetch` provides `ExtractCBDatasets` to filter metadata with **collection**, **sub-collection**, **organ**, **disease status**, **organism**, **project** and **cell number** (The available values of these attributes can be obtained with `StatDBAttribute` except **cell number**). All attributes except cell number support fuzzy match with `fuzzy.match`, this is useful when selecting datasets.
 
@@ -223,7 +205,7 @@ head(hbb.sample.df)
 
 <hr />
 
-#### Extract cell type composition
+### Extract cell type composition
 
 `scfetch` provides `ExtractCBComposition` to extract cell type annotation and composition.
 
@@ -234,7 +216,7 @@ head(hbb.sample.ct)
 
 <hr />
 
-#### Load the online datasets to Seurat
+### Load the online datasets to Seurat
 
 After manually check the extracted metadata, `scfetch` provides `ParseCBDatasets` to **load the online count matrix** to Seurat. All the attributes available in `ExtractCBDatasets` are also same here. Please note that the loading process provided by `ParseCBDatasets` will load the online count matrix instead of downloading it to local. If multiple datasets available, users can choose to merge the SeuratObject with `merge`.
 
@@ -243,173 +225,3 @@ hbb.sample.seu <- ParseCBDatasets(sample.df = hbb.sample.df)
 ```
 
 <hr />
-
-## Objects
-
-### Zenodo
-
-Different from above resources which mainly contains count matrix, [Zenodo](https://zenodo.org/) mainly contains processed objects, such as `SeuratObject` which has been clustered and annotated, `AnnData` which contains processed results generated by `scanpy`.
-
-#### Extract metadata
-
-`scfetch` provides `ExtractZenodoMeta` to extract dataset metadata, including dataset title, description, available files and corresponding md5. Please note that when the dataset is restricted access, the returned dataframe will be empty.
-
-```{r zenodo_meta}
-# single doi
-zebrafish.df <- ExtractZenodoMeta(doi = "10.5281/zenodo.7243603")
-head(zebrafish.df)
-
-# vector dois
-multi.dois <- ExtractZenodoMeta(doi = c("1111", "10.5281/zenodo.7243603", "10.5281/zenodo.7244441"))
-head(multi.dois)
-```
-
-<hr />
-
-#### Download object
-
-After manually check the extracted metadata, users can **download the specified objects** with `ParseZenodo`. The downloaded objects are controlled by `file.ext` and **the provided object formats should be in lower case (e.g. rds/rdata/h5ad).**
-
-The returned result is a dataframe containing failed objects. If not `NULL`, users can re-run `ParseZenodo` by setting `doi.df` to the returned result.
-
-```{r zenodo_parse, eval=FALSE}
-multi.dois.parse <- ParseZenodo(
-  doi = c("1111", "10.5281/zenodo.7243603", "10.5281/zenodo.7244441"),
-  file.ext = c("rdata", "rds"), out.folder = "/Users/soyabean/Desktop/tmp/scdown/download_zenodo"
-)
-```
-
-The structure of downloaded objects:
-```{bash zenodo_parse_structure}
-tree /Users/soyabean/Desktop/tmp/scdown/download_zenodo
-```
-
-<hr />
-
-### CELLxGENE
-
-The [CELLxGENE](https://cellxgene.cziscience.com/) is a web server contains **910** single-cell datasets, users can explore, download and upload own datasets. The downloaded datasets provided by [CELLxGENE](https://cellxgene.cziscience.com/) have two formats: `h5ad (AnnData v0.8)` and `rds (Seurat v4)`.
-
-#### Show available datasets
-
-`scfetch` provides `ShowCELLxGENEDatasets` to extract dataset metadata, including dataset title, description, contact, organism, ethnicity, sex, tissue, disease, assay, suspension type, cell type, et al.
-
-```{r cellxgene_all}
-# all available datasets
-all.cellxgene.datasets <- ShowCELLxGENEDatasets()
-```
-
-<hr />
-
-#### Summary attributes
-
-`scfetch` provides `StatDBAttribute` to summary attributes of [CELLxGENE](https://cellxgene.cziscience.com/):
-
-```{r cellxgene_summary}
-StatDBAttribute(df = all.cellxgene.datasets, filter = c("organism", "sex"), database = "CELLxGENE")
-```
-
-<hr />
-
-#### Extract metadata
-
-`scfetch` provides `ExtractCELLxGENEMeta` to filter dataset metadata, the available values of attributes can be obtained with `StatDBAttribute` except **cell number**:
-
-```{r cellxgene_meta}
-# human 10x v2 and v3 datasets
-human.10x.cellxgene.meta <- ExtractCELLxGENEMeta(
-  all.samples.df = all.cellxgene.datasets,
-  assay = c("10x 3' v2", "10x 3' v3"), organism = "Homo sapiens"
-)
-head(human.10x.cellxgene.meta)
-```
-
-<hr />
-
-#### Download object
-
-After manually check the extracted metadata, users can **download the specified objects** with `ParseCELLxGENE`. The downloaded objects are controlled by `file.ext` (choose from `"rds"` and `"h5ad"`).
-
-The returned result is a dataframe containing failed datasets. If not `NULL`, users can re-run `ParseCELLxGENE` by setting `meta` to the returned result.
-
-```{r cellxgene_parse, eval=FALSE}
-ParseCELLxGENE(
-  meta = human.10x.cellxgene.meta[1:5, ], file.ext = "rds",
-  out.folder = "/Users/soyabean/Desktop/tmp/scdown/download_cellxgene"
-)
-```
-
-The structure of downloaded objects:
-```{bash cellxgene_parse_structure}
-tree /Users/soyabean/Desktop/tmp/scdown/download_cellxgene
-```
-
-<hr />
-
-### Human Cell Atlas
-
-[Human Cell Atlas](https://www.humancellatlas.org/) aims to map every cell type in the human body, it contains **397 projects**, most of which are from `Homo sapiens` (also includes projects from `Mus musculus`, `Macaca mulatta` and `canis lupus familiaris`).
-
-#### Show available datasets
-
-`scfetch` provides `ShowHCAProjects` to extract detailed project metadata, including project title, description, organism, sex, organ/organPart, disease, assay, preservation method, sample type, suspension type, cell type, development stage, et al.
-
-There are **397 unique projects** under *five different catalogs (`dcp29`, `dcp30`, `dcp1`, `lm2`, `lm3`)*:
-
-```{r hca_all}
-all.hca.projects <- ShowHCAProjects()
-head(all.hca.projects)
-```
-
-<hr />
-
-#### Summary attributes
-
-`scfetch` provides `StatDBAttribute` to summary attributes of [Human Cell Atlas](https://www.humancellatlas.org/):
-
-```{r hca_summary}
-StatDBAttribute(df = all.hca.projects, filter = c("organism", "sex"), database = "HCA")
-```
-
-<hr />
-
-#### Extract metadata
-
-`scfetch` provides `ExtractHCAMeta` to filter projects metadata, the available values of attributes can be obtained with `StatDBAttribute` except **cell number**:
-
-```{r hca_meta}
-# human 10x v2 and v3 datasets
-hca.human.10x.projects <- ExtractHCAMeta(
-  all.projects.df = all.hca.projects, organism = "Homo sapiens",
-  protocol = c("10x 3' v2", "10x 3' v3")
-)
-head(hca.human.10x.projects)
-```
-
-<hr />
-
-#### Download object
-
-After manually check the extracted metadata, users can **download the specified objects** with `ParseHCA`. The downloaded objects are controlled by `file.ext` (choose from `"rds"`, `"rdata"`, `"h5"`, `"h5ad"` and `"loom"`).
-
-The returned result is a dataframe containing failed projects. If not `NULL`, users can re-run `ParseHCA` by setting `meta` to the returned result.
-
-```{r hca_parse, eval=FALSE}
-# no-run
-ParseHCA(
-  meta = all.human.10x.projects,
-  out.folder = "/Users/soyabean/Desktop/tmp/scdown/download_hca"
-)
-```
-
-The example structure of downloaded objects:
-```{bash hca_parse_structure}
-tree /Users/soyabean/Desktop/tmp/scdown/download_hca
-```
-
-<hr />
-
-
-
-
-
