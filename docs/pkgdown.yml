@@ -1,0 +1,13 @@
+pandoc: 2.19.2
+pkgdown: 2.0.7
+pkgdown_sha: ~
+articles:
+  DownloadMatrices: DownloadMatrices.html
+  DownloadObjects: DownloadObjects.html
+  DownloadRaw: DownloadRaw.html
+  ObjectConversion: ObjectConversion.html
+last_built: 2023-08-30T17:57Z
+urls:
+  reference: https://showteeth.github.io/scfetch/reference
+  article: https://showteeth.github.io/scfetch/articles
+
