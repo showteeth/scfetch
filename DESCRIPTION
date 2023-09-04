@@ -41,6 +41,10 @@ Imports:
     SeuratWrappers,
     zellkonverter,
     SingleCellExperiment
+Remotes: 
+    cellgeni/sceasy,
+    mojaveazure/seurat-disk,
+    satijalab/seurat-wrappers
 Suggests: 
     knitr,
     rmarkdown,
