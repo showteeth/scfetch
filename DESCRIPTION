@@ -40,7 +40,9 @@ Imports:
     SeuratDisk,
     SeuratWrappers,
     zellkonverter,
-    SingleCellExperiment
+    SingleCellExperiment,
+    SummarizedExperiment,
+    scater
 Remotes: 
     cellgeni/sceasy,
     mojaveazure/seurat-disk,
