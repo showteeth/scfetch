@@ -65,8 +65,12 @@ ExportSeurat <- function(seu.obj, assay = NULL, reduction = NULL,
   } else if (to == "CellDataSet") {
     message("Convert SeuratObject to CellDataSet (suitable for Monocle)!")
     result.obj <- Seurat::as.CellDataSet(x = seu.obj, assay = assay, reduction = reduction, ...)
-    # # bug of as.CellDataSet: the dimension is transposed
-    # result.obj@reducedDimS <- t(result.obj@reducedDimS)
+    if (tolower(reduction) != "tsne") {
+      # tsne stored in reducedDimA, others stored in reducedDimS and transposed
+      # bug of as.CellDataSet: the dimension is transposed
+      # https://github.com/satijalab/seurat/blob/57564e282a1ba54c655192d907d83df21164dc78/R/objects.R#L851
+      result.obj@reducedDimS <- t(result.obj@reducedDimS)
+    }
     return(result.obj)
   } else if (to == "cell_data_set") {
     message("Convert SeuratObject to cell_data_set (suitable for Monocle3)!")
@@ -80,7 +84,7 @@ ExportSeurat <- function(seu.obj, assay = NULL, reduction = NULL,
     message("Convert SeuratObject to loom!")
     # prepare loom file
     if (is.null(loom.file)) {
-      warning("You do not provide anndata file, generate automatically in current working directory!")
+      warning("You do not provide loom file, generate automatically in current working directory!")
       seu.name <- deparse(substitute(seu.obj))
       loom.file <- file.path(getwd(), paste0(seu.name, ".loom"))
     }

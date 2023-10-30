@@ -18,6 +18,7 @@
 * Added `catalog` in `ShowHCAProjects`.
 * Fixed bug in `ParseCELLxGENE` and returned failed dataframe when downloading error.
 * Fixed bug in `ImportSeurat`.
+* Fixed bug in `ExportSeurat`.
 
 -------------------
 
