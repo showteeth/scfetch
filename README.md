@@ -32,7 +32,7 @@ You can install the development version of `scfetch` from [GitHub](https://githu
 devtools::install_github("showteeth/scfetch")
 ```
 
-**For issues about installation, please refer [./INSTALL.md].**
+**For issues about installation, please refer [Installation guide](./INSTALL.md).**
 
 For data structures conversion, `scfetch` requires several python pcakages, you can install with:
 
