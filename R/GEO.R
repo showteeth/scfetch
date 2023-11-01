@@ -3,7 +3,7 @@
 #' @param acce GEO accession number.
 #' @param platform Platform information/field. Disable when \code{down.supp} is TRUE. Default: NULL (disable).
 #' @param down.supp Logical value, whether to download supplementary files to create count matrix. If TRUE, always
-#' download supplementary files. If FALSE, use \code{ExpressionSet} (If contains non-integer or emoty,
+#' download supplementary files. If FALSE, use \code{ExpressionSet} (If contains non-integer or empty,
 #' download supplementary files automatically). Default: FALSE.
 #' @param supp.idx The index of supplementary files to download. This should be consistent with \code{platform}. Default: 1.
 #' @param timeout Timeout for \code{\link{download.file}}. Default: 3600.

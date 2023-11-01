@@ -42,11 +42,13 @@ Imports:
     zellkonverter,
     SingleCellExperiment,
     SummarizedExperiment,
-    scater
+    scater,
+    LoomExperiment
 Remotes: 
     cellgeni/sceasy,
     mojaveazure/seurat-disk,
-    satijalab/seurat-wrappers
+    satijalab/seurat-wrappers,
+    alexvpickering/GEOfastq
 Suggests: 
     knitr,
     rmarkdown,
