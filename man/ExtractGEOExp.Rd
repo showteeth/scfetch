@@ -43,6 +43,7 @@ Extract Raw Count Matrix or Fortmat Supplementary Files to 10x.
 }
 \examples{
 # pf.obj = GEOobj(acce = "GSE200257", platform = "GPL24676")
-# count.mat = ExtractGEOExp(pf.obj, acce = "GSE200257", supp.idx = 1, down.supp = TRUE, supp.type = "10x",
+# count.mat = ExtractGEOExp(pf.obj, acce = "GSE200257", supp.idx = 1,
+#                           down.supp = TRUE, supp.type = "10x",
 #                           out.folder = "/path/to/output/folder")
 }

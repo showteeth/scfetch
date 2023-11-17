@@ -128,7 +128,8 @@ ShowCELLxGENEDatasets <- function() {
 #' # # all available datasets
 #' # all.cellxgene.datasets = ShowCELLxGENEDatasets()
 #' # # human 10x v2 and v3 datasets
-#' # human.10x.cellxgene.meta = ExtractCELLxGENEMeta(all.samples.df = all.cellxgene.datasets, assay = c("10x 3' v2", "10x 3' v3"),
+#' # human.10x.cellxgene.meta = ExtractCELLxGENEMeta(all.samples.df = all.cellxgene.datasets,
+#' #                                                 assay = c("10x 3' v2", "10x 3' v3"),
 #' #                                                 organism = "Homo sapiens")
 ExtractCELLxGENEMeta <- function(all.samples.df, organism = NULL, ethnicity = NULL, sex = NULL, tissue = NULL, disease = NULL,
                                  assay = NULL, suspension.type = NULL, cell.type = NULL, cell.num = NULL) {
@@ -184,7 +185,8 @@ ExtractCELLxGENEMeta <- function(all.samples.df, organism = NULL, ethnicity = NU
 #' # # all available datasets
 #' # all.cellxgene.datasets = ShowCELLxGENEDatasets()
 #' # # human 10x v2 and v3 datasets
-#' # human.10x.cellxgene.meta = ExtractCELLxGENEMeta(all.samples.df = all.cellxgene.datasets, assay = c("10x 3' v2", "10x 3' v3"),
+#' # human.10x.cellxgene.meta = ExtractCELLxGENEMeta(all.samples.df = all.cellxgene.datasets,
+#' #                                                 assay = c("10x 3' v2", "10x 3' v3"),
 #' #                                                 organism = "Homo sapiens")
 #' # # download
 #' # ParseCELLxGENE(meta = human.10x.cellxgene.meta, out.folder = "/path/to/output")

@@ -2,7 +2,7 @@
 mergeExperiments <- function(experimentList) {
   for (i in seq_along(experimentList)[-1]) {
     experimentList[[1]] <- suppressWarnings(merge(experimentList[[1]], experimentList[[i]]))
-    experimentList[[i]] <- new("Seurat")
+    experimentList[[i]] <- methods::new("Seurat")
   }
   experimentList <- experimentList[[1]]
   return(experimentList)
@@ -263,7 +263,7 @@ Read10XOnline <- function(matrix.url, barcode.url, feature.url, gene.column = 2,
   if (ncol(x = feature.names) > 2) {
     data_types <- factor(x = feature.names$V3)
     lvls <- levels(x = data_types)
-    if (length(x = lvls) > 1 && length(x = full.data) == 0) {
+    if (length(x = lvls) > 1) {
       message("10X data contains more than one type and is being returned as a list containing matrices of each type.")
     }
     expr_name <- "Gene Expression"

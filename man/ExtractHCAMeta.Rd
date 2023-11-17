@@ -71,7 +71,8 @@ Extract Metadata of Human Cell Atlas Projects with Attributes.
 # # all human projects
 # all.human.projects = ExtractHCAMeta(all.projects.df = all.hca.projects, organism = "Homo sapiens")
 # # all human and 10x 3' v2
-# all.human.10x.projects = ExtractHCAMeta(all.projects.df = all.hca.projects,  organism = "Homo sapiens",
+# all.human.10x.projects = ExtractHCAMeta(all.projects.df = all.hca.projects,
+#                                         organism = "Homo sapiens",
 #                                         protocol = c("10x 3' v2", "10x 3' v3"))
 }
 \references{

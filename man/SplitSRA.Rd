@@ -49,7 +49,8 @@ Split SRA to fastq Files and Format to 10x Standard Style.
 # GSE186003.runs = ExtractRun(acce = "GSE186003", platform = "GPL24247")
 # GSE186003.down = DownloadSRA(gsm.df = GSE186003.runs, prefetch.path = "/path/to/prefetch",
 #                              out.folder = "/path/to/output")
-# GSE186003.split = SplitSRA(sra.folder = "/path/to/output", split.cmd.path = "/path/to/parallel-fastq-dump",
+# GSE186003.split = SplitSRA(sra.folder = "/path/to/output",
+#                            split.cmd.path = "/path/to/parallel-fastq-dump",
 #                            sratools.path = "/path/to/sra/bin", fastq.type = "10x",
 #                            split.cmd.threads = 4)
 }

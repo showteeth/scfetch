@@ -12,10 +12,13 @@
 #' @importFrom magrittr %>%
 #' @importFrom rPanglaoDB getSampleList getSampleComposition
 #' @importFrom dplyr filter
+#' @importFrom rlang .data
 #' @export
 #'
 #' @examples
-#' # human.meta = ExtractPanglaoDBMeta(species = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"), cell.num = c(1000,2000))
+#' # human.meta = ExtractPanglaoDBMeta(species = "Homo sapiens",
+#' #                                   protocol = c("Smart-seq2", "10x chromium"),
+#' #                                   cell.num = c(1000,2000))
 ExtractPanglaoDBMeta <- function(species = NULL, protocol = NULL, tissue = NULL, cell.num = NULL, show.cell.type = TRUE, local.data = TRUE) {
   # get all sample metadata
   if (local.data) {
@@ -37,7 +40,7 @@ ExtractPanglaoDBMeta <- function(species = NULL, protocol = NULL, tissue = NULL,
       warning("Please provide valid species! The returned dataframe contains metadata without species filtering, please check!")
       used.meta <- all.meta
     } else {
-      used.meta <- all.meta %>% dplyr::filter(Species %in% valid.species)
+      used.meta <- all.meta %>% dplyr::filter(.data[["Species"]] %in% valid.species)
     }
   } else {
     used.meta <- all.meta
@@ -48,7 +51,7 @@ ExtractPanglaoDBMeta <- function(species = NULL, protocol = NULL, tissue = NULL,
     if (length(valid.protocol) == 0) {
       warning("Please provide valid protocol! The returned dataframe contains metadata without protocol filtering, please check!")
     } else {
-      used.meta <- used.meta %>% dplyr::filter(Protocol %in% valid.protocol)
+      used.meta <- used.meta %>% dplyr::filter(.data[["Protocol"]] %in% valid.protocol)
     }
   }
   # test tissue
@@ -57,7 +60,7 @@ ExtractPanglaoDBMeta <- function(species = NULL, protocol = NULL, tissue = NULL,
     if (length(valid.tissue) == 0) {
       warning("Please provide valid tissue! The returned dataframe contains metadata without tissue filtering, please check!")
     } else {
-      used.meta <- used.meta %>% dplyr::filter(Tissue %in% valid.tissue)
+      used.meta <- used.meta %>% dplyr::filter(.data[["Tissue"]] %in% valid.tissue)
     }
   }
   used.meta$CellNum <- as.numeric(gsub(pattern = ",", replacement = "", x = used.meta$Cells))
@@ -65,11 +68,11 @@ ExtractPanglaoDBMeta <- function(species = NULL, protocol = NULL, tissue = NULL,
   if (is.null(cell.num)) {
     used.meta <- used.meta
   } else if (length(cell.num) == 1) {
-    used.meta <- used.meta %>% dplyr::filter(CellNum > cell.num)
+    used.meta <- used.meta %>% dplyr::filter(.data[["CellNum"]] > cell.num)
   } else {
     used.meta <- used.meta %>%
-      dplyr::filter(CellNum > as.numeric(cell.num[1])) %>%
-      dplyr::filter(CellNum < as.numeric(cell.num[2]))
+      dplyr::filter(.data[["CellNum"]] > as.numeric(cell.num[1])) %>%
+      dplyr::filter(.data[["CellNum"]] < as.numeric(cell.num[2]))
   }
   # get sample cell type
   if (!local.data) {
@@ -118,7 +121,8 @@ ExtractPanglaoDBMeta <- function(species = NULL, protocol = NULL, tissue = NULL,
 #' @export
 #'
 #' @examples
-#' # human.composition = ExtractPanglaoDBComposition(species = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"))
+#' # human.composition = ExtractPanglaoDBComposition(species = "Homo sapiens",
+#' #                                                 protocol = c("Smart-seq2", "10x chromium"))
 ExtractPanglaoDBComposition <- function(sra = NULL, srs = NULL, species = NULL, protocol = NULL, tissue = NULL, local.data = TRUE) {
   if (local.data) {
     select.compos <- PanglaoDBComposition
@@ -174,10 +178,14 @@ ExtractPanglaoDBComposition <- function(sra = NULL, srs = NULL, species = NULL, 
 #' @importFrom Matrix rowSums colMeans
 #' @importFrom Seurat CreateSeuratObject
 #' @importFrom utils read.table
+#' @importFrom rlang .data
+#' @importFrom methods new
+#'
 #' @export
 #'
 #' @examples
-#' # hsa.meta = ExtractPanglaoDBMeta(species = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"),
+#' # hsa.meta = ExtractPanglaoDBMeta(species = "Homo sapiens",
+#' #                                 protocol = c("Smart-seq2", "10x chromium"),
 #' #                                 show.cell.type = TRUE, cell.num = c(1000,2000))
 #' # hsa.seu = ParsePanglaoDB(hsa.meta, merge = TRUE)
 ParsePanglaoDB <- function(meta, cell.type = "All", include.gene = NA, exclude.gene = NA, merge = FALSE) {
@@ -185,8 +193,8 @@ ParsePanglaoDB <- function(meta, cell.type = "All", include.gene = NA, exclude.g
   CheckColumns(df = meta, columns = c("SRA", "SRS", "Tissue", "Protocol", "Species"))
 
   # split meta to save time
-  meta.normal <- meta %>% dplyr::filter(SRS != "notused")
-  meta.abnormal <- meta %>% dplyr::filter(SRS == "notused")
+  meta.normal <- meta %>% dplyr::filter(.data[["SRS"]] != "notused")
+  meta.abnormal <- meta %>% dplyr::filter(.data[["SRS"]] == "notused")
 
   # get Seurat object
   ## normal

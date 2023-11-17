@@ -50,11 +50,13 @@ Convert Other Formats to SeuratObject.
 }
 \examples{
 # import data from SingleCellExperiment
-# seu.obj = ImportSeurat(obj=sce.obj, from="SCE", count.assay="counts", data.assay="logcounts", assay="RNA")
+# seu.obj = ImportSeurat(obj=sce.obj, from="SCE", count.assay="counts",
+#                        data.assay="logcounts", assay="RNA")
 # import data from CellDataSet
 # seu.obj = ImportSeurat(obj=cds.obj, from="CellDataSet", count.assay="counts", assay = "RNA")
 # import data from cell_data_set
-# seu.obj = ImportSeurat(obj=sce.obj, from="cell_data_set", count.assay="counts", data.assay="logcounts", assay="RNA")
+# seu.obj = ImportSeurat(obj=sce.obj, from="cell_data_set", count.assay="counts",
+#                        data.assay="logcounts", assay="RNA")
 # import data from AnnData
 # seu.obj = ImportSeurat(anndata.file = 'path/to/h5ad', from="AnnData", assay = "RNA")
 # import data from loom

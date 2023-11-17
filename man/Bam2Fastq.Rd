@@ -43,6 +43,7 @@ Convert bam files to fastq files.
 # GSE138266.runs = ExtractRun(acce = "GSE138266", platform = "GPL18573")
 # GSE138266.down = DownloadBam(gsm.df = GSE138266.runs, prefetch.path = "/path/to/prefetch",
 #                              out.folder = "/path/to/output")
-# GSE138266.convert = Bam2Fastq(bam.folder = "/path/to/output", bamtofastq.path = "/path/to/bamtofastq_linux or samtools",
+# GSE138266.convert = Bam2Fastq(bam.folder = "/path/to/output",
+#                               bamtofastq.path = "/path/to/bamtofastq_linux or samtools",
 #                               bamtofastq.paras = "--nthreads 4")
 }

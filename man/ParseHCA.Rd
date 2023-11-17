@@ -17,6 +17,9 @@ ParseHCA(
 \item{meta}{Metadata used to download, can be from \code{ExtractHCAMeta},
 should contain entryId and name catalog.}
 
+\item{file.ext}{The valid file extension for download. When NULL, use "rds", "rdata", "h5", "h5ad", "loom".
+Default: c("rds", "rdata", "h5", "h5ad", "loom").}
+
 \item{out.folder}{The output folder. Default: NULL (current working directory).}
 
 \item{timeout}{Maximum request time. Default: 3600.}
@@ -25,9 +28,6 @@ should contain entryId and name catalog.}
 
 \item{parallel}{Logical value, whether to download parallelly. Default: TRUE. When "libcurl" is available for \code{download.file},
 the parallel is done by default (\code{parallel} can be FALSE).}
-
-\item{file.ext.}{The valid file extension for download. When NULL, use "rds", "rdata", "h5", "h5ad", "loom".
-Default: c("rds", "rdata", "h5", "h5ad", "loom").}
 }
 \value{
 Dataframe contains failed projects or NULL.
@@ -39,7 +39,8 @@ Download Human Cell Atlas Datasets.
 # # all available projects
 # all.hca.projects = ShowHCAProjects()
 # # all human and 10x 3' v2
-# all.human.10x.projects = ExtractHCAMeta(all.projects.df = all.hca.projects,  organism = "Homo sapiens",
+# all.human.10x.projects = ExtractHCAMeta(all.projects.df = all.hca.projects,
+#                                         organism = "Homo sapiens",
 #                                         protocol = c("10x 3' v2", "10x 3' v3"))
 # # download
 # ParseHCA(meta = all.human.10x.projects, out.folder = "/path/to/output")

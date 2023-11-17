@@ -58,7 +58,8 @@ Extract Metadata of CELLxGENE Datasets with Attributes.
 # # all available datasets
 # all.cellxgene.datasets = ShowCELLxGENEDatasets()
 # # human 10x v2 and v3 datasets
-# human.10x.cellxgene.meta = ExtractCELLxGENEMeta(all.samples.df = all.cellxgene.datasets, assay = c("10x 3' v2", "10x 3' v3"),
+# human.10x.cellxgene.meta = ExtractCELLxGENEMeta(all.samples.df = all.cellxgene.datasets,
+#                                                 assay = c("10x 3' v2", "10x 3' v3"),
 #                                                 organism = "Homo sapiens")
 }
 \references{

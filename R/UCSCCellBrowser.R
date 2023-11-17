@@ -12,6 +12,7 @@
 #' @importFrom data.table rbindlist
 #' @importFrom dplyr select filter mutate starts_with
 #' @importFrom utils download.file
+#' @importFrom rlang .data
 #' @export
 #'
 #' @examples
@@ -79,10 +80,10 @@ ShowCBDatasets <- function(lazy = TRUE, json.folder = NULL, update = FALSE, quie
   # remove unused columns
   all.samples.df <- all.samples.df %>% dplyr::select(-c("md5", "hasFiles", "isCollection", "datasetCount", "collectionCount"))
   # add label
-  all.samples.df.single <- all.samples.df %>% dplyr::filter(!grepl(x = name, pattern = "/"))
+  all.samples.df.single <- all.samples.df %>% dplyr::filter(!grepl(x = .data[["name"]], pattern = "/"))
   all.samples.df.multi <- all.samples.df %>%
-    dplyr::filter(grepl(x = name, pattern = "/")) %>%
-    dplyr::mutate(parent = gsub(pattern = "([^/]*).*", replacement = "\\1", x = name))
+    dplyr::filter(grepl(x = .data[["name"]], pattern = "/")) %>%
+    dplyr::mutate(parent = gsub(pattern = "([^/]*).*", replacement = "\\1", x = .data[["name"]]))
   all.datasets.df.multi <- all.datasets.df[!is.na(all.datasets.df$isCollection), c("shortLabel", "name", "tags", "organisms", "body_parts", "diseases", "projects")]
   colnames(all.datasets.df.multi) <- gsub(pattern = "^", replacement = "parent_", x = colnames(all.datasets.df.multi))
   all.samples.df.multi <- merge(all.samples.df.multi, all.datasets.df.multi, by.y = "parent_name", by.x = "parent")
@@ -311,6 +312,7 @@ ExtractCBComposition <- function(json.folder = NULL, sample.df = NULL, all.sampl
 #' @importFrom purrr reduce
 #' @importFrom tibble column_to_rownames
 #' @importFrom Matrix readMM
+#' @importFrom methods new
 #' @export
 #'
 #' @examples

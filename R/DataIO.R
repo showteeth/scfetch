@@ -121,11 +121,13 @@ ExportSeurat <- function(seu.obj, assay = NULL, reduction = NULL,
 #'
 #' @examples
 #' # import data from SingleCellExperiment
-#' # seu.obj = ImportSeurat(obj=sce.obj, from="SCE", count.assay="counts", data.assay="logcounts", assay="RNA")
+#' # seu.obj = ImportSeurat(obj=sce.obj, from="SCE", count.assay="counts",
+#' #                        data.assay="logcounts", assay="RNA")
 #' # import data from CellDataSet
 #' # seu.obj = ImportSeurat(obj=cds.obj, from="CellDataSet", count.assay="counts", assay = "RNA")
 #' # import data from cell_data_set
-#' # seu.obj = ImportSeurat(obj=sce.obj, from="cell_data_set", count.assay="counts", data.assay="logcounts", assay="RNA")
+#' # seu.obj = ImportSeurat(obj=sce.obj, from="cell_data_set", count.assay="counts",
+#' #                        data.assay="logcounts", assay="RNA")
 #' # import data from AnnData
 #' # seu.obj = ImportSeurat(anndata.file = 'path/to/h5ad', from="AnnData", assay = "RNA")
 #' # import data from loom
@@ -238,7 +240,8 @@ ImportSeurat <- function(obj = NULL, assay = "RNA", from = c("SCE", "AnnData", "
 #' # library(scRNAseq)
 #' # seger <- SegerstolpePancreasData()
 #' # SCEAnnData(from = "SingleCellExperiment", to = "AnnData", sce = seger, X_name = "counts")
-#' # sce = SCEAnnData(from = "AnnData", to = "SingleCellExperiment", anndata.file = "path/to/seger.h5ad")
+#' # sce = SCEAnnData(from = "AnnData", to = "SingleCellExperiment",
+#' #                  anndata.file = "path/to/seger.h5ad")
 SCEAnnData <- function(from = c("SingleCellExperiment", "AnnData"),
                        to = c("AnnData", "SingleCellExperiment"),
                        sce = NULL, anndata.file = NULL, slot.name = "counts", ...) {
@@ -293,6 +296,7 @@ SCEAnnData <- function(from = c("SingleCellExperiment", "AnnData"),
 #' @return NULL or SingleCellExperiment.
 #' @importFrom LoomExperiment SingleCellLoomExperiment export import
 #' @importFrom SummarizedExperiment assayNames
+#' @importFrom methods as
 #' @export
 #'
 #' @examples
@@ -369,6 +373,6 @@ loom2sce_internal <- function(inFile, ...) {
     stop("This function requires the 'SingleCellExperiment' package.")
   }
   scle <- LoomExperiment::import(inFile, rownames_attr = "Gene", colnames_attr = "CellID", ...)
-  sce <- as(scle, "SingleCellExperiment")
+  sce <- methods::as(scle, "SingleCellExperiment")
   return(sce)
 }

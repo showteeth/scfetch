@@ -8,13 +8,15 @@
 #' @importFrom curl curl_fetch_memory
 #' @importFrom jsonlite fromJSON
 #' @importFrom dplyr filter
+#' @importFrom rlang .data
 #' @export
 #'
 #' @examples
 #' # zebrafish.df = ExtractZenodoMeta(doi = "10.5281/zenodo.7243603")
 #' # ExtractZenodoMeta(doi = "10.5281/zenodo.48065") # Restricted Access
 #' # # vector of dois
-#' # multi.dois = ExtractZenodoMeta(doi = c("1111", "10.5281/zenodo.7243603", "10.5281/zenodo.7244441"))
+#' # multi.dois = ExtractZenodoMeta(doi = c("1111", "10.5281/zenodo.7243603",
+#' #                                        "10.5281/zenodo.7244441"))
 ExtractZenodoMeta <- function(doi, file.ext = c("rdata", "h5ad")) {
   # check doi
   doi.status <- startsWith(x = doi, prefix = "10.5281/zenodo.")
@@ -51,7 +53,7 @@ ExtractZenodoMetaSingle <- function(doi, file.ext = c("rdata", "h5ad")) {
     if (is.null(file.ext)) {
       record.files.used <- record.files
     } else {
-      record.files.used <- record.files %>% dplyr::filter(type %in% file.ext)
+      record.files.used <- record.files %>% dplyr::filter(.data[["type"]] %in% file.ext)
     }
     # check the data
     if (nrow(record.files.used) == 0) {
@@ -95,7 +97,9 @@ ExtractZenodoMetaSingle <- function(doi, file.ext = c("rdata", "h5ad")) {
 #' @export
 #'
 #' @examples
-#' # multi.dois.parse = ParseZenodo(doi = c("1111", "10.5281/zenodo.7243603", "10.5281/zenodo.7244441"), file.ext = c("rdata", "rds"),
+#' # multi.dois.parse = ParseZenodo(doi = c("1111", "10.5281/zenodo.7243603",
+#' #                                        "10.5281/zenodo.7244441"),
+#' #                                file.ext = c("rdata", "rds"),
 #' #                                out.folder = "/path/to/outfoder")
 ParseZenodo <- function(doi = NULL, file.ext = c("rdata", "rds", "h5ad"), doi.df = NULL, out.folder = NULL, timeout = 1000,
                         quiet = FALSE, parallel = TRUE) {

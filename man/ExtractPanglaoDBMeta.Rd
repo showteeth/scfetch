@@ -34,5 +34,7 @@ Dataframe contains SRA, SRS, Tissue, Protocol, Species, Cells, CellType (inferre
 Extract Metadata of scRNA-seq Datasets in PanglaoDB.
 }
 \examples{
-# human.meta = ExtractPanglaoDBMeta(species = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"), cell.num = c(1000,2000))
+# human.meta = ExtractPanglaoDBMeta(species = "Homo sapiens",
+#                                   protocol = c("Smart-seq2", "10x chromium"),
+#                                   cell.num = c(1000,2000))
 }

@@ -151,7 +151,8 @@ RunPrefetch <- function(sra, prefetch.path, out.folder, prefetch.paras) {
 #' # GSE186003.runs = ExtractRun(acce = "GSE186003", platform = "GPL24247")
 #' # GSE186003.down = DownloadSRA(gsm.df = GSE186003.runs, prefetch.path = "/path/to/prefetch",
 #' #                              out.folder = "/path/to/output")
-#' # GSE186003.split = SplitSRA(sra.folder = "/path/to/output", split.cmd.path = "/path/to/parallel-fastq-dump",
+#' # GSE186003.split = SplitSRA(sra.folder = "/path/to/output",
+#' #                            split.cmd.path = "/path/to/parallel-fastq-dump",
 #' #                            sratools.path = "/path/to/sra/bin", fastq.type = "10x",
 #' #                            split.cmd.threads = 4)
 SplitSRA <- function(sra.folder = NULL, sra.path = NULL, fastq.type = c("10x", "other"), split.cmd.path = NULL, sratools.path = NULL,

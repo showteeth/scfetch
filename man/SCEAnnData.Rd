@@ -39,5 +39,6 @@ Data Format Conversion between SingleCellExperiment and AnnData.
 # library(scRNAseq)
 # seger <- SegerstolpePancreasData()
 # SCEAnnData(from = "SingleCellExperiment", to = "AnnData", sce = seger, X_name = "counts")
-# sce = SCEAnnData(from = "AnnData", to = "SingleCellExperiment", anndata.file = "path/to/seger.h5ad")
+# sce = SCEAnnData(from = "AnnData", to = "SingleCellExperiment",
+#                  anndata.file = "path/to/seger.h5ad")
 }

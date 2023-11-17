@@ -179,7 +179,8 @@ ShowHCAProjects <- function(catalog = NULL) {
 #' # # all human projects
 #' # all.human.projects = ExtractHCAMeta(all.projects.df = all.hca.projects, organism = "Homo sapiens")
 #' # # all human and 10x 3' v2
-#' # all.human.10x.projects = ExtractHCAMeta(all.projects.df = all.hca.projects,  organism = "Homo sapiens",
+#' # all.human.10x.projects = ExtractHCAMeta(all.projects.df = all.hca.projects,
+#' #                                         organism = "Homo sapiens",
 #' #                                         protocol = c("10x 3' v2", "10x 3' v3"))
 ExtractHCAMeta <- function(all.projects.df, organism = NULL, sex = NULL, organ = NULL, organ.part = NULL, disease = NULL,
                            sample.type = NULL, preservation.method = NULL, protocol = NULL,
@@ -220,7 +221,7 @@ ExtractHCAMeta <- function(all.projects.df, organism = NULL, sex = NULL, organ =
 #'
 #' @param meta Metadata used to download, can be from \code{ExtractHCAMeta},
 #' should contain entryId and name catalog.
-#' @param file.ext. The valid file extension for download. When NULL, use "rds", "rdata", "h5", "h5ad", "loom".
+#' @param file.ext The valid file extension for download. When NULL, use "rds", "rdata", "h5", "h5ad", "loom".
 #' Default: c("rds", "rdata", "h5", "h5ad", "loom").
 #' @param out.folder The output folder. Default: NULL (current working directory).
 #' @param timeout Maximum request time. Default: 3600.
@@ -244,7 +245,8 @@ ExtractHCAMeta <- function(all.projects.df, organism = NULL, sex = NULL, organ =
 #' # # all available projects
 #' # all.hca.projects = ShowHCAProjects()
 #' # # all human and 10x 3' v2
-#' # all.human.10x.projects = ExtractHCAMeta(all.projects.df = all.hca.projects,  organism = "Homo sapiens",
+#' # all.human.10x.projects = ExtractHCAMeta(all.projects.df = all.hca.projects,
+#' #                                         organism = "Homo sapiens",
 #' #                                         protocol = c("10x 3' v2", "10x 3' v3"))
 #' # # download
 #' # ParseHCA(meta = all.human.10x.projects, out.folder = "/path/to/output")

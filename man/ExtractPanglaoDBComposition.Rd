@@ -37,5 +37,6 @@ Dataframe contains sample metadata, cluster, cell number and cell type informati
 Extract Cell Type Composition of PanglaoDB Datasets.
 }
 \examples{
-# human.composition = ExtractPanglaoDBComposition(species = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"))
+# human.composition = ExtractPanglaoDBComposition(species = "Homo sapiens",
+#                                                 protocol = c("Smart-seq2", "10x chromium"))
 }

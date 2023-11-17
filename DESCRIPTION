@@ -1,6 +1,6 @@
 Package: scfetch
 Type: Package
-Title: Access and Format Single-cell RNA-seq Datasets from Public Resources 
+Title: Access and Format Single-Cell RNA-Seq Datasets from Public Resources 
 Version: 0.5.0
 Authors@R: 
     person(given = "Yabing",
@@ -43,7 +43,11 @@ Imports:
     SingleCellExperiment,
     SummarizedExperiment,
     scater,
-    LoomExperiment
+    LoomExperiment,
+    httr,
+    rlang,
+    tidyr,
+    methods
 Remotes: 
     cellgeni/sceasy,
     mojaveazure/seurat-disk,
@@ -52,7 +56,9 @@ Remotes:
 Suggests: 
     knitr,
     rmarkdown,
-    scRNAseq
+    scRNAseq,
+    BiocStyle,
+    htmltools
 VignetteBuilder: knitr
 Depends: 
     R (>= 2.10)

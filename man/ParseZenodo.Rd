@@ -39,6 +39,8 @@ When successful, NULL. When MD5 verification failure, a dataframe contains failu
 Download Data with Zenodo DOI.
 }
 \examples{
-# multi.dois.parse = ParseZenodo(doi = c("1111", "10.5281/zenodo.7243603", "10.5281/zenodo.7244441"), file.ext = c("rdata", "rds"),
+# multi.dois.parse = ParseZenodo(doi = c("1111", "10.5281/zenodo.7243603",
+#                                        "10.5281/zenodo.7244441"),
+#                                file.ext = c("rdata", "rds"),
 #                                out.folder = "/path/to/outfoder")
 }

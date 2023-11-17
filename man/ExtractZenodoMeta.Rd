@@ -21,5 +21,6 @@ Prepare Dataframe with Zenodo DOIs.
 # zebrafish.df = ExtractZenodoMeta(doi = "10.5281/zenodo.7243603")
 # ExtractZenodoMeta(doi = "10.5281/zenodo.48065") # Restricted Access
 # # vector of dois
-# multi.dois = ExtractZenodoMeta(doi = c("1111", "10.5281/zenodo.7243603", "10.5281/zenodo.7244441"))
+# multi.dois = ExtractZenodoMeta(doi = c("1111", "10.5281/zenodo.7243603",
+#                                        "10.5281/zenodo.7244441"))
 }

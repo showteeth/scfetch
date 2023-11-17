@@ -32,7 +32,8 @@ Stat Database Attributes.
 # StatDBAttribute(df = ucsc.cb.samples, filter = c("organism", "organ"), database = "UCSC")
 # # CELLxGENE
 # all.cellxgene.datasets = ShowCELLxGENEDatasets()
-# StatDBAttribute(df = all.cellxgene.datasets, filter = c("organism", "sex"), database = "CELLxGENE")
+# StatDBAttribute(df = all.cellxgene.datasets, filter = c("organism", "sex"),
+#                 database = "CELLxGENE")
 # # HCA
 # all.hca.projects = ShowHCAProjects()
 # StatDBAttribute(df = all.hca.projects, filter = c("organism", "sex"), database = "HCA")
