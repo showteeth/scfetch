@@ -16,9 +16,13 @@
 #' @export
 #'
 #' @examples
-#' # human.meta = ExtractPanglaoDBMeta(species = "Homo sapiens",
-#' #                                   protocol = c("Smart-seq2", "10x chromium"),
-#' #                                   cell.num = c(1000,2000))
+#' \donttest{
+#' human.meta <- ExtractPanglaoDBMeta(
+#'   species = "Homo sapiens",
+#'   protocol = c("Smart-seq2", "10x chromium"),
+#'   cell.num = c(1000, 2000)
+#' )
+#' }
 ExtractPanglaoDBMeta <- function(species = NULL, protocol = NULL, tissue = NULL, cell.num = NULL, show.cell.type = TRUE, local.data = TRUE) {
   # get all sample metadata
   if (local.data) {
@@ -121,8 +125,12 @@ ExtractPanglaoDBMeta <- function(species = NULL, protocol = NULL, tissue = NULL,
 #' @export
 #'
 #' @examples
-#' # human.composition = ExtractPanglaoDBComposition(species = "Homo sapiens",
-#' #                                                 protocol = c("Smart-seq2", "10x chromium"))
+#' \donttest{
+#' human.composition <- ExtractPanglaoDBComposition(
+#'   species = "Homo sapiens",
+#'   protocol = c("Smart-seq2", "10x chromium")
+#' )
+#' }
 ExtractPanglaoDBComposition <- function(sra = NULL, srs = NULL, species = NULL, protocol = NULL, tissue = NULL, local.data = TRUE) {
   if (local.data) {
     select.compos <- PanglaoDBComposition
@@ -184,10 +192,14 @@ ExtractPanglaoDBComposition <- function(sra = NULL, srs = NULL, species = NULL, 
 #' @export
 #'
 #' @examples
-#' # hsa.meta = ExtractPanglaoDBMeta(species = "Homo sapiens",
-#' #                                 protocol = c("Smart-seq2", "10x chromium"),
-#' #                                 show.cell.type = TRUE, cell.num = c(1000,2000))
-#' # hsa.seu = ParsePanglaoDB(hsa.meta, merge = TRUE)
+#' \dontrun{
+#' hsa.meta <- ExtractPanglaoDBMeta(
+#'   species = "Homo sapiens",
+#'   protocol = c("Smart-seq2", "10x chromium"),
+#'   show.cell.type = TRUE, cell.num = c(1000, 2000)
+#' )
+#' hsa.seu <- ParsePanglaoDB(hsa.meta, merge = TRUE)
+#' }
 ParsePanglaoDB <- function(meta, cell.type = "All", include.gene = NA, exclude.gene = NA, merge = FALSE) {
   # check columns
   CheckColumns(df = meta, columns = c("SRA", "SRS", "Tissue", "Protocol", "Species"))

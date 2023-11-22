@@ -12,10 +12,15 @@
 #' @export
 #'
 #' @examples
-#' # GSE138266.runs = ExtractRun(acce = "GSE138266", platform = "GPL18573")
-#' # GSE138266.down = DownloadBam(gsm.df = GSE138266.runs, bam.type = "10x",
-#' #                              prefetch.path = "/path/to/prefetch",
-#' #                              out.folder = "/path/to/output")
+#' \dontrun{
+#' # need users to provide prefetch.path
+#' GSE138266.runs <- ExtractRun(acce = "GSE138266", platform = "GPL18573")
+#' GSE138266.down <- DownloadBam(
+#'   gsm.df = GSE138266.runs, bam.type = "10x",
+#'   prefetch.path = "/path/to/prefetch",
+#'   out.folder = "/path/to/output"
+#' )
+#' }
 DownloadBam <- function(gsm.df, bam.type = c("10x", "other"), prefetch.path = NULL, samdump.path = NULL,
                         out.folder = NULL, prefetch.paras = "-X 100G", samdump.paras = "") {
   # check parameters
@@ -121,12 +126,19 @@ RunSamdump <- function(sra, samdump.path, samdump.paras) {
 #' @export
 #'
 #' @examples
-#' # GSE138266.runs = ExtractRun(acce = "GSE138266", platform = "GPL18573")
-#' # GSE138266.down = DownloadBam(gsm.df = GSE138266.runs, prefetch.path = "/path/to/prefetch",
-#' #                              out.folder = "/path/to/output")
-#' # GSE138266.convert = Bam2Fastq(bam.folder = "/path/to/output",
-#' #                               bamtofastq.path = "/path/to/bamtofastq_linux or samtools",
-#' #                               bamtofastq.paras = "--nthreads 4")
+#' \dontrun{
+#' # need users to provide prefetch.path and bamtofastq.path
+#' GSE138266.runs <- ExtractRun(acce = "GSE138266", platform = "GPL18573")
+#' GSE138266.down <- DownloadBam(
+#'   gsm.df = GSE138266.runs, prefetch.path = "/path/to/prefetch",
+#'   out.folder = "/path/to/output"
+#' )
+#' GSE138266.convert <- Bam2Fastq(
+#'   bam.folder = "/path/to/output",
+#'   bamtofastq.path = "/path/to/bamtofastq_linux or samtools",
+#'   bamtofastq.paras = "--nthreads 4"
+#' )
+#' }
 Bam2Fastq <- function(bam.folder = NULL, bam.path = NULL, bam.type = c("10x", "other"), pair.end = NULL,
                       bamtofastq.path = NULL, bamtofastq.paras = "--nthreads 4", sort.name = FALSE, sort.thread = 4) {
   # check parameters

@@ -19,12 +19,3 @@ A dataframe.
 \description{
 Extract Raw Count Matrix from Supplementary Files.
 }
-\examples{
-# for bulk rna-seq
-# count.mat = ExtractGEOExpSupp(acce = "GSE149838")
-# count.mat = ExtractGEOExpSupp(acce = "GSE147507")
-# count.mat = ExtractGEOExpSupp(acce = "GSE147507", supp.idx = 2)
-# count.mat = ExtractGEOExpSupp(acce = "GSE122774")
-# # for single cell matrix
-# count.mat = ExtractGEOExpSupp(acce = "GSE94820")
-}

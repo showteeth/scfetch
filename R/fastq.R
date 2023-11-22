@@ -12,11 +12,12 @@
 #' @importFrom GEOquery getGEO
 #' @importFrom Biobase annotation experimentData pData phenoData notes sampleNames exprs
 #' @importFrom parallel detectCores
-#' @importFrom GEOfastq crawl_gsms
 #' @export
 #'
 #' @examples
-#' # GSE186003.runs = ExtractRun(acce = "GSE186003", platform = "GPL24247")
+#' \dontrun{
+#' GSE186003.runs <- ExtractRun(acce = "GSE186003", platform = "GPL24247", parallel = FALSE)
+#' }
 ExtractRun <- function(gsm = NULL, acce = NULL, platform = NULL, parallel = TRUE, ...) {
   # get GSM
   if (is.null(gsm)) {
@@ -31,6 +32,10 @@ ExtractRun <- function(gsm = NULL, acce = NULL, platform = NULL, parallel = TRUE
     cores.used <- 1
   }
   # extract srr
+  rnsgeofastq <- requireNamespace("GEOfastq", quietly = TRUE)
+  if (!rnsgeofastq) {
+    stop("Can not find GEOfastq package, install with devtools::install_github('alexvpickering/GEOfastq')!")
+  }
   gsm.run.df <- GEOfastq::crawl_gsms(gsm, max.workers = cores.used)
   if (is.null(gsm.run.df)) {
     stop("There is no valid srr numbers available, please check the raw data available under ", paste0(gsm, collapse = ", "))
@@ -51,9 +56,14 @@ ExtractRun <- function(gsm = NULL, acce = NULL, platform = NULL, parallel = TRUE
 #' @export
 #'
 #' @examples
-#' # GSE186003.runs = ExtractRun(acce = "GSE186003", platform = "GPL24247")
-#' # GSE186003.down = DownloadSRA(gsm.df = GSE186003.runs, prefetch.path = "/path/to/prefetch",
-#' #                              out.folder = "/path/to/output")
+#' \dontrun{
+#' # need users to provide the prefetch.path and out.folder
+#' GSE186003.runs <- ExtractRun(acce = "GSE186003", platform = "GPL24247")
+#' GSE186003.down <- DownloadSRA(
+#'   gsm.df = GSE186003.runs, prefetch.path = "/path/to/prefetch",
+#'   out.folder = "/path/to/output"
+#' )
+#' }
 DownloadSRA <- function(gsm.df, prefetch.path = NULL, out.folder = NULL, prefetch.paras = "-X 100G") {
   # check dataframe
   if (nrow(gsm.df) == 0) {
@@ -76,7 +86,6 @@ DownloadSRA <- function(gsm.df, prefetch.path = NULL, out.folder = NULL, prefetc
   } else {
     prefetch.path <- prefetch.path
   }
-  cwd <- getwd()
   # prepare sample output folder
   samples.folder <- file.path(out.folder, gsm.df$gsm_name)
   names(samples.folder) <- gsm.df$run
@@ -84,7 +93,6 @@ DownloadSRA <- function(gsm.df, prefetch.path = NULL, out.folder = NULL, prefetc
     sf <- samples.folder[x]
     RunPrefetch(sra = x, prefetch.path = prefetch.path, out.folder = sf, prefetch.paras = prefetch.paras)
   })
-  setwd(cwd)
   # select fail samples
   fail.flag <- sapply(names(all.runs.down), function(x) {
     !is.null(all.runs.down[[x]])
@@ -109,6 +117,8 @@ RunPrefetch <- function(sra, prefetch.path, out.folder, prefetch.paras) {
   if (!dir.exists(out.folder)) {
     dir.create(path = out.folder, recursive = TRUE)
   }
+  cwd <- getwd()
+  on.exit(setwd(cwd))
   # change directory to avoid bam download bug
   setwd(out.folder)
   # prefetch command
@@ -148,13 +158,20 @@ RunPrefetch <- function(sra, prefetch.path, out.folder, prefetch.paras) {
 #' @export
 #'
 #' @examples
-#' # GSE186003.runs = ExtractRun(acce = "GSE186003", platform = "GPL24247")
-#' # GSE186003.down = DownloadSRA(gsm.df = GSE186003.runs, prefetch.path = "/path/to/prefetch",
-#' #                              out.folder = "/path/to/output")
-#' # GSE186003.split = SplitSRA(sra.folder = "/path/to/output",
-#' #                            split.cmd.path = "/path/to/parallel-fastq-dump",
-#' #                            sratools.path = "/path/to/sra/bin", fastq.type = "10x",
-#' #                            split.cmd.threads = 4)
+#' \dontrun{
+#' # need users to provide the prefetch.path, sra.folder, split.cmd.path, sratools.path and out.folder
+#' GSE186003.runs <- ExtractRun(acce = "GSE186003", platform = "GPL24247")
+#' GSE186003.down <- DownloadSRA(
+#'   gsm.df = GSE186003.runs, prefetch.path = "/path/to/prefetch",
+#'   out.folder = "/path/to/output"
+#' )
+#' GSE186003.split <- SplitSRA(
+#'   sra.folder = "/path/to/output",
+#'   split.cmd.path = "/path/to/parallel-fastq-dump",
+#'   sratools.path = "/path/to/sra/bin", fastq.type = "10x",
+#'   split.cmd.threads = 4
+#' )
+#' }
 SplitSRA <- function(sra.folder = NULL, sra.path = NULL, fastq.type = c("10x", "other"), split.cmd.path = NULL, sratools.path = NULL,
                      split.cmd.paras = NULL, split.cmd.threads = NULL, format.10x = TRUE, remove.raw = FALSE) {
   # check parameters

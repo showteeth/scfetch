@@ -23,8 +23,10 @@ Dataframe contains all available datasets.
 Show All Available Datasets in UCSC Cell Browser.
 }
 \examples{
-# # first time run (lazy mode)
-# ucsc.cb.samples = ShowCBDatasets(lazy = TRUE, update = TRUE)
-# # second time run (lazy mode)
-# ucsc.cb.samples = ShowCBDatasets(lazy = TRUE, update = FALSE)
+\dontrun{
+# first time run (lazy mode), need users to provide json folder
+ucsc.cb.samples <- ShowCBDatasets(lazy = TRUE, update = TRUE)
+# second time run (lazy mode), need users to provide json folder
+ucsc.cb.samples <- ShowCBDatasets(lazy = TRUE, update = FALSE)
+}
 }

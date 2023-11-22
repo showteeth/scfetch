@@ -52,9 +52,14 @@ If \code{data.type} is "bulk", return count matrix.
 Download Matrix from GEO and Load to Seurat.
 }
 \examples{
-# # the supp files are count matrix
-# GSE94820.seu = ParseGEO(acce = "GSE94820", down.supp = TRUE, supp.idx = 1, supp.type = "count")
-# # the supp files are cellranger output files: barcodes, genes/features and matrix
-# GSE200257.seu = ParseGEO(acce = "GSE200257", down.supp = TRUE, supp.idx = 1, supp.type = "10x",
-#                          out.folder = "/path/to/output/folder")
+\dontrun{
+# the supp files are count matrix
+GSE94820.seu <- ParseGEO(acce = "GSE94820", down.supp = TRUE, supp.idx = 1, supp.type = "count")
+# the supp files are cellranger output files: barcodes, genes/features and matrix
+# need users to provide the output folder
+GSE200257.seu <- ParseGEO(
+  acce = "GSE200257", down.supp = TRUE, supp.idx = 1, supp.type = "10x",
+  out.folder = "/path/to/output/folder"
+)
+}
 }

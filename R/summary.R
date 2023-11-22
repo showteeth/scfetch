@@ -10,18 +10,22 @@
 #' @export
 #'
 #' @examples
-#' # # PanglaoDB
-#' # StatDBAttribute(df = PanglaoDBMeta, filter = c("species", "protocol"), database = "PanglaoDB")
-#' # # UCSC Cell Browser
-#' # ucsc.cb.samples = ShowCBDatasets(lazy = TRUE, json.folder = NULL, update = FALSE)
-#' # StatDBAttribute(df = ucsc.cb.samples, filter = c("organism", "organ"), database = "UCSC")
-#' # # CELLxGENE
-#' # all.cellxgene.datasets = ShowCELLxGENEDatasets()
-#' # StatDBAttribute(df = all.cellxgene.datasets, filter = c("organism", "sex"),
-#' #                 database = "CELLxGENE")
-#' # # HCA
-#' # all.hca.projects = ShowHCAProjects()
-#' # StatDBAttribute(df = all.hca.projects, filter = c("organism", "sex"), database = "HCA")
+#' \dontrun{
+#' # PanglaoDB
+#' StatDBAttribute(df = PanglaoDBMeta, filter = c("species", "protocol"), database = "PanglaoDB")
+#' # UCSC Cell Browser, need users to provide the json folder
+#' ucsc.cb.samples <- ShowCBDatasets(lazy = TRUE, json.folder = NULL, update = FALSE)
+#' StatDBAttribute(df = ucsc.cb.samples, filter = c("organism", "organ"), database = "UCSC")
+#' # CELLxGENE
+#' all.cellxgene.datasets <- ShowCELLxGENEDatasets()
+#' StatDBAttribute(
+#'   df = all.cellxgene.datasets, filter = c("organism", "sex"),
+#'   database = "CELLxGENE"
+#' )
+#' # HCA
+#' all.hca.projects <- ShowHCAProjects()
+#' StatDBAttribute(df = all.hca.projects, filter = c("organism", "sex"), database = "HCA")
+#' }
 StatDBAttribute <- function(df, filter, database = c("PanglaoDB", "UCSC", "CELLxGENE", "HCA")) {
   # check parameters
   database <- match.arg(arg = database)

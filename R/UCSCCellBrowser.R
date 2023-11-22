@@ -16,10 +16,12 @@
 #' @export
 #'
 #' @examples
-#' # # first time run (lazy mode)
-#' # ucsc.cb.samples = ShowCBDatasets(lazy = TRUE, update = TRUE)
-#' # # second time run (lazy mode)
-#' # ucsc.cb.samples = ShowCBDatasets(lazy = TRUE, update = FALSE)
+#' \dontrun{
+#' # first time run (lazy mode), need users to provide json folder
+#' ucsc.cb.samples <- ShowCBDatasets(lazy = TRUE, update = TRUE)
+#' # second time run (lazy mode), need users to provide json folder
+#' ucsc.cb.samples <- ShowCBDatasets(lazy = TRUE, update = FALSE)
+#' }
 ShowCBDatasets <- function(lazy = TRUE, json.folder = NULL, update = FALSE, quiet = FALSE) {
   # parse all datasets json
   if (lazy) {
@@ -72,6 +74,37 @@ ShowCBDatasets <- function(lazy = TRUE, json.folder = NULL, update = FALSE, quie
     desc.folder <- "https://cells.ucsc.edu"
     datasets.folder <- "https://cells.ucsc.edu"
   }
+  # split columns
+  all.sample.dup.index <- duplicated(colnames(all.samples.df))
+  # all.sample.dup.cols = colnames(all.samples.df)[all.sample.dup.index]
+  # all.samples.df.unique = all.samples.df[!all.sample.dup.index]
+  # all.samples.df.dup = all.samples.df[all.sample.dup.index]
+  # # modify columns
+  # attr.cols = c(
+  #   "tags", "diseases", "organisms", "body_parts",
+  #   "projects", "life_stages", "domains", "sources", "assays"
+  # )
+  # unique.valid = intersect(attr.cols, colnames(all.samples.df.unique))
+  # all.samples.df.unique <- PasteAttr(df = all.samples.df.unique, attr = unique.valid)
+  # dup.valid = intersect(attr.cols, colnames(all.samples.df.dup))
+  # all.samples.df.dup <- PasteAttr(df = all.samples.df.dup, attr = dup.valid)
+  # # deal with duplicated columns
+  # for (col in all.sample.dup.cols){
+  #   col.df = data.frame(col1=all.samples.df.unique[, col], col2 = all.samples.df.dup[, col])
+  #   col.value = apply(col.df, 1, function(x){
+  #     if(x["col1"] == ""){
+  #       if(x["col2"] == ""){
+  #         x["col1"]
+  #       }else{
+  #         x["col2"]
+  #       }
+  #     }else{
+  #       x["col1"]
+  #     }
+  #   })
+  #   all.samples.df.unique[, col] = col.value
+  # }
+  all.samples.df <- all.samples.df[!all.sample.dup.index]
   # modify columns
   all.samples.df <- PasteAttr(df = all.samples.df, attr = c(
     "tags", "diseases", "organisms", "body_parts",
@@ -161,11 +194,15 @@ ShowCBDatasets <- function(lazy = TRUE, json.folder = NULL, update = FALSE, quie
 #' @export
 #'
 #' @examples
-#' # # lazy mode, load datasets json files locally
-#' # ucsc.cb.samples = ShowCBDatasets(lazy = TRUE, json.folder = NULL, update = FALSE)
-#' # # cell number is between 1000 and 2000
-#' # hbb.sample.df = ExtractCBDatasets(all.samples.df = ucsc.cb.samples, organ = c("brain", "blood"),
-#' #                                   organism = "Human (H. sapiens)", cell.num = c(1000,2000))
+#' \dontrun{
+#' # lazy mode, load datasets json files locally, need users to provide json folder
+#' ucsc.cb.samples <- ShowCBDatasets(lazy = TRUE, json.folder = NULL, update = FALSE)
+#' # cell number is between 1000 and 2000
+#' hbb.sample.df <- ExtractCBDatasets(
+#'   all.samples.df = ucsc.cb.samples, organ = c("brain", "blood"),
+#'   organism = "Human (H. sapiens)", cell.num = c(1000, 2000)
+#' )
+#' }
 ExtractCBDatasets <- function(all.samples.df, collection = NULL, sub.collection = NULL, organ = NULL, disease = NULL, organism = NULL,
                               project = NULL, fuzzy.match = TRUE, cell.num = NULL) {
   # extract row index under different filter
@@ -219,12 +256,16 @@ ExtractCBDatasets <- function(all.samples.df, collection = NULL, sub.collection 
 #' @export
 #'
 #' @examples
-#' # # lazy mode, load datasets json files locally
-#' # ucsc.cb.samples = ShowCBDatasets(lazy = TRUE, json.folder = NULL, update = FALSE)
-#' # # cell number is between 1000 and 2000
-#' # hbb.sample.df = ExtractCBDatasets(all.samples.df = ucsc.cb.samples, organ = c("brain", "blood"),
-#' #                                   organism = "Human (H. sapiens)", cell.num = c(1000,2000))
-#' # hbb.sample.ct = ExtractCBComposition(json.folder = NULL, sample.df = hbb.sample.df)
+#' \dontrun{
+#' # lazy mode, load datasets json files locally, need users to provide json folder
+#' ucsc.cb.samples <- ShowCBDatasets(lazy = TRUE, json.folder = NULL, update = FALSE)
+#' # cell number is between 1000 and 2000
+#' hbb.sample.df <- ExtractCBDatasets(
+#'   all.samples.df = ucsc.cb.samples, organ = c("brain", "blood"),
+#'   organism = "Human (H. sapiens)", cell.num = c(1000, 2000)
+#' )
+#' hbb.sample.ct <- ExtractCBComposition(json.folder = NULL, sample.df = hbb.sample.df)
+#' }
 ExtractCBComposition <- function(json.folder = NULL, sample.df = NULL, all.samples.df = NULL, collection = NULL, sub.collection = NULL, organ = NULL,
                                  disease = NULL, organism = NULL, project = NULL, fuzzy.match = TRUE, cell.num = NULL) {
   # prepare samples for download
@@ -316,15 +357,19 @@ ExtractCBComposition <- function(json.folder = NULL, sample.df = NULL, all.sampl
 #' @export
 #'
 #' @examples
-#' # # lazy mode, load datasets json files locally
-#' # ucsc.cb.samples = ShowCBDatasets(lazy = TRUE, json.folder = NULL, update = FALSE)
-#' # # cell number is between 1000 and 2000
-#' # hbb.sample.df = ExtractCBDatasets(all.samples.df = ucsc.cb.samples, organ = c("brain", "blood"),
-#' #                                   organism = "Human (H. sapiens)", cell.num = c(1000,2000))
-#' # hbb.sample.seu = ParseCBDatasets(sample.df = hbb.sample.df)
-#' # # test 10x and matrix load
-#' # complex.df = ucsc.cb.samples[c(1, 927, 379), ] # two 10x and one matrix
-#' # complex.seu.list = ParseCBDatasets(sample.df = test.df, merge = F)
+#' \dontrun{
+#' # lazy mode, load datasets json files locally, need users to provide json folder
+#' ucsc.cb.samples <- ShowCBDatasets(lazy = TRUE, json.folder = NULL, update = FALSE)
+#' # cell number is between 1000 and 2000
+#' hbb.sample.df <- ExtractCBDatasets(
+#'   all.samples.df = ucsc.cb.samples, organ = c("brain", "blood"),
+#'   organism = "Human (H. sapiens)", cell.num = c(1000, 2000)
+#' )
+#' hbb.sample.seu <- ParseCBDatasets(sample.df = hbb.sample.df)
+#' # test 10x and matrix load
+#' complex.df <- ucsc.cb.samples[c(1, 927, 379), ] # two 10x and one matrix
+#' complex.seu.list <- ParseCBDatasets(sample.df = test.df, merge = F)
+#' }
 ParseCBDatasets <- function(sample.df = NULL, all.samples.df = NULL, collection = NULL, sub.collection = NULL, organ = NULL,
                             disease = NULL, organism = NULL, project = NULL, fuzzy.match = TRUE, cell.num = NULL,
                             timeout = 1000, merge = TRUE) {
@@ -343,6 +388,7 @@ ParseCBDatasets <- function(sample.df = NULL, all.samples.df = NULL, collection 
   }
   # set timeout
   env.timeout <- getOption("timeout")
+  on.exit(options(timeout = env.timeout)) # restore timeout
   options(timeout = timeout)
   # base url
   base.url <- "https://cells.ucsc.edu/"
@@ -369,8 +415,6 @@ ParseCBDatasets <- function(sample.df = NULL, all.samples.df = NULL, collection 
       meta.file = meta.url, coord.file = coord.file, name = sample.name
     )
   }
-  # restore timeout
-  options(timeout = env.timeout)
   # merge or not
   if (isTRUE(merge)) {
     seu.obj <- mergeExperiments(seu.obj.list)

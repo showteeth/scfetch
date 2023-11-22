@@ -1,17 +1,11 @@
 ---
 title: >
-  scfetch User Guide
+  scfetch - Access and Format Single-cell RNA-seq Datasets from Public Resources
 author: 
 - name: Yabing Song
-  affiliation: 
-  - &id1 School of Life Sciences, Tsinghua University
-  email: songyb0519@gmail.com
 date: "`r BiocStyle::doc_date()`"
-package: "`r BiocStyle::pkg_ver('scfetch')`"
-abstract: >
-  The goal of `scfetch` is to access and format scRNA-seq datasets. It can be used to download scRNA-seq datasets from widely used public resources, including GEO, Zenodo, CELLxGENE, PanglaoDB and UCSC Cell Browser. And, it can also be used to perform object conversion between SeuratObject, loom,  h5ad, SingleCellExperiment and CellDataSet/cell_data_set.
 output: 
-  BiocStyle::html_document:
+  html_document:
     toc_depth: 4
     toc_float: true
 fig_caption: TRUE
@@ -20,10 +14,6 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-  
-```{r style, echo = FALSE, results = 'asis'}
-BiocStyle::markdown()
-```
 
 ```{r setup, echo=FALSE, warning=FALSE}
 library(knitr)
@@ -37,7 +27,19 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Getting started
+# Introduction
+
+`scfetch` is designed to accelerate users download and prepare single-cell datasets from public resources. It can be used to:
+
+* **Download fastq files** from `GEO/SRA`, **foramt fastq files** to standard style that can be identified by 10x softwares (e.g. CellRanger).
+* **Download bam files** from `GEO/SRA`, support **downloading original 10x generated bam files (with custom tags) and normal bam files**, and **convert bam files to fastq files**.
+* Download scRNA-seq **matrix** and **annotation (e.g. cell type)** information from `GEO`, `PanglanDB` and `UCSC Cell Browser`, **load the downnloaded matrix to `Seurat`**.
+* Download processed objects from `Zeenodo` and `CELLxGENE`.
+* **Formats conversion between widely used single cell objects** (`SeuratObject`, `AnnData`, `SingleCellExperiment`, `CellDataSet/cell_data_set` and `loom`).
+
+<hr />
+
+# Installation
 
 `scfetch` is an R package distributed as part of the [CRAN](https://cran.r-project.org/).
 To install the package, start R and enter:
@@ -47,10 +49,10 @@ To install the package, start R and enter:
 install.packages("scfetch")
 # if you install from CRAN, you should install the following packages
 # install.packages("devtools") #In case you have not installed it.
-devtools::install_github('alexvpickering/GEOfastq') # download fastq
-devtools::install_github('cellgeni/sceasy') # format conversion
-devtools::install_github('mojaveazure/seurat-disk') # format conversion
-devtools::install_github('satijalab/seurat-wrappers') # format conversion
+devtools::install_github("alexvpickering/GEOfastq") # download fastq
+devtools::install_github("cellgeni/sceasy") # format conversion
+devtools::install_github("mojaveazure/seurat-disk") # format conversion
+devtools::install_github("satijalab/seurat-wrappers") # format conversion
 
 # install via Github (v0.5.0)
 devtools::install_github("showteeth/scfetch")
@@ -71,18 +73,6 @@ Once `scfetch` is installed, it can be loaded by the following command.
 ```{r library, message=FALSE, warning=FALSE}
 library("scfetch")
 ```
-
-# Introduction
-
-<img src = "../man/figures/scfetch.png" align = "right" width = "200"/>
-
-`scfetch` is designed to accelerate users download and prepare single-cell datasets from public resources. It can be used to:
-
-* **Download fastq files** from `GEO/SRA`, **foramt fastq files** to standard style that can be identified by 10x softwares (e.g. CellRanger).
-* **Download bam files** from `GEO/SRA`, support **downloading original 10x generated bam files (with custom tags) and normal bam files**, and **convert bam files to fastq files**.
-* Download scRNA-seq **matrix** and **annotation (e.g. cell type)** information from `GEO`, `PanglanDB` and `UCSC Cell Browser`, **load the downnloaded matrix to `Seurat`**.
-* Download processed objects from `Zeenodo` and `CELLxGENE`.
-* **Formats conversion between widely used single cell objects** (`SeuratObject`, `AnnData`, `SingleCellExperiment`, `CellDataSet/cell_data_set` and `loom`).
 
 <hr />
 
@@ -110,11 +100,11 @@ With the dataframe contains gsm and run number, `scfetch` will download sra file
 ```{r dwonload_sra, eval=FALSE}
 # a small test
 GSE130636.runs <- GSE130636.runs[GSE130636.runs$run %in% c("SRR9004346", "SRR9004351"), ]
-# download
+# download, you may need to set prefetch.path
+out.folder <- tempdir()
 GSE130636.down <- DownloadSRA(
   gsm.df = GSE130636.runs,
-  prefetch.path = "/Users/soyabean/software/sratoolkit.3.0.6-mac64/bin/prefetch",
-  out.folder = "/Users/soyabean/Desktop/tmp/scdown/download_fastq"
+  out.folder = out.folder
 )
 # GSE130636.down is null or dataframe contains failed runs
 ```
@@ -133,11 +123,11 @@ The returned result is a vector of failed sra files. If not `NULL`, users can re
 
 ```{r split_sra, eval=FALSE}
 # parallel-fastq-dump requires sratools.path
+# you may need to set split.cmd.path and sratools.path
+sra.folder <- tempdir()
 GSE130636.split <- SplitSRA(
-  sra.folder = "/Users/soyabean/Desktop/tmp/scdown/download_fastq",
-  fastq.type = "10x",
-  split.cmd.path = "/Applications/anaconda3/bin/parallel-fastq-dump",
-  sratools.path = "/usr/local/bin", split.cmd.threads = 4
+  sra.folder = sra.folder,
+  fastq.type = "10x", split.cmd.threads = 4
 )
 ```
 
@@ -185,11 +175,11 @@ The returned result is a dataframe containing failed runs (either failed to down
 ```{r dwonload_bam, eval=FALSE}
 # a small test
 GSE138266.runs <- GSE138266.runs[GSE138266.runs$run %in% c("SRR10211566"), ]
-# download
+# download, you may need to set prefetch.path
+out.folder <- tempdir()
 GSE138266.down <- DownloadBam(
   gsm.df = GSE138266.runs,
-  prefetch.path = "/Users/soyabean/software/sratoolkit.3.0.6-mac64/bin/prefetch",
-  out.folder = "/Users/soyabean/Desktop/tmp/scdown/download_bam"
+  out.folder = out.folder
 )
 # GSE138266.down is null or dataframe contains failed runs
 ```
@@ -205,10 +195,10 @@ With downloaded bam files, `scfetch` provides function `Bam2Fastq` to convert ba
 The returned result is a vector of bam files failed to convert to fastq files. If not `NULL`, users can re-run `Bam2Fastq` by setting `bam.path` to the returned result.
 
 ```{r convert_bam_fastq, eval=FALSE}
+bam.folder <- tempdir()
+# you may need to set bamtofastq.path and bamtofastq.paras
 GSE138266.convert <- Bam2Fastq(
-  bam.folder = "/Users/soyabean/Desktop/tmp/scdown/download_bam",
-  bamtofastq.path = "/Users/soyabean/software/bamtofastq_macos",
-  bamtofastq.paras = "--nthreads 4"
+  bam.folder = bam.folder
 )
 ```
 
@@ -257,9 +247,10 @@ With the count matrix, `ParseGEO` will load the matrix to Seurat automatically. 
 
 ```{r geo_parse, eval=FALSE}
 # for cellranger output
+out.folder <- tempdir()
 GSE200257.seu <- ParseGEO(
   acce = "GSE200257", platform = NULL, supp.idx = 1, down.supp = TRUE, supp.type = "10x",
-  out.folder = "/Users/soyabean/Desktop/tmp/scdown/dwonload_geo"
+  out.folder = out.folder
 )
 # for count matrix, no need to specify out.folder, download count matrix to tmp folder
 GSE94820.seu <- ParseGEO(acce = "GSE94820", platform = NULL, supp.idx = 1, down.supp = TRUE, supp.type = "count")
@@ -275,7 +266,7 @@ GSE94820.seu <- ParseGEO(acce = "GSE94820", platform = NULL, supp.idx = 1, down.
 
 Since [PanglaoDB](https://panglaodb.se/about.html) is no longer maintained, `scfetch` has cached all metadata and cell type composition and use these cached data by default to accelerate, users can access the cached data with `PanglaoDBMeta` (all metadata) and `PanglaoDBComposition` (all cell type composition).
 
-### Summary attributes
+### Summarise attributes
 
 `scfetch` provides `StatDBAttribute` to summary attributes of [PanglaoDB](https://panglaodb.se/index.html):
 
@@ -293,7 +284,10 @@ StatDBAttribute(df = PanglaoDBMeta, filter = c("species", "protocol"), database 
 `scfetch` uses cached metadata and cell type composition by default, users can change this by setting `local.data = FALSE`.
 
 ```{r panglaodb_meta, eval=FALSE}
-hsa.meta <- ExtractPanglaoDBMeta(species = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"), show.cell.type = TRUE, cell.num = c(1000, 2000))
+hsa.meta <- ExtractPanglaoDBMeta(
+  species = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"),
+  show.cell.type = TRUE, cell.num = c(1000, 2000)
+)
 ```
 
 <hr />
@@ -315,7 +309,8 @@ After manually check the extracted metadata, `scfetch` provides `ParsePanglaoDB`
 With the count matrix, `ParsePanglaoDB` will load the matrix to Seurat automatically. If multiple datasets available, users can choose to merge the SeuratObject with `merge`.
 
 ```{r panglaodb_parse, eval=FALSE}
-hsa.seu <- ParsePanglaoDB(hsa.meta, merge = TRUE)
+# small test
+hsa.seu <- ParsePanglaoDB(hsa.meta[1:3, ], merge = TRUE)
 ```
 
 <hr />
@@ -329,11 +324,12 @@ The [UCSC Cell Browser](https://cells.ucsc.edu/?#) is a web-based tool that allo
 `scfetch` provides `ShowCBDatasets` to show all available datasets. Due to the large number of datasets, `ShowCBDatasets` enables users to perform *lazy load* of dataset json files instead of downloading the json files online (time-consuming!!!). This *lazy load* requires users to provide `json.folder` to save json files and set `lazy = TRUE` (for the first time of run, `ShowCBDatasets` will download current json files to `json.folder`, for next time of run, with `lazy = TRUE`, `ShowCBDatasets` will load the downloaded json files from `json.folder`.). And, `ShowCBDatasets` supports updating the local datasets with `update = TRUE`.
 
 ```{r cb_show, eval=FALSE}
+json.folder <- tempdir()
 # first time run, the json files are stored under json.folder
-# ucsc.cb.samples = ShowCBDatasets(lazy = TRUE, json.folder = "/Users/soyabean/Desktop/tmp/scdown/cell_browser/json", update = TRUE)
+# ucsc.cb.samples = ShowCBDatasets(lazy = TRUE, json.folder = json.folder, update = TRUE)
 
 # second time run, load the downloaded json files
-ucsc.cb.samples <- ShowCBDatasets(lazy = TRUE, json.folder = "/Users/soyabean/Desktop/tmp/scdown/cell_browser/json", update = FALSE)
+ucsc.cb.samples <- ShowCBDatasets(lazy = TRUE, json.folder = json.folder, update = FALSE)
 
 # always read online
 # ucsc.cb.samples = ShowCBDatasets(lazy = FALSE)
@@ -353,7 +349,7 @@ unique(unlist(sapply(unique(gsub(pattern = "\\|parent", replacement = "", x = uc
 
 <hr />
 
-### Summary attributes
+### Summarise attributes
 
 `scfetch` provides `StatDBAttribute` to summary attributes of [UCSC Cell Browser](https://cells.ucsc.edu/?#):
 
@@ -378,7 +374,7 @@ hbb.sample.df <- ExtractCBDatasets(all.samples.df = ucsc.cb.samples, organ = c("
 `scfetch` provides `ExtractCBComposition` to extract cell type annotation and composition.
 
 ```{r cb_celltype, eval=FALSE}
-hbb.sample.ct <- ExtractCBComposition(json.folder = "/Users/soyabean/Desktop/tmp/scdown/cell_browser/json", sample.df = hbb.sample.df)
+hbb.sample.ct <- ExtractCBComposition(json.folder = json.folder, sample.df = hbb.sample.df)
 ```
 
 <hr />
@@ -432,9 +428,10 @@ After manually check the extracted metadata, users can **download the specified 
 The returned result is a dataframe containing failed objects. If not `NULL`, users can re-run `ParseZenodo` by setting `doi.df` to the returned result.
 
 ```{r zenodo_parse, eval=FALSE}
+out.folder <- tempdir()
 multi.dois.parse <- ParseZenodo(
   doi = c("1111", "10.5281/zenodo.7243603", "10.5281/zenodo.7244441"),
-  file.ext = c("rdata", "rds"), out.folder = "/Users/soyabean/Desktop/tmp/scdown/download_zenodo"
+  file.ext = c("rdata", "rds"), out.folder = out.folder
 )
 ```
 
@@ -455,7 +452,7 @@ all.cellxgene.datasets <- ShowCELLxGENEDatasets()
 
 <hr />
 
-### Summary attributes
+### Summarise attributes
 
 `scfetch` provides `StatDBAttribute` to summary attributes of [CELLxGENE](https://cellxgene.cziscience.com/):
 
@@ -486,9 +483,10 @@ After manually check the extracted metadata, users can **download the specified 
 The returned result is a dataframe containing failed datasets. If not `NULL`, users can re-run `ParseCELLxGENE` by setting `meta` to the returned result.
 
 ```{r cellxgene_parse, eval=FALSE}
+out.folder <- tempdir()
 ParseCELLxGENE(
   meta = human.10x.cellxgene.meta[1:5, ], file.ext = "rds",
-  out.folder = "/Users/soyabean/Desktop/tmp/scdown/download_cellxgene"
+  out.folder = out.folder
 )
 ```
 
@@ -563,9 +561,11 @@ cds3.obj <- ExportSeurat(seu.obj = pbmc_small, assay = "RNA", to = "cell_data_se
 The conversion is performed with functions implemented in `sceasy`:
 ```{r seu2anndata, eval=FALSE}
 # remove pbmc_small.h5ad first
+anndata.file <- tempfile(pattern = "pbmc_small_", fileext = ".h5ad")
+# you may need to set conda.path
 ExportSeurat(
-  seu.obj = pbmc_small, assay = "RNA", to = "AnnData", conda.path = "/Applications/anaconda3",
-  anndata.file = "/Users/soyabean/Desktop/tmp/scdown/conversion/pbmc_small.h5ad"
+  seu.obj = pbmc_small, assay = "RNA", to = "AnnData",
+  anndata.file = anndata.file
 )
 ```
 
@@ -575,9 +575,10 @@ ExportSeurat(
 
 The conversion is performed with functions implemented in `SeuratDisk`:
 ```{r seu2loom, eval=FALSE}
+loom.file <- tempfile(pattern = "pbmc_small_", fileext = ".loom")
 ExportSeurat(
   seu.obj = pbmc_small, assay = "RNA", to = "loom",
-  loom.file = "/Users/soyabean/Desktop/tmp/scdown/conversion/pbmc_small.loom"
+  loom.file = loom.file
 )
 ```
 
@@ -614,9 +615,9 @@ seu.obj.cds3 <- ImportSeurat(obj = cds3.obj, from = "cell_data_set", count.assay
 
 The conversion is performed with functions implemented in `sceasy`:
 ```{r anndata2seu, eval=FALSE}
+# you may need to set conda.path
 seu.obj.h5ad <- ImportSeurat(
-  anndata.file = "/Users/soyabean/Desktop/tmp/scdown/conversion/pbmc_small.h5ad",
-  from = "AnnData", assay = "RNA", conda.path = "/Applications/anaconda3"
+  anndata.file = anndata.file, from = "AnnData", assay = "RNA"
 )
 ```
 
@@ -628,7 +629,7 @@ The conversion is performed with functions implemented in `SeuratDisk` and `Seur
 
 ```{r loom2seu, eval=FALSE}
 # loom will lose reduction
-seu.obj.loom <- ImportSeurat(loom.file = "/Users/soyabean/Desktop/tmp/scdown/conversion/pbmc_small.loom", from = "loom")
+seu.obj.loom <- ImportSeurat(loom.file = loom.file, from = "loom")
 ```
 
 <hr />
@@ -641,9 +642,10 @@ The conversion is performed with functions implemented in `zellkonverter`.
 
 ```{r sce2anndata, eval=FALSE}
 # remove seger.h5ad first
+seger.anndata.file <- tempfile(pattern = "seger_", fileext = ".h5ad")
 SCEAnnData(
   from = "SingleCellExperiment", to = "AnnData", sce = seger, X_name = "counts",
-  anndata.file = "/Users/soyabean/Desktop/tmp/scdown/conversion/seger.h5ad"
+  anndata.file = seger.anndata.file
 )
 ```
 
@@ -654,7 +656,7 @@ SCEAnnData(
 ```{r anndata2sce, eval=FALSE}
 seger.anndata <- SCEAnnData(
   from = "AnnData", to = "SingleCellExperiment",
-  anndata.file = "/Users/soyabean/Desktop/tmp/scdown/conversion/seger.h5ad"
+  anndata.file = seger.anndata.file
 )
 ```
 
@@ -668,9 +670,10 @@ The conversion is performed with functions implemented in `LoomExperiment`.
 
 ```{r sce2loom, eval=FALSE}
 # remove seger.loom first
+seger.loom.file <- tempfile(pattern = "seger_", fileext = ".loom")
 SCELoom(
   from = "SingleCellExperiment", to = "loom", sce = seger,
-  loom.file = "/Users/soyabean/Desktop/tmp/scdown/conversion/seger.loom"
+  loom.file = seger.loom.file
 )
 ```
 
@@ -681,7 +684,7 @@ SCELoom(
 ```{r loom2sce, eval=FALSE}
 seger.loom <- SCELoom(
   from = "loom", to = "SingleCellExperiment",
-  loom.file = "/Users/soyabean/Desktop/tmp/scdown/conversion/seger.loom"
+  loom.file = seger.loom.file
 )
 ```
 

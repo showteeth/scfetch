@@ -40,8 +40,8 @@ ExtractSample <- function(df, base.url, json.folder, quiet) {
       dir.create(x, showWarnings = FALSE, recursive = TRUE)
     })
     down.status <- lapply(df$name, function(x) {
-      utils::download.file(url = df.json[x], destfile = file.path(df.json.folder[x], "dataset.json"), quiet = quiet, mode = "wb", method = "wget")
-      utils::download.file(url = df.desc[x], destfile = file.path(df.json.folder[x], "desc.json"), quiet = quiet, mode = "wb", method = "wget")
+      utils::download.file(url = df.json[x], destfile = file.path(df.json.folder[x], "dataset.json"), quiet = quiet, mode = "wb", method = "wget", extra = "--no-check-certificate")
+      utils::download.file(url = df.desc[x], destfile = file.path(df.json.folder[x], "desc.json"), quiet = quiet, mode = "wb", method = "wget", extra = "--no-check-certificate")
     })
   }
   # process

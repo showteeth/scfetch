@@ -18,9 +18,13 @@ Dataframe contains files with valid extension in given Zenodo DOI.
 Prepare Dataframe with Zenodo DOIs.
 }
 \examples{
-# zebrafish.df = ExtractZenodoMeta(doi = "10.5281/zenodo.7243603")
-# ExtractZenodoMeta(doi = "10.5281/zenodo.48065") # Restricted Access
-# # vector of dois
-# multi.dois = ExtractZenodoMeta(doi = c("1111", "10.5281/zenodo.7243603",
-#                                        "10.5281/zenodo.7244441"))
+\donttest{
+zebrafish.df <- ExtractZenodoMeta(doi = "10.5281/zenodo.7243603")
+ExtractZenodoMeta(doi = "10.5281/zenodo.48065") # Restricted Access
+# vector of dois
+multi.dois <- ExtractZenodoMeta(doi = c(
+  "1111", "10.5281/zenodo.7243603",
+  "10.5281/zenodo.7244441"
+))
+}
 }

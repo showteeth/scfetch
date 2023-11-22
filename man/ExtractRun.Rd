@@ -25,5 +25,7 @@ Dataframe contains GSM and Runs.
 Extract Runs with GEO Accession Number or GSM Number.
 }
 \examples{
-# GSE186003.runs = ExtractRun(acce = "GSE186003", platform = "GPL24247")
+\dontrun{
+GSE186003.runs <- ExtractRun(acce = "GSE186003", platform = "GPL24247", parallel = FALSE)
+}
 }

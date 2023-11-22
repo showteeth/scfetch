@@ -9,24 +9,41 @@
 #' @param loom.file File used to save loom results. Default: NULL.
 #' @param conda.path Conda environment path, used when \code{to} is "AnnData". Default: NULL.
 #' @param ... Parameter for \code{\link{as.SingleCellExperiment}}, \code{sceasy::convertFormat}, \code{\link{as.CellDataSet}},
-#' \code{\link{as.cell_data_set}}, \code{\link{SaveLoom}}, corresponding to \code{to}.
+#' \code{as.cell_data_set}, \code{SaveLoom}, corresponding to \code{to}.
 #'
 #' @return Object corresponding to \code{to}.
 #' @export
 #' @importFrom Seurat DefaultAssay as.SingleCellExperiment as.CellDataSet
-#' @importFrom sceasy convertFormat
-#' @importFrom SeuratDisk SaveLoom
-#' @importFrom SeuratWrappers as.cell_data_set
 #' @importFrom reticulate use_condaenv
+#' @importFrom methods is
 #'
+#' @examples
+#' \dontrun{
+#' library(Seurat)
+#' # export to SingleCellExperiment
+#' sce.obj <- ExportSeurat(seu.obj = pbmc_small, assay = "RNA", to = "SCE")
+#' # export to CellDataSet
+#' cds.obj <- ExportSeurat(seu.obj = pbmc_small, assay = "RNA", reduction = "tsne", to = "CellDataSet")
+#' # export to cell_data_set
+#' cds3.obj <- ExportSeurat(seu.obj = pbmc_small, assay = "RNA", to = "cell_data_set")
+#' # export to AnnData, need users to provide the conda path and the output file
+#' ExportSeurat(
+#'   seu.obj = pbmc_small, assay = "RNA", to = "AnnData", conda.path = "/path/to/anaconda3",
+#'   anndata.file = "/path/to/pbmc_small.h5ad"
+#' )
+#' # export to loom, need users to provide the output file
+#' ExportSeurat(
+#'   seu.obj = pbmc_small, assay = "RNA", to = "loom",
+#'   loom.file = "/path/to/pbmc_small.loom"
+#' )
+#' }
 ExportSeurat <- function(seu.obj, assay = NULL, reduction = NULL,
                          to = c("SCE", "AnnData", "CellDataSet", "cell_data_set", "loom"),
                          anndata.file = NULL, loom.file = NULL, conda.path = NULL, ...) {
   # check parameters
   to <- match.arg(arg = to)
-
   # check object
-  if (class(seu.obj) != "Seurat") {
+  if (!methods::is(seu.obj, "Seurat")) {
     stop("Please provide valid Seurat object!")
   }
 
@@ -58,6 +75,9 @@ ExportSeurat <- function(seu.obj, assay = NULL, reduction = NULL,
     if (!is.null(conda.path)) {
       reticulate::use_condaenv(conda.path, required = TRUE)
     }
+    if (!requireNamespace("sceasy", quietly = TRUE)) {
+      stop("Can not find sceasy package, install with devtools::install_github('cellgeni/sceasy')!")
+    }
     sceasy::convertFormat(seu.obj,
       from = "seurat", to = "anndata", drop_single_values = F,
       assay = assay, outFile = anndata.file, ...
@@ -74,6 +94,9 @@ ExportSeurat <- function(seu.obj, assay = NULL, reduction = NULL,
     return(result.obj)
   } else if (to == "cell_data_set") {
     message("Convert SeuratObject to cell_data_set (suitable for Monocle3)!")
+    if (!requireNamespace("SeuratWrappers", quietly = TRUE)) {
+      stop("Can not find SeuratWrappers package, install with devtools::install_github('satijalab/seurat-wrappers')!")
+    }
     if (is.null(reduction)) {
       result.obj <- SeuratWrappers::as.cell_data_set(x = seu.obj, assay = assay, ...)
     } else {
@@ -89,6 +112,9 @@ ExportSeurat <- function(seu.obj, assay = NULL, reduction = NULL,
       loom.file <- file.path(getwd(), paste0(seu.name, ".loom"))
     }
     # Convert SingleCellExperiment to loom
+    if (!requireNamespace("SeuratDisk", quietly = TRUE)) {
+      stop("Can not find SeuratDisk package, install with devtools::install_github('mojaveazure/seurat-disk')!")
+    }
     SeuratDisk::SaveLoom(object = seu.obj, filename = loom.file, overwrite = TRUE, ...)
   }
 }
@@ -112,26 +138,31 @@ ExportSeurat <- function(seu.obj, assay = NULL, reduction = NULL,
 #'
 #' @return A Seurat object.
 #' @importFrom Seurat as.Seurat
-#' @importFrom sceasy convertFormat
-#' @importFrom SeuratDisk Connect
 #' @importFrom reticulate use_condaenv
 #' @importFrom SummarizedExperiment assayNames
 #' @importFrom scater logNormCounts
+#' @importFrom methods is
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' # import data from SingleCellExperiment
-#' # seu.obj = ImportSeurat(obj=sce.obj, from="SCE", count.assay="counts",
-#' #                        data.assay="logcounts", assay="RNA")
+#' seu.obj <- ImportSeurat(
+#'   obj = sce.obj, from = "SCE", count.assay = "counts",
+#'   data.assay = "logcounts", assay = "RNA"
+#' )
 #' # import data from CellDataSet
-#' # seu.obj = ImportSeurat(obj=cds.obj, from="CellDataSet", count.assay="counts", assay = "RNA")
+#' seu.obj <- ImportSeurat(obj = cds.obj, from = "CellDataSet", count.assay = "counts", assay = "RNA")
 #' # import data from cell_data_set
-#' # seu.obj = ImportSeurat(obj=sce.obj, from="cell_data_set", count.assay="counts",
-#' #                        data.assay="logcounts", assay="RNA")
-#' # import data from AnnData
-#' # seu.obj = ImportSeurat(anndata.file = 'path/to/h5ad', from="AnnData", assay = "RNA")
-#' # import data from loom
-#' # seu.obj = ImportSeurat(loom.file = 'path/to/loom', from="loom")
+#' seu.obj <- ImportSeurat(
+#'   obj = sce.obj, from = "cell_data_set", count.assay = "counts",
+#'   data.assay = "logcounts", assay = "RNA"
+#' )
+#' # import data from AnnData, need users to provide the file for conversion
+#' seu.obj <- ImportSeurat(anndata.file = "path/to/h5ad", from = "AnnData", assay = "RNA")
+#' # import data from loom, need users to provide the file for conversion
+#' seu.obj <- ImportSeurat(loom.file = "path/to/loom", from = "loom")
+#' }
 ImportSeurat <- function(obj = NULL, assay = "RNA", from = c("SCE", "AnnData", "CellDataSet", "cell_data_set", "loom"),
                          count.assay = "counts", data.assay = "logcounts", slot = "counts",
                          anndata.file = NULL, loom.file = NULL, conda.path = NULL, ...) {
@@ -144,7 +175,7 @@ ImportSeurat <- function(obj = NULL, assay = "RNA", from = c("SCE", "AnnData", "
     # check object
     if (is.null(obj)) {
       stop("Please provide SingleCellExperiment with obj!")
-    } else if (class(obj) != "SingleCellExperiment") {
+    } else if (!methods::is(obj, "SingleCellExperiment")) {
       stop("Please provide valid SingleCellExperiment object!")
     }
     # check assays
@@ -175,6 +206,9 @@ ImportSeurat <- function(obj = NULL, assay = "RNA", from = c("SCE", "AnnData", "
       if (!is.null(conda.path)) {
         reticulate::use_condaenv(conda.path, required = TRUE)
       }
+      if (!requireNamespace("sceasy", quietly = TRUE)) {
+        stop("Can not find sceasy package, install with devtools::install_github('cellgeni/sceasy')!")
+      }
       seu.obj <- sceasy::convertFormat(anndata.file,
         from = "anndata", to = "seurat",
         assay = assay, outFile = NULL, ...
@@ -185,7 +219,7 @@ ImportSeurat <- function(obj = NULL, assay = "RNA", from = c("SCE", "AnnData", "
     # check object
     if (is.null(obj)) {
       stop("Please provide CellDataSet with obj!")
-    } else if (class(obj) != "CellDataSet") {
+    } else if (!methods::is(obj, "CellDataSet")) {
       stop("Please provide valid CellDataSet object!")
     }
     # convert
@@ -197,7 +231,7 @@ ImportSeurat <- function(obj = NULL, assay = "RNA", from = c("SCE", "AnnData", "
     # check object
     if (is.null(obj)) {
       stop("Please provide cell_data_set with obj!")
-    } else if (class(obj) != "cell_data_set") {
+    } else if (!methods::is(obj, "cell_data_set")) {
       stop("Please provide valid cell_data_set object!")
     }
     # convert
@@ -212,6 +246,9 @@ ImportSeurat <- function(obj = NULL, assay = "RNA", from = c("SCE", "AnnData", "
     if (is.null(loom.file)) {
       stop("Please provide a file a to loom results.")
     } else {
+      if (!requireNamespace("SeuratDisk", quietly = TRUE)) {
+        stop("Can not find SeuratDisk package, install with devtools::install_github('mojaveazure/seurat-disk')!")
+      }
       loom.info <- SeuratDisk::Connect(filename = loom.file, mode = "r")
       seu.obj <- Seurat::as.Seurat(loom.info, ...)
     }
@@ -229,33 +266,40 @@ ImportSeurat <- function(obj = NULL, assay = "RNA", from = c("SCE", "AnnData", "
 #' @param anndata.file File used to save or contains AnnData results. Default: NULL.
 #' @param slot.name Slot name used to save count matrix, used when converting from AnnData to SingleCellExperiment.
 #' Default: counts.
-#' @param ... Parameters for \code{\link{writeH5AD}} and \code{\link{readH5AD}}.
+#' @param ... Parameters for \code{writeH5AD} and \code{readH5AD}.
 #'
 #' @return NULL or SingleCellExperiment.
-#' @importFrom zellkonverter readH5AD writeH5AD
 #' @importFrom SingleCellExperiment reducedDimNames reducedDimNames<-
+#' @importFrom methods is
 #' @export
 #'
 #' @examples
-#' # library(scRNAseq)
-#' # seger <- SegerstolpePancreasData()
-#' # SCEAnnData(from = "SingleCellExperiment", to = "AnnData", sce = seger, X_name = "counts")
-#' # sce = SCEAnnData(from = "AnnData", to = "SingleCellExperiment",
-#' #                  anndata.file = "path/to/seger.h5ad")
+#' \dontrun{
+#' library(scRNAseq)
+#' seger <- SegerstolpePancreasData()
+#' SCEAnnData(from = "SingleCellExperiment", to = "AnnData", sce = seger, X_name = "counts")
+#' # need users to provide the output file
+#' sce <- SCEAnnData(
+#'   from = "AnnData", to = "SingleCellExperiment",
+#'   anndata.file = "path/to/seger.h5ad"
+#' )
+#' }
 SCEAnnData <- function(from = c("SingleCellExperiment", "AnnData"),
                        to = c("AnnData", "SingleCellExperiment"),
                        sce = NULL, anndata.file = NULL, slot.name = "counts", ...) {
   # check parameters
   from <- match.arg(arg = from)
   to <- match.arg(arg = to)
-
+  if (!requireNamespace("zellkonverter", quietly = TRUE)) {
+    stop("Can not find zellkonverter package, install with BiocManager::install('zellkonverter')!")
+  }
   # conversion
   if (from == "SingleCellExperiment" & to == "AnnData") {
     message("Convert SingleCellExperiment to AnnData.")
     # check SingleCellExperiment
     if (is.null(sce)) {
       stop("Please provide SingleCellExperiment with sce!")
-    } else if (class(sce) != "SingleCellExperiment") {
+    } else if (!methods::is(sce, "SingleCellExperiment")) {
       stop("Please provide valid SingleCellExperiment object!")
     }
     # check h5ad file
@@ -296,16 +340,22 @@ SCEAnnData <- function(from = c("SingleCellExperiment", "AnnData"),
 #' @return NULL or SingleCellExperiment.
 #' @importFrom LoomExperiment SingleCellLoomExperiment export import
 #' @importFrom SummarizedExperiment assayNames
-#' @importFrom methods as
+#' @importFrom methods as is
 #' @export
 #'
 #' @examples
-#' # convert from loom to SingleCellExperiment
-#' # sce.obj = SCELoom(from = "loom", to = "SingleCellExperiment",
-#' #                   loom.file = "path/to/loom")
-#' # convert from SingleCellExperiment to loom
-#' # SCELoom(from = "SingleCellExperiment", to = "loom",sce = sce.obj,
-#' #         loom.file = "path/to/loom")
+#' \dontrun{
+#' # convert from loom to SingleCellExperiment, need users to provide the loom file
+#' sce.obj <- SCELoom(
+#'   from = "loom", to = "SingleCellExperiment",
+#'   loom.file = "path/to/loom"
+#' )
+#' # convert from SingleCellExperiment to loom, need users to provide the loom file
+#' SCELoom(
+#'   from = "SingleCellExperiment", to = "loom", sce = sce.obj,
+#'   loom.file = "path/to/loom"
+#' )
+#' }
 SCELoom <- function(from = c("SingleCellExperiment", "loom"),
                     to = c("loom", "SingleCellExperiment"),
                     sce = NULL, loom.file = NULL, ...) {
@@ -318,7 +368,7 @@ SCELoom <- function(from = c("SingleCellExperiment", "loom"),
     # check SingleCellExperiment
     if (is.null(sce)) {
       stop("Please provide SingleCellExperiment with sce!")
-    } else if (class(sce) != "SingleCellExperiment") {
+    } else if (!methods::is(sce, "SingleCellExperiment")) {
       stop("Please provide valid SingleCellExperiment object!")
     }
     # check loom file

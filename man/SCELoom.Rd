@@ -32,10 +32,16 @@ NULL or SingleCellExperiment.
 Data Format Conversion between SingleCellExperiment and loom.
 }
 \examples{
-# convert from loom to SingleCellExperiment
-# sce.obj = SCELoom(from = "loom", to = "SingleCellExperiment",
-#                   loom.file = "path/to/loom")
-# convert from SingleCellExperiment to loom
-# SCELoom(from = "SingleCellExperiment", to = "loom",sce = sce.obj,
-#         loom.file = "path/to/loom")
+\dontrun{
+# convert from loom to SingleCellExperiment, need users to provide the loom file
+sce.obj <- SCELoom(
+  from = "loom", to = "SingleCellExperiment",
+  loom.file = "path/to/loom"
+)
+# convert from SingleCellExperiment to loom, need users to provide the loom file
+SCELoom(
+  from = "SingleCellExperiment", to = "loom", sce = sce.obj,
+  loom.file = "path/to/loom"
+)
+}
 }

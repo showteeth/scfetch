@@ -8,9 +8,12 @@ Authors@R:
            role = c("aut", "cre"),
            email = "songyb0519@gmail.com")
 Maintainer: Yabing Song <songyb0519@gmail.com>
-Description: The goal of 'scfetch' is to access and format scRNA-seq datasets. It can be used to download scRNA-seq 
-    datasets from widely used public resources, including GEO, Zenodo, CELLxGENE, Human Cell Atlas, PanglaoDB and UCSC Cell Browser. 
-    And, it can also be used to perform object conversion between SeuratObject, loom,  h5ad, SingleCellExperiment and CellDataSet/cell_data_set.
+Description: The goal of 'scfetch' is to access and format single-cell RNA-seq datasets. It can be used to download single-cell RNA-seq
+    datasets from widely used public resources, including GEO <https://www.ncbi.nlm.nih.gov/geo/>, Zenodo <https://zenodo.org/>, 
+    CELLxGENE <https://cellxgene.cziscience.com/>, Human Cell Atlas <https://www.humancellatlas.org/>, PanglaoDB <https://panglaodb.se/index.html> 
+    and UCSC Cell Browser <https://cells.ucsc.edu/>. And, it can also be used to perform object conversion between SeuratObject <https://satijalab.org/seurat/>, 
+    loom <http://loompy.org/>, h5ad <https://scanpy.readthedocs.io/en/stable/>, SingleCellExperiment <https://bioconductor.org/packages/release/bioc/html/scran.html>, 
+    CellDataSet <http://cole-trapnell-lab.github.io/monocle-release/> and cell_data_set <https://cole-trapnell-lab.github.io/monocle3/>.
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
@@ -21,7 +24,6 @@ Imports:
     curl,
     data.table,
     dplyr,
-    GEOfastq,
     GEOquery,
     jsonlite,
     magrittr,
@@ -36,10 +38,6 @@ Imports:
     tibble,
     tools,
     utils,
-    sceasy,
-    SeuratDisk,
-    SeuratWrappers,
-    zellkonverter,
     SingleCellExperiment,
     SummarizedExperiment,
     scater,
@@ -48,17 +46,20 @@ Imports:
     rlang,
     tidyr,
     methods
-Remotes: 
-    cellgeni/sceasy,
-    mojaveazure/seurat-disk,
-    satijalab/seurat-wrappers,
-    alexvpickering/GEOfastq
 Suggests: 
     knitr,
     rmarkdown,
     scRNAseq,
     BiocStyle,
-    htmltools
+    htmltools,
+    sceasy,
+    SeuratDisk,
+    SeuratWrappers,
+    zellkonverter,
+    GEOfastq
 VignetteBuilder: knitr
+Additional_repositories: https://showteeth.github.io/drat/
+URL: https://github.com/showteeth/scfetch
+BugReports: https://github.com/showteeth/scfetch/issues
 Depends: 
     R (>= 2.10)

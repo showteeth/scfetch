@@ -12,11 +12,15 @@
 #' @export
 #'
 #' @examples
-#' # zebrafish.df = ExtractZenodoMeta(doi = "10.5281/zenodo.7243603")
-#' # ExtractZenodoMeta(doi = "10.5281/zenodo.48065") # Restricted Access
-#' # # vector of dois
-#' # multi.dois = ExtractZenodoMeta(doi = c("1111", "10.5281/zenodo.7243603",
-#' #                                        "10.5281/zenodo.7244441"))
+#' \donttest{
+#' zebrafish.df <- ExtractZenodoMeta(doi = "10.5281/zenodo.7243603")
+#' ExtractZenodoMeta(doi = "10.5281/zenodo.48065") # Restricted Access
+#' # vector of dois
+#' multi.dois <- ExtractZenodoMeta(doi = c(
+#'   "1111", "10.5281/zenodo.7243603",
+#'   "10.5281/zenodo.7244441"
+#' ))
+#' }
 ExtractZenodoMeta <- function(doi, file.ext = c("rdata", "h5ad")) {
   # check doi
   doi.status <- startsWith(x = doi, prefix = "10.5281/zenodo.")
@@ -53,6 +57,7 @@ ExtractZenodoMetaSingle <- function(doi, file.ext = c("rdata", "h5ad")) {
     if (is.null(file.ext)) {
       record.files.used <- record.files
     } else {
+      record.files$type <- tolower(tools::file_ext(record.files$key))
       record.files.used <- record.files %>% dplyr::filter(.data[["type"]] %in% file.ext)
     }
     # check the data
@@ -61,9 +66,14 @@ ExtractZenodoMetaSingle <- function(doi, file.ext = c("rdata", "h5ad")) {
     }
     # prepare md5sum
     record.files.used$checksum <- gsub(pattern = "md5:", replacement = "", record.files.used$checksum)
+    # record.files.used.final <- data.frame(
+    #   title = record.content$metadata$title, description = record.content$metadata$description,
+    #   url = record.files.used$links$self, filename = basename(record.files.used$links$self),
+    #   md5 = record.files.used$checksum, license = record.content$metadata$license$id
+    # )
     record.files.used.final <- data.frame(
       title = record.content$metadata$title, description = record.content$metadata$description,
-      url = record.files.used$links$self, filename = basename(record.files.used$links$self),
+      url = record.files.used$links$self, filename = basename(record.files.used$key),
       md5 = record.files.used$checksum, license = record.content$metadata$license$id
     )
   } else {
@@ -97,10 +107,17 @@ ExtractZenodoMetaSingle <- function(doi, file.ext = c("rdata", "h5ad")) {
 #' @export
 #'
 #' @examples
-#' # multi.dois.parse = ParseZenodo(doi = c("1111", "10.5281/zenodo.7243603",
-#' #                                        "10.5281/zenodo.7244441"),
-#' #                                file.ext = c("rdata", "rds"),
-#' #                                out.folder = "/path/to/outfoder")
+#' \dontrun{
+#' # need users to provide the output folder
+#' multi.dois.parse <- ParseZenodo(
+#'   doi = c(
+#'     "1111", "10.5281/zenodo.7243603",
+#'     "10.5281/zenodo.7244441"
+#'   ),
+#'   file.ext = c("rdata", "rds"),
+#'   out.folder = "/path/to/outfoder"
+#' )
+#' }
 ParseZenodo <- function(doi = NULL, file.ext = c("rdata", "rds", "h5ad"), doi.df = NULL, out.folder = NULL, timeout = 1000,
                         quiet = FALSE, parallel = TRUE) {
   if (!is.null(doi.df)) {
@@ -117,6 +134,7 @@ ParseZenodo <- function(doi = NULL, file.ext = c("rdata", "rds", "h5ad"), doi.df
   doi.df$filename <- file.path(out.folder, doi.df$filename)
   # set timeout
   env.timeout <- getOption("timeout")
+  on.exit(options(timeout = env.timeout)) # restore timeout
   options(timeout = timeout)
   message("Start downloading!")
   if (isTRUE(parallel)) {
@@ -129,8 +147,6 @@ ParseZenodo <- function(doi = NULL, file.ext = c("rdata", "rds", "h5ad"), doi.df
     down.status <- utils::download.file(url = doi.df$url, destfile = doi.df$filename, quiet = quiet, mode = "wb")
   }
   message("Finish downloading!")
-  # restore timeout
-  options(timeout = env.timeout)
   # check the md5sum
   down.md5 <- tools::md5sum(doi.df$filename)
   raw.md5 <- doi.df$md5

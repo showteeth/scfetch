@@ -27,7 +27,7 @@ Default: AnnData.}
 \item{slot.name}{Slot name used to save count matrix, used when converting from AnnData to SingleCellExperiment.
 Default: counts.}
 
-\item{...}{Parameters for \code{\link{writeH5AD}} and \code{\link{readH5AD}}.}
+\item{...}{Parameters for \code{writeH5AD} and \code{readH5AD}.}
 }
 \value{
 NULL or SingleCellExperiment.
@@ -36,9 +36,14 @@ NULL or SingleCellExperiment.
 Data Format Conversion between SingleCellExperiment and AnnData.
 }
 \examples{
-# library(scRNAseq)
-# seger <- SegerstolpePancreasData()
-# SCEAnnData(from = "SingleCellExperiment", to = "AnnData", sce = seger, X_name = "counts")
-# sce = SCEAnnData(from = "AnnData", to = "SingleCellExperiment",
-#                  anndata.file = "path/to/seger.h5ad")
+\dontrun{
+library(scRNAseq)
+seger <- SegerstolpePancreasData()
+SCEAnnData(from = "SingleCellExperiment", to = "AnnData", sce = seger, X_name = "counts")
+# need users to provide the output file
+sce <- SCEAnnData(
+  from = "AnnData", to = "SingleCellExperiment",
+  anndata.file = "path/to/seger.h5ad"
+)
+}
 }

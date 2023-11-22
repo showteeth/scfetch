@@ -13,8 +13,10 @@ Dataframe contains all available datasets.
 Show All Available Datasets in CELLxGENE.
 }
 \examples{
-# # all available datasets
-# all.cellxgene.datasets = ShowCELLxGENEDatasets()
+\donttest{
+# all available datasets
+all.cellxgene.datasets <- ShowCELLxGENEDatasets()
+}
 }
 \references{
 https://gist.github.com/ivirshup/f1a1603db69de3888eacb4bdb6a9317a

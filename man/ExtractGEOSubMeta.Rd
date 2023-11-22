@@ -15,7 +15,3 @@ A dataframe.
 \description{
 Extract Sample Metadata.
 }
-\examples{
-# pf.obj = GEOobj(acce = "GSE94820", platform = "GPL16791")
-# pf.info = ExtractGEOSubMeta(pf.obj)
-}

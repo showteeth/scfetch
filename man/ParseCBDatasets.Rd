@@ -58,13 +58,17 @@ Seurat object (if \code{merge} is TRUE) or list of Seurat objects (if \code{merg
 Download UCSC Cell Browser Datasets.
 }
 \examples{
-# # lazy mode, load datasets json files locally
-# ucsc.cb.samples = ShowCBDatasets(lazy = TRUE, json.folder = NULL, update = FALSE)
-# # cell number is between 1000 and 2000
-# hbb.sample.df = ExtractCBDatasets(all.samples.df = ucsc.cb.samples, organ = c("brain", "blood"),
-#                                   organism = "Human (H. sapiens)", cell.num = c(1000,2000))
-# hbb.sample.seu = ParseCBDatasets(sample.df = hbb.sample.df)
-# # test 10x and matrix load
-# complex.df = ucsc.cb.samples[c(1, 927, 379), ] # two 10x and one matrix
-# complex.seu.list = ParseCBDatasets(sample.df = test.df, merge = F)
+\dontrun{
+# lazy mode, load datasets json files locally, need users to provide json folder
+ucsc.cb.samples <- ShowCBDatasets(lazy = TRUE, json.folder = NULL, update = FALSE)
+# cell number is between 1000 and 2000
+hbb.sample.df <- ExtractCBDatasets(
+  all.samples.df = ucsc.cb.samples, organ = c("brain", "blood"),
+  organism = "Human (H. sapiens)", cell.num = c(1000, 2000)
+)
+hbb.sample.seu <- ParseCBDatasets(sample.df = hbb.sample.df)
+# test 10x and matrix load
+complex.df <- ucsc.cb.samples[c(1, 927, 379), ] # two 10x and one matrix
+complex.seu.list <- ParseCBDatasets(sample.df = test.df, merge = F)
+}
 }

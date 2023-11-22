@@ -31,8 +31,12 @@ Seurat object (if \code{merge} is TRUE) or list of Seurat objects (if \code{merg
 Parse PanglaoDB Data.
 }
 \examples{
-# hsa.meta = ExtractPanglaoDBMeta(species = "Homo sapiens",
-#                                 protocol = c("Smart-seq2", "10x chromium"),
-#                                 show.cell.type = TRUE, cell.num = c(1000,2000))
-# hsa.seu = ParsePanglaoDB(hsa.meta, merge = TRUE)
+\dontrun{
+hsa.meta <- ExtractPanglaoDBMeta(
+  species = "Homo sapiens",
+  protocol = c("Smart-seq2", "10x chromium"),
+  show.cell.type = TRUE, cell.num = c(1000, 2000)
+)
+hsa.seu <- ParsePanglaoDB(hsa.meta, merge = TRUE)
+}
 }

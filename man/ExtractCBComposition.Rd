@@ -56,10 +56,14 @@ Dataframe contains sample information and cell type composition.
 Extract Cell Type Composition of UCSC Cell Browser Datasets.
 }
 \examples{
-# # lazy mode, load datasets json files locally
-# ucsc.cb.samples = ShowCBDatasets(lazy = TRUE, json.folder = NULL, update = FALSE)
-# # cell number is between 1000 and 2000
-# hbb.sample.df = ExtractCBDatasets(all.samples.df = ucsc.cb.samples, organ = c("brain", "blood"),
-#                                   organism = "Human (H. sapiens)", cell.num = c(1000,2000))
-# hbb.sample.ct = ExtractCBComposition(json.folder = NULL, sample.df = hbb.sample.df)
+\dontrun{
+# lazy mode, load datasets json files locally, need users to provide json folder
+ucsc.cb.samples <- ShowCBDatasets(lazy = TRUE, json.folder = NULL, update = FALSE)
+# cell number is between 1000 and 2000
+hbb.sample.df <- ExtractCBDatasets(
+  all.samples.df = ucsc.cb.samples, organ = c("brain", "blood"),
+  organism = "Human (H. sapiens)", cell.num = c(1000, 2000)
+)
+hbb.sample.ct <- ExtractCBComposition(json.folder = NULL, sample.df = hbb.sample.df)
+}
 }

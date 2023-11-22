@@ -34,7 +34,3 @@ Count matrix (\code{supp.type} is count) or NULL (\code{supp.type} is 10x).
 \description{
 Extract Raw Count Matrix from Supplementary Files or Fortmat Supplementary Files to 10x.
 }
-\examples{
-# exp.data = ExtractGEOExpSuppAll(acce = "GSE200257", supp.idx = 1, supp.type = "10x",
-#                                 out.folder = "/path/to/output/folder")
-}

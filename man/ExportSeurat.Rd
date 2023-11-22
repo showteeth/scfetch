@@ -32,11 +32,32 @@ Default: "SCE".}
 \item{conda.path}{Conda environment path, used when \code{to} is "AnnData". Default: NULL.}
 
 \item{...}{Parameter for \code{\link{as.SingleCellExperiment}}, \code{sceasy::convertFormat}, \code{\link{as.CellDataSet}},
-\code{\link{as.cell_data_set}}, \code{\link{SaveLoom}}, corresponding to \code{to}.}
+\code{as.cell_data_set}, \code{SaveLoom}, corresponding to \code{to}.}
 }
 \value{
 Object corresponding to \code{to}.
 }
 \description{
 Export SeuratObject to Other Formats.
+}
+\examples{
+\dontrun{
+library(Seurat)
+# export to SingleCellExperiment
+sce.obj <- ExportSeurat(seu.obj = pbmc_small, assay = "RNA", to = "SCE")
+# export to CellDataSet
+cds.obj <- ExportSeurat(seu.obj = pbmc_small, assay = "RNA", reduction = "tsne", to = "CellDataSet")
+# export to cell_data_set
+cds3.obj <- ExportSeurat(seu.obj = pbmc_small, assay = "RNA", to = "cell_data_set")
+# export to AnnData, need users to provide the conda path and the output file
+ExportSeurat(
+  seu.obj = pbmc_small, assay = "RNA", to = "AnnData", conda.path = "/path/to/anaconda3",
+  anndata.file = "/path/to/pbmc_small.h5ad"
+)
+# export to loom, need users to provide the output file
+ExportSeurat(
+  seu.obj = pbmc_small, assay = "RNA", to = "loom",
+  loom.file = "/path/to/pbmc_small.loom"
+)
+}
 }

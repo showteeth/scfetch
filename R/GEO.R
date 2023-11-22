@@ -29,11 +29,16 @@
 #' @export
 #'
 #' @examples
-#' # # the supp files are count matrix
-#' # GSE94820.seu = ParseGEO(acce = "GSE94820", down.supp = TRUE, supp.idx = 1, supp.type = "count")
-#' # # the supp files are cellranger output files: barcodes, genes/features and matrix
-#' # GSE200257.seu = ParseGEO(acce = "GSE200257", down.supp = TRUE, supp.idx = 1, supp.type = "10x",
-#' #                          out.folder = "/path/to/output/folder")
+#' \dontrun{
+#' # the supp files are count matrix
+#' GSE94820.seu <- ParseGEO(acce = "GSE94820", down.supp = TRUE, supp.idx = 1, supp.type = "count")
+#' # the supp files are cellranger output files: barcodes, genes/features and matrix
+#' # need users to provide the output folder
+#' GSE200257.seu <- ParseGEO(
+#'   acce = "GSE200257", down.supp = TRUE, supp.idx = 1, supp.type = "10x",
+#'   out.folder = "/path/to/output/folder"
+#' )
+#' }
 ParseGEO <- function(acce, platform = NULL, down.supp = FALSE, supp.idx = 1, timeout = 3600, data.type = c("sc", "bulk"),
                      supp.type = c("count", "10x"), out.folder = NULL, gene2feature = TRUE, merge = TRUE, ...) {
   # check parameters
@@ -103,10 +108,12 @@ ParseGEO <- function(acce, platform = NULL, down.supp = FALSE, supp.idx = 1, tim
 #' @export
 #'
 #' @examples
-#' # # extract metadata of specified platform
-#' # GSE200257.meta = ExtractGEOMeta(acce = "GSE200257", platform = "GPL24676")
-#' # # extract metadata of all platforms
-#' # GSE94820.meta = ExtractGEOMeta(acce = "GSE94820", platform = NULL)
+#' \donttest{
+#' # users may need to set the size of the connection buffer
+#' # Sys.setenv("VROOM_CONNECTION_SIZE" = 131072 * 60)
+#' # extract metadata of specified platform
+#' GSE200257.meta <- ExtractGEOMeta(acce = "GSE200257", platform = "GPL24676")
+#' }
 ExtractGEOMeta <- function(acce, platform = NULL, ...) {
   # get GEO object
   if (is.null(platform)) {
@@ -174,9 +181,6 @@ SimpleCol <- function(df, col) {
 #'
 #' @return A dataframe.
 #'
-#' @examples
-#' # pf.obj = GEOobj(acce = "GSE94820", platform = "GPL16791")
-#' # pf.info = ExtractGEOInfo(pf.obj)
 ExtractGEOInfo <- function(pf.obj, sample.wise = FALSE) {
   # platform information
   pf.info <- Biobase::experimentData(pf.obj)
@@ -227,9 +231,6 @@ ExtractGEOInfo <- function(pf.obj, sample.wise = FALSE) {
 #'
 #' @return A dataframe.
 #'
-#' @examples
-#' # pf.obj = GEOobj(acce = "GSE94820", platform = "GPL16791")
-#' # pf.info = ExtractGEOSubMeta(pf.obj)
 ExtractGEOSubMeta <- function(pf.obj) {
   # extract sample detail information
   pf.info <- as.data.frame(Biobase::pData(Biobase::phenoData(pf.obj)))
@@ -263,20 +264,14 @@ ExtractGEOSubMeta <- function(pf.obj) {
 #'
 #' @return A dataframe.
 #'
-#' @examples
-#' # for bulk rna-seq
-#' # count.mat = ExtractGEOExpSupp(acce = "GSE149838")
-#' # count.mat = ExtractGEOExpSupp(acce = "GSE147507")
-#' # count.mat = ExtractGEOExpSupp(acce = "GSE147507", supp.idx = 2)
-#' # count.mat = ExtractGEOExpSupp(acce = "GSE122774")
-#' # # for single cell matrix
-#' # count.mat = ExtractGEOExpSupp(acce = "GSE94820")
 ExtractGEOExpSupp <- function(acce, timeout = 3600, supp.idx = 1) {
   # create tmp folder
   tmp.folder <- tempdir()
   # get current timeout
   if (!is.null(timeout)) {
     message("Change Timeout to: ", timeout)
+    env.timeout <- getOption("timeout")
+    on.exit(options(timeout = env.timeout)) # restore timeout
     options(timeout = timeout)
   }
   # download supplementary file
@@ -357,9 +352,6 @@ ExtractGEOExpSupp <- function(acce, timeout = 3600, supp.idx = 1) {
 #'
 #' @return NULL
 #'
-#' @examples
-#' # ExtractGEOExpSupp10x(acce = "GSE200257", out.folder = '/path/to/output')
-#' # ExtractGEOExpSupp10x(acce = "GSE226160", out.folder = '/path/to/output')
 ExtractGEOExpSupp10x <- function(acce, supp.idx = 1, timeout = 3600,
                                  out.folder = NULL, gene2feature = TRUE) {
   # create tmp folder
@@ -367,6 +359,8 @@ ExtractGEOExpSupp10x <- function(acce, supp.idx = 1, timeout = 3600,
   # get current timeout
   if (!is.null(timeout)) {
     message("Change Timeout to: ", timeout)
+    env.timeout <- getOption("timeout")
+    on.exit(options(timeout = env.timeout)) # restore timeout
     options(timeout = timeout)
   }
   # download supp file
@@ -463,9 +457,6 @@ ExtractGEOExpSupp10x <- function(acce, supp.idx = 1, timeout = 3600,
 #'
 #' @return Count matrix (\code{supp.type} is count) or NULL (\code{supp.type} is 10x).
 #'
-#' @examples
-#' # exp.data = ExtractGEOExpSuppAll(acce = "GSE200257", supp.idx = 1, supp.type = "10x",
-#' #                                 out.folder = "/path/to/output/folder")
 ExtractGEOExpSuppAll <- function(acce, supp.idx = 1, timeout = 3600,
                                  supp.type = c("count", "10x"), out.folder = NULL, gene2feature = TRUE) {
   if (supp.type == "count") {
@@ -493,11 +484,6 @@ ExtractGEOExpSuppAll <- function(acce, supp.idx = 1, timeout = 3600,
 #'
 #' @return Count matrix (\code{supp.type} is count) or NULL (\code{supp.type} is 10x).
 #'
-#' @examples
-#' # pf.obj = GEOobj(acce = "GSE200257", platform = "GPL24676")
-#' # count.mat = ExtractGEOExp(pf.obj, acce = "GSE200257", supp.idx = 1,
-#' #                           down.supp = TRUE, supp.type = "10x",
-#' #                           out.folder = "/path/to/output/folder")
 ExtractGEOExp <- function(pf.obj, acce, supp.idx = 1, down.supp = FALSE, timeout = 3600,
                           supp.type = c("count", "10x"), out.folder = NULL, gene2feature = TRUE) {
   # check parameters

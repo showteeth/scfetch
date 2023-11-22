@@ -49,16 +49,22 @@ A Seurat object.
 Convert Other Formats to SeuratObject.
 }
 \examples{
+\dontrun{
 # import data from SingleCellExperiment
-# seu.obj = ImportSeurat(obj=sce.obj, from="SCE", count.assay="counts",
-#                        data.assay="logcounts", assay="RNA")
+seu.obj <- ImportSeurat(
+  obj = sce.obj, from = "SCE", count.assay = "counts",
+  data.assay = "logcounts", assay = "RNA"
+)
 # import data from CellDataSet
-# seu.obj = ImportSeurat(obj=cds.obj, from="CellDataSet", count.assay="counts", assay = "RNA")
+seu.obj <- ImportSeurat(obj = cds.obj, from = "CellDataSet", count.assay = "counts", assay = "RNA")
 # import data from cell_data_set
-# seu.obj = ImportSeurat(obj=sce.obj, from="cell_data_set", count.assay="counts",
-#                        data.assay="logcounts", assay="RNA")
-# import data from AnnData
-# seu.obj = ImportSeurat(anndata.file = 'path/to/h5ad', from="AnnData", assay = "RNA")
-# import data from loom
-# seu.obj = ImportSeurat(loom.file = 'path/to/loom', from="loom")
+seu.obj <- ImportSeurat(
+  obj = sce.obj, from = "cell_data_set", count.assay = "counts",
+  data.assay = "logcounts", assay = "RNA"
+)
+# import data from AnnData, need users to provide the file for conversion
+seu.obj <- ImportSeurat(anndata.file = "path/to/h5ad", from = "AnnData", assay = "RNA")
+# import data from loom, need users to provide the file for conversion
+seu.obj <- ImportSeurat(loom.file = "path/to/loom", from = "loom")
+}
 }

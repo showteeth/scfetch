@@ -20,8 +20,10 @@ Dataframe contains all metadata of provided GEO accession number.
 Extract Sample Metadata from GEO.
 }
 \examples{
-# # extract metadata of specified platform
-# GSE200257.meta = ExtractGEOMeta(acce = "GSE200257", platform = "GPL24676")
-# # extract metadata of all platforms
-# GSE94820.meta = ExtractGEOMeta(acce = "GSE94820", platform = NULL)
+\donttest{
+# users may need to set the size of the connection buffer
+# Sys.setenv("VROOM_CONNECTION_SIZE" = 131072 * 60)
+# extract metadata of specified platform
+GSE200257.meta <- ExtractGEOMeta(acce = "GSE200257", platform = "GPL24676")
+}
 }

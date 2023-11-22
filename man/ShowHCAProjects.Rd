@@ -17,6 +17,8 @@ Dataframe contains all available projects.
 Show All Available Projects in Human Cell Atlas.
 }
 \examples{
-# # all available projects
-# all.hca.projects = ShowHCAProjects()
+\donttest{
+# all available projects
+all.hca.projects <- ShowHCAProjects()
+}
 }

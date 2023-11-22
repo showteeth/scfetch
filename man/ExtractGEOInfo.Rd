@@ -17,7 +17,3 @@ A dataframe.
 \description{
 Extract GEO Study Information.
 }
-\examples{
-# pf.obj = GEOobj(acce = "GSE94820", platform = "GPL16791")
-# pf.info = ExtractGEOInfo(pf.obj)
-}

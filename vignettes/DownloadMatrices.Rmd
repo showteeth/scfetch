@@ -145,7 +145,7 @@ After manually check the extracted metadata, `scfetch` provides `ParsePanglaoDB`
 With the count matrix, `ParsePanglaoDB` will load the matrix to Seurat automatically. If multiple datasets available, users can choose to merge the SeuratObject with `merge`.
 
 ```{r panglaodb_parse, eval=FALSE}
-hsa.seu <- ParsePanglaoDB(hsa.meta, merge = TRUE)
+hsa.seu <- ParsePanglaoDB(hsa.meta[1:3, ], merge = TRUE)
 ```
 
 <hr />

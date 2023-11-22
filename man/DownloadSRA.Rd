@@ -27,7 +27,12 @@ Dataframe contains failed runs or NULL.
 Download SRA.
 }
 \examples{
-# GSE186003.runs = ExtractRun(acce = "GSE186003", platform = "GPL24247")
-# GSE186003.down = DownloadSRA(gsm.df = GSE186003.runs, prefetch.path = "/path/to/prefetch",
-#                              out.folder = "/path/to/output")
+\dontrun{
+# need users to provide the prefetch.path and out.folder
+GSE186003.runs <- ExtractRun(acce = "GSE186003", platform = "GPL24247")
+GSE186003.down <- DownloadSRA(
+  gsm.df = GSE186003.runs, prefetch.path = "/path/to/prefetch",
+  out.folder = "/path/to/output"
+)
+}
 }

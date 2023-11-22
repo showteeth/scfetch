@@ -36,12 +36,16 @@ Dataframe contains failed projects or NULL.
 Download Human Cell Atlas Datasets.
 }
 \examples{
-# # all available projects
-# all.hca.projects = ShowHCAProjects()
-# # all human and 10x 3' v2
-# all.human.10x.projects = ExtractHCAMeta(all.projects.df = all.hca.projects,
-#                                         organism = "Homo sapiens",
-#                                         protocol = c("10x 3' v2", "10x 3' v3"))
-# # download
-# ParseHCA(meta = all.human.10x.projects, out.folder = "/path/to/output")
+\dontrun{
+# all available projects
+all.hca.projects <- ShowHCAProjects()
+# all human and 10x 3' v2
+all.human.10x.projects <- ExtractHCAMeta(
+  all.projects.df = all.hca.projects,
+  organism = "Homo sapiens",
+  protocol = c("10x 3' v2", "10x 3' v3")
+)
+# download, need users to provide the output folder
+ParseHCA(meta = all.human.10x.projects, out.folder = "/path/to/output")
+}
 }

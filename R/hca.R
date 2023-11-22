@@ -43,8 +43,10 @@ ExtractHCAProjects <- function(catalog = NULL) {
 #' @export
 #'
 #' @examples
-#' # # all available projects
-#' # all.hca.projects = ShowHCAProjects()
+#' \donttest{
+#' # all available projects
+#' all.hca.projects <- ShowHCAProjects()
+#' }
 ShowHCAProjects <- function(catalog = NULL) {
   # get all projects information
   hca.projects.df <- ExtractHCAProjects(catalog = catalog)
@@ -174,14 +176,18 @@ ShowHCAProjects <- function(catalog = NULL) {
 #' @references https://bioconductor.org/packages/release/bioc/html/hca.html
 #'
 #' @examples
-#' # # all available projects
-#' # all.hca.projects = ShowHCAProjects()
-#' # # all human projects
-#' # all.human.projects = ExtractHCAMeta(all.projects.df = all.hca.projects, organism = "Homo sapiens")
-#' # # all human and 10x 3' v2
-#' # all.human.10x.projects = ExtractHCAMeta(all.projects.df = all.hca.projects,
-#' #                                         organism = "Homo sapiens",
-#' #                                         protocol = c("10x 3' v2", "10x 3' v3"))
+#' \donttest{
+#' # all available projects
+#' all.hca.projects <- ShowHCAProjects()
+#' # all human projects
+#' all.human.projects <- ExtractHCAMeta(all.projects.df = all.hca.projects, organism = "Homo sapiens")
+#' # all human and 10x 3' v2
+#' all.human.10x.projects <- ExtractHCAMeta(
+#'   all.projects.df = all.hca.projects,
+#'   organism = "Homo sapiens",
+#'   protocol = c("10x 3' v2", "10x 3' v3")
+#' )
+#' }
 ExtractHCAMeta <- function(all.projects.df, organism = NULL, sex = NULL, organ = NULL, organ.part = NULL, disease = NULL,
                            sample.type = NULL, preservation.method = NULL, protocol = NULL,
                            suspension.type = NULL, cell.type = NULL, cell.num = NULL, sequencing.type = NULL) {
@@ -242,14 +248,18 @@ ExtractHCAMeta <- function(all.projects.df, organism = NULL, sex = NULL, organ =
 #' @export
 #'
 #' @examples
-#' # # all available projects
-#' # all.hca.projects = ShowHCAProjects()
-#' # # all human and 10x 3' v2
-#' # all.human.10x.projects = ExtractHCAMeta(all.projects.df = all.hca.projects,
-#' #                                         organism = "Homo sapiens",
-#' #                                         protocol = c("10x 3' v2", "10x 3' v3"))
-#' # # download
-#' # ParseHCA(meta = all.human.10x.projects, out.folder = "/path/to/output")
+#' \dontrun{
+#' # all available projects
+#' all.hca.projects <- ShowHCAProjects()
+#' # all human and 10x 3' v2
+#' all.human.10x.projects <- ExtractHCAMeta(
+#'   all.projects.df = all.hca.projects,
+#'   organism = "Homo sapiens",
+#'   protocol = c("10x 3' v2", "10x 3' v3")
+#' )
+#' # download, need users to provide the output folder
+#' ParseHCA(meta = all.human.10x.projects, out.folder = "/path/to/output")
+#' }
 ParseHCA <- function(meta, file.ext = c("rds", "rdata", "h5", "h5ad", "loom"), out.folder = NULL,
                      timeout = 3600, quiet = FALSE, parallel = TRUE) {
   # file.ext: ignore case, tar.gz, gz
@@ -324,6 +334,7 @@ ParseHCA <- function(meta, file.ext = c("rds", "rdata", "h5", "h5ad", "loom"), o
   # download urls
   # set timeout
   env.timeout <- getOption("timeout")
+  on.exit(options(timeout = env.timeout)) # restore timeout
   options(timeout = timeout)
   message("Start downloading!")
   if (isTRUE(parallel)) {
@@ -335,8 +346,6 @@ ParseHCA <- function(meta, file.ext = c("rds", "rdata", "h5", "h5ad", "loom"), o
   } else {
     down.status <- utils::download.file(url = download.urls, destfile = names(download.urls), quiet = quiet, mode = "wb")
   }
-  # restore timeout
-  options(timeout = env.timeout)
   # process failed datasets
   down.status <- unlist(down.status)
   fail.status <- which(down.status != 0)

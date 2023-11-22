@@ -27,7 +27,3 @@ Default: TURE.}
 \description{
 Fortmat Supplementary Files to 10x.
 }
-\examples{
-# ExtractGEOExpSupp10x(acce = "GSE200257", out.folder = '/path/to/output')
-# ExtractGEOExpSupp10x(acce = "GSE226160", out.folder = '/path/to/output')
-}

@@ -36,8 +36,13 @@ Dataframe contains failed runs or NULL.
 Download bam.
 }
 \examples{
-# GSE138266.runs = ExtractRun(acce = "GSE138266", platform = "GPL18573")
-# GSE138266.down = DownloadBam(gsm.df = GSE138266.runs, bam.type = "10x",
-#                              prefetch.path = "/path/to/prefetch",
-#                              out.folder = "/path/to/output")
+\dontrun{
+# need users to provide prefetch.path
+GSE138266.runs <- ExtractRun(acce = "GSE138266", platform = "GPL18573")
+GSE138266.down <- DownloadBam(
+  gsm.df = GSE138266.runs, bam.type = "10x",
+  prefetch.path = "/path/to/prefetch",
+  out.folder = "/path/to/output"
+)
+}
 }

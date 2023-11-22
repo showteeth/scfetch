@@ -9,8 +9,10 @@
 #' @references https://gist.github.com/ivirshup/f1a1603db69de3888eacb4bdb6a9317a
 #'
 #' @examples
-#' # # all available datasets
-#' # all.cellxgene.datasets = ShowCELLxGENEDatasets()
+#' \donttest{
+#' # all available datasets
+#' all.cellxgene.datasets <- ShowCELLxGENEDatasets()
+#' }
 ShowCELLxGENEDatasets <- function() {
   # urls
   cellxgene.base.url <- "https://api.cellxgene.cziscience.com/dp/v1/"
@@ -64,22 +66,25 @@ ShowCELLxGENEDatasets <- function() {
   # add h5ad and rds information
   cellxgene.collections.datasets.list <- lapply(1:nrow(cellxgene.collections.datasets.df), function(x) {
     x.df <- cellxgene.collections.datasets.df[x, ]
-    x.df$dataset_id <- unique(x.df$dataset_assets[[1]]$dataset_id)
-    if ("RDS" %in% unique(x.df$dataset_assets[[1]]$filetype)) {
-      x.rds.idx <- which(x.df$dataset_assets[[1]]$filetype == "RDS")
-      x.df$rds_id <- x.df$dataset_assets[[1]]$id[x.rds.idx]
-      x.df$rds_s3_uri <- x.df$dataset_assets[[1]]$s3_uri[x.rds.idx]
-      x.df$rds_user_submitted <- x.df$dataset_assets[[1]]$user_submitted[x.rds.idx]
+    x.df.dataset <- x.df$dataset_assets[[1]]
+    # remove duplicated urls
+    x.df.dataset <- x.df.dataset[!duplicated(x.df.dataset$s3_uri), ]
+    x.df$dataset_id <- unique(x.df.dataset$dataset_id)
+    if ("RDS" %in% unique(x.df.dataset$filetype)) {
+      x.rds.idx <- which(x.df.dataset$filetype == "RDS")
+      x.df$rds_id <- x.df.dataset$id[x.rds.idx]
+      x.df$rds_s3_uri <- x.df.dataset$s3_uri[x.rds.idx]
+      x.df$rds_user_submitted <- x.df.dataset$user_submitted[x.rds.idx]
     } else {
       x.df$rds_id <- NA
       x.df$rds_s3_uri <- NA
       x.df$rds_user_submitted <- NA
     }
-    if ("H5AD" %in% unique(x.df$dataset_assets[[1]]$filetype)) {
-      x.h5ad.idx <- which(x.df$dataset_assets[[1]]$filetype == "H5AD")
-      x.df$h5ad_id <- x.df$dataset_assets[[1]]$id[x.h5ad.idx]
-      x.df$h5ad_s3_uri <- x.df$dataset_assets[[1]]$s3_uri[x.h5ad.idx]
-      x.df$h5ad_user_submitted <- x.df$dataset_assets[[1]]$user_submitted[x.h5ad.idx]
+    if ("H5AD" %in% unique(x.df.dataset$filetype)) {
+      x.h5ad.idx <- which(x.df.dataset$filetype == "H5AD")
+      x.df$h5ad_id <- x.df.dataset$id[x.h5ad.idx]
+      x.df$h5ad_s3_uri <- x.df.dataset$s3_uri[x.h5ad.idx]
+      x.df$h5ad_user_submitted <- x.df.dataset$user_submitted[x.h5ad.idx]
     } else {
       x.df$h5ad_id <- NA
       x.df$h5ad_s3_uri <- NA
@@ -125,12 +130,16 @@ ShowCELLxGENEDatasets <- function() {
 #' @references https://gist.github.com/ivirshup/f1a1603db69de3888eacb4bdb6a9317a
 #'
 #' @examples
-#' # # all available datasets
-#' # all.cellxgene.datasets = ShowCELLxGENEDatasets()
-#' # # human 10x v2 and v3 datasets
-#' # human.10x.cellxgene.meta = ExtractCELLxGENEMeta(all.samples.df = all.cellxgene.datasets,
-#' #                                                 assay = c("10x 3' v2", "10x 3' v3"),
-#' #                                                 organism = "Homo sapiens")
+#' \donttest{
+#' # all available datasets
+#' all.cellxgene.datasets <- ShowCELLxGENEDatasets()
+#' # human 10x v2 and v3 datasets
+#' human.10x.cellxgene.meta <- ExtractCELLxGENEMeta(
+#'   all.samples.df = all.cellxgene.datasets,
+#'   assay = c("10x 3' v2", "10x 3' v3"),
+#'   organism = "Homo sapiens"
+#' )
+#' }
 ExtractCELLxGENEMeta <- function(all.samples.df, organism = NULL, ethnicity = NULL, sex = NULL, tissue = NULL, disease = NULL,
                                  assay = NULL, suspension.type = NULL, cell.type = NULL, cell.num = NULL) {
   # all datasets information
@@ -182,14 +191,18 @@ ExtractCELLxGENEMeta <- function(all.samples.df, organism = NULL, ethnicity = NU
 #' @references https://gist.github.com/ivirshup/f1a1603db69de3888eacb4bdb6a9317a
 #'
 #' @examples
-#' # # all available datasets
-#' # all.cellxgene.datasets = ShowCELLxGENEDatasets()
-#' # # human 10x v2 and v3 datasets
-#' # human.10x.cellxgene.meta = ExtractCELLxGENEMeta(all.samples.df = all.cellxgene.datasets,
-#' #                                                 assay = c("10x 3' v2", "10x 3' v3"),
-#' #                                                 organism = "Homo sapiens")
-#' # # download
-#' # ParseCELLxGENE(meta = human.10x.cellxgene.meta, out.folder = "/path/to/output")
+#' \dontrun{
+#' # all available datasets
+#' all.cellxgene.datasets <- ShowCELLxGENEDatasets()
+#' # human 10x v2 and v3 datasets
+#' human.10x.cellxgene.meta <- ExtractCELLxGENEMeta(
+#'   all.samples.df = all.cellxgene.datasets,
+#'   assay = c("10x 3' v2", "10x 3' v3"),
+#'   organism = "Homo sapiens"
+#' )
+#' # download, need to provide the output folder
+#' ParseCELLxGENE(meta = human.10x.cellxgene.meta, out.folder = "/path/to/output")
+#' }
 ParseCELLxGENE <- function(meta, file.ext = c("rds", "h5ad"), out.folder = NULL,
                            timeout = 3600, quiet = FALSE, parallel = TRUE) {
   # check file extension
@@ -227,6 +240,7 @@ ParseCELLxGENE <- function(meta, file.ext = c("rds", "h5ad"), out.folder = NULL,
   # download urls
   # set timeout
   env.timeout <- getOption("timeout")
+  on.exit(options(timeout = env.timeout)) # restore timeout
   options(timeout = timeout)
   message("Start downloading!")
   if (isTRUE(parallel)) {
@@ -238,8 +252,6 @@ ParseCELLxGENE <- function(meta, file.ext = c("rds", "h5ad"), out.folder = NULL,
   } else {
     down.status <- utils::download.file(url = download.urls, destfile = names(download.urls), quiet = quiet, mode = "wb")
   }
-  # restore timeout
-  options(timeout = env.timeout)
   # process failed datasets
   down.status <- unlist(down.status)
   fail.status <- which(down.status != 0)
