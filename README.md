@@ -3,6 +3,10 @@
 
 <img src = "man/figures/scfetch.png" align = "right" width = "200"/>
 
+[![CRAN](https://www.r-pkg.org/badges/version/scfetch?color=orange)](https://cran.r-project.org/package=scfetch)
+[![License: GPLv3](https://img.shields.io/badge/license-GPLv3-blue.svg)](https://cran.r-project.org/web/licenses/GPLv3)
+[![CODE\_SIZE](https://img.shields.io/github/languages/code-size/showteeth/scfetch.svg)](https://github.com/showteeth/scfetch)
+
 ## Introduction
 
 `scfetch` is designed to accelerate users download and prepare single-cell datasets from public resources. It can be used to:
