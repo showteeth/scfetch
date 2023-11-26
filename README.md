@@ -62,13 +62,12 @@ pip install anndata loompy
 
 <hr />
 
-## Usage
-### Vignette
+## Vignette
 Detailed usage is available in [website](https://showteeth.github.io/scfetch/).
 
 <hr />
 
-### Function list
+## Function list
 
 <table>
 <thead>
@@ -198,6 +197,7 @@ Detailed usage is available in [website](https://showteeth.github.io/scfetch/).
 
 <hr />
 
+## Usage
 ### Downloas fastq and bam
 
 Since the downloading process is time-consuming, we provide the commands used to illustrate the usage.
