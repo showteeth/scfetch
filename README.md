@@ -54,10 +54,13 @@ devtools::install_github("satijalab/seurat-wrappers") # format conversion
 For data structures conversion, `scfetch` requires several python packages, you can install with:
 
 ``` bash
-# install python packages
-conda install -c bioconda loompy anndata
+# install additional packages for format conversion
+conda install -c bioconda loompy anndata 
 # or
 pip install anndata loompy
+
+# install additional packages for downloading fastq/bam files
+conda install -c bioconda 'parallel-fastq-dump' 'sra-tools'
 ```
 
 <hr />
