@@ -8,6 +8,7 @@
 * Added `ShowCELLxGENEDatasets` to show all available CELLxGENE datasets.
 * Added `StatDBAttribute`to stat database attributes.
 * Added `ParseHCA` to download objects from Human Cell Atlas.
+* docker image added. 
 
 -------------------
 

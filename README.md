@@ -51,7 +51,7 @@ devtools::install_github("satijalab/seurat-wrappers") # format conversion
 
 **For issues about installation, please refer `INSTALL.md`.**
 
-For data structures conversion, `scfetch` requires several python packages, you can install with:
+For data structures conversion and downloading fastq/bam files, `scfetch` requires additional tools, you can install with:
 
 ``` bash
 # install additional packages for format conversion
@@ -60,8 +60,33 @@ conda install -c bioconda loompy anndata
 pip install anndata loompy
 
 # install additional packages for downloading fastq/bam files
-conda install -c bioconda 'parallel-fastq-dump' 'sra-tools'
+conda install -c bioconda 'parallel-fastq-dump' 'sra-tools>=3.0.0'
+
+# install bamtofastq, the following installs linux version
+wget --quiet https://github.com/10XGenomics/bamtofastq/releases/download/v1.4.1/bamtofastq_linux && chmod +x bamtofastq_linux
 ```
+
+<hr />
+
+## Docker
+We also provide a [docker image](https://hub.docker.com/repository/docker/soyabean/scfetch) to use:
+
+```bash
+# pull the image
+dock pull soyabean/scfetch:1.6
+
+# run the image
+docker run --rm -p 8888:8787 -e PASSWORD=passwd -e ROOT=TRUE -it scfetch:1.6
+```
+
+**Notes**:
+
+* After running the above codes, open browser and enter `http://localhost:8888/`, the user name is `rstudio`, the password is `passwd` (set by `-e PASSWORD=passwd`)
+* If port `8888` is in use, change `-p 8888:8787`
+* The `conda.path` in `ExportSeurat` and `ImportSeurat` can be set `/opt/conda`.
+* The **sra-tools** can be found in `/opt/sratoolkit.3.0.6-ubuntu64/bin`.
+* The `parallel-fastq-dump` path: `/opt/conda/bin/parallel-fastq-dump`.
+* The `bamtofastq_linux` path: `/opt/bamtofastq_linux`.
 
 <hr />
 
