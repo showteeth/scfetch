@@ -24,6 +24,7 @@
 * Fixed bug in `ExtractZenodoMeta` (API changed).
 * Fixed bug in `ShowCBDatasets` (added `--no-check-certificate` when downloading json files).
 * Fixed bug in `ShowCELLxGENEDatasets`.
+* Supported GEO of 10x (separate files).
 
 -------------------
 

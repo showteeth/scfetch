@@ -8,8 +8,9 @@
 #' @param supp.idx The index of supplementary files to download. This should be consistent with \code{platform}. Default: 1.
 #' @param timeout Timeout for \code{\link{download.file}}. Default: 3600.
 #' @param data.type The data type of the dataset, choose from "sc" (single-cell) and "bulk" (bulk). Default: "sc".
-#' @param supp.type The type of downloaded supplementary files, choose from count (count matrix file or single count matrix file)
-#' and 10x (cellranger output files, contains barcodes, genes/features and matrix). Default: count.
+#' @param supp.type The type of downloaded supplementary files, choose from count (count matrix file or single count matrix file),
+#' 10x (cellranger output files in tar/gz supplementary files, contains barcodes, genes/features and matrix, e.g. GSE200257)
+#' and 10xSingle (cellranger output files in supplementary files directly, e.g. GSE236082). Default: count.
 #' @param out.folder Output folder to save 10x files. Default: NULL (current working directory).
 #' @param gene2feature Logical value, whether to rename \code{genes.tsv.gz} to \code{features.tsv.gz}. Default: TRUE.
 #' @param merge Logical value, whether to merge Seurat list when there are multiple 10x files (\code{supp.type} is 10x). Default: FALSE.
@@ -38,9 +39,14 @@
 #'   acce = "GSE200257", down.supp = TRUE, supp.idx = 1, supp.type = "10x",
 #'   out.folder = "/path/to/output/folder"
 #' )
+#' # need users to provide the output folder
+#' GSE236082.seu <- ParseGEO(
+#'   acce = "GSE236082", down.supp = TRUE, supp.type = "10xSingle",
+#'   out.folder = "/path/to/output/folder"
+#' )
 #' }
 ParseGEO <- function(acce, platform = NULL, down.supp = FALSE, supp.idx = 1, timeout = 3600, data.type = c("sc", "bulk"),
-                     supp.type = c("count", "10x"), out.folder = NULL, gene2feature = TRUE, merge = TRUE, ...) {
+                     supp.type = c("count", "10x", "10xSingle"), out.folder = NULL, gene2feature = TRUE, merge = TRUE, ...) {
   # check parameters
   data.type <- match.arg(arg = data.type)
   supp.type <- match.arg(arg = supp.type)
@@ -69,7 +75,8 @@ ParseGEO <- function(acce, platform = NULL, down.supp = FALSE, supp.idx = 1, tim
     return(pf.count)
   } else if (data.type == "sc") {
     # load seurat
-    if (is.null(pf.count) && supp.type == "10x") {
+    # if (is.null(pf.count) && supp.type == "10x") {
+    if (is.null(pf.count) && (supp.type == "10x" || supp.type == "10xSingle")) {
       message("Loading data to Seurat!")
       all.samples.folder <- dir(out.folder, full.names = TRUE)
       # check file
@@ -443,14 +450,90 @@ ExtractGEOExpSupp10x <- function(acce, supp.idx = 1, timeout = 3600,
   }
 }
 
+#' Fortmat Supplementary Files to 10x (separate files).
+#'
+#' @param acce GEO accession number.
+#' @param timeout Timeout for \code{\link{download.file}}. Default: 3600.
+#' @param out.folder Output folder to save 10x files. Default: NULL (current working directory).
+#' @param gene2feature Logical value, whether to rename \code{genes.tsv.gz} to \code{features.tsv.gz}.
+#' Default: TURE.
+#'
+#' @return NULL
+#'
+ExtractGEOExpSupp10xSingle <- function(acce, timeout = 3600, out.folder = NULL, gene2feature = TRUE) {
+  # create tmp folder
+  tmp.folder <- tempdir()
+  # get current timeout
+  if (!is.null(timeout)) {
+    message("Change Timeout to: ", timeout)
+    env.timeout <- getOption("timeout")
+    on.exit(options(timeout = env.timeout)) # restore timeout
+    options(timeout = timeout)
+  }
+  # download supp file
+  supp.down.log <- tryCatch(
+    expr = {
+      GEOquery::getGEOSuppFiles(GEO = acce, baseDir = tmp.folder)
+    },
+    error = function(e) {
+      print(e)
+      stop("You can change the timeout with a larger value.")
+    }
+  )
+  # get valid files
+  valid.pat <- "barcodes.tsv.gz$|genes.tsv.gz$|matrix.mtx.gz$|features.tsv.gz$"
+  all.files <- list.files(file.path(tmp.folder, acce), full.names = TRUE, pattern = valid.pat)
+  # change file name
+  if (gene2feature) {
+    change.name.log <- sapply(all.files, function(x) {
+      if (grepl(pattern = "genes.tsv.gz$", x = x)) {
+        new.name <- gsub(pattern = "genes.tsv.gz$", replacement = "features.tsv.gz", x = x)
+        file.rename(from = x, to = new.name)
+      }
+    })
+    all.files <- list.files(file.path(tmp.folder, acce), full.names = TRUE, pattern = valid.pat)
+  }
+  # prepare out folder
+  if (is.null(out.folder)) {
+    out.folder <- getwd()
+  }
+  # get folder
+  all.sample.folder <- sapply(all.files, function(x) {
+    # get basename and dirname
+    file.name <- basename(x)
+    dir.name <- dirname(x)
+    # remove file type tag
+    file.name <- gsub(pattern = valid.pat, replacement = "", x = file.name)
+    # remove possible _ and .
+    file.name <- gsub(pattern = "[_.]$", replacement = "", x = file.name)
+    file.folder <- file.path(out.folder, file.name)
+  })
+  # create folder and move file
+  move.file.log <- sapply(all.files, function(x) {
+    # get folder name
+    folder.name <- all.sample.folder[x]
+    # create folder
+    if (!dir.exists(folder.name)) {
+      dir.create(path = folder.name, recursive = TRUE)
+    }
+    new.file.name <- gsub(pattern = paste0(".*(barcodes.tsv.gz$|genes.tsv.gz$|matrix.mtx.gz$|features.tsv.gz$)"), replacement = "\\1", x = x)
+    # move file
+    copy.tag <- file.copy(from = x, to = file.path(folder.name, new.file.name))
+    # remove the original file
+    remove.tag <- file.remove(x)
+    copy.tag
+  })
+  message("Process 10x fiels done! All files are in ", out.folder)
+}
 
 #' Extract Raw Count Matrix from Supplementary Files or Fortmat Supplementary Files to 10x.
 #'
 #' @param acce GEO accession number.
 #' @param supp.idx The index of supplementary files to download. Default: 1.
 #' @param timeout Timeout for \code{\link{download.file}}. Default: 3600.
-#' @param supp.type The type of downloaded supplementary files, choose from count (count matrix file or single count matrix file)
-#' and 10x (cellranger output files, contains barcodes, genes/features and matrix). Default: count.
+#' @param supp.type The type of downloaded supplementary files, choose from count (count matrix file or single count matrix file),
+#' 10x (cellranger output files in tar/gz supplementary files, contains barcodes, genes/features and matrix, e.g. GSE200257)
+#' and 10xSingle (cellranger output files in supplementary files directly, e.g. GSE236082). Default: count.
 #' @param out.folder Output folder to save 10x files. Default: NULL (current working directory).
 #' @param gene2feature Logical value, whether to rename \code{genes.tsv.gz} to \code{features.tsv.gz}. Default: TRUE.
 #' Default: TURE.
@@ -458,12 +541,15 @@ ExtractGEOExpSupp10x <- function(acce, supp.idx = 1, timeout = 3600,
 #' @return Count matrix (\code{supp.type} is count) or NULL (\code{supp.type} is 10x).
 #'
 ExtractGEOExpSuppAll <- function(acce, supp.idx = 1, timeout = 3600,
-                                 supp.type = c("count", "10x"), out.folder = NULL, gene2feature = TRUE) {
+                                 supp.type = c("count", "10x", "10xSingle"), out.folder = NULL, gene2feature = TRUE) {
   if (supp.type == "count") {
     count.mat <- ExtractGEOExpSupp(acce = acce, supp.idx = supp.idx, timeout = timeout)
     return(count.mat)
   } else if (supp.type == "10x") {
     ExtractGEOExpSupp10x(acce = acce, supp.idx = supp.idx, timeout = timeout, out.folder = out.folder, gene2feature = gene2feature)
+    return(NULL)
+  } else if (supp.type == "10xSingle") {
+    ExtractGEOExpSupp10xSingle(acce = acce, timeout = timeout, out.folder = out.folder, gene2feature = gene2feature)
     return(NULL)
   }
 }
@@ -477,15 +563,16 @@ ExtractGEOExpSuppAll <- function(acce, supp.idx = 1, timeout = 3600,
 #' download supplementary files. If FALSE, use \code{ExpressionSet} (If contains non-integer or emoty,
 #' download supplementary files automatically). Default: FALSE.
 #' @param timeout Timeout for \code{\link{download.file}}. Default: 3600.
-#' @param supp.type The type of downloaded supplementary files, choose from count (count matrix file or single count matrix file)
-#' and 10x (cellranger output files, contains barcodes, genes/features and matrix). Default: count.
+#' @param supp.type The type of downloaded supplementary files, choose from count (count matrix file or single count matrix file),
+#' 10x (cellranger output files in tar/gz supplementary files, contains barcodes, genes/features and matrix, e.g. GSE200257)
+#' and 10xSingle (cellranger output files in supplementary files directly, e.g. GSE236082). Default: count.
 #' @param out.folder Output folder to save 10x files. Default: NULL (current working directory).
 #' @param gene2feature Logical value, whether to rename \code{genes.tsv.gz} to \code{features.tsv.gz}. Default: TRUE.
 #'
-#' @return Count matrix (\code{supp.type} is count) or NULL (\code{supp.type} is 10x).
+#' @return Count matrix (\code{supp.type} is count) or NULL (\code{supp.type} is 10x/10xSingle).
 #'
 ExtractGEOExp <- function(pf.obj, acce, supp.idx = 1, down.supp = FALSE, timeout = 3600,
-                          supp.type = c("count", "10x"), out.folder = NULL, gene2feature = TRUE) {
+                          supp.type = c("count", "10x", "10xSingle"), out.folder = NULL, gene2feature = TRUE) {
   # check parameters
   supp.type <- match.arg(arg = supp.type)
   # download supplementary files
