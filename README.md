@@ -73,10 +73,10 @@ We also provide a [docker image](https://hub.docker.com/repository/docker/soyabe
 
 ```bash
 # pull the image
-dock pull soyabean/scfetch:1.6
+docker pull soyabean/scfetch:1.6
 
 # run the image
-docker run --rm -p 8888:8787 -e PASSWORD=passwd -e ROOT=TRUE -it scfetch:1.6
+docker run --rm -p 8888:8787 -e PASSWORD=passwd -e ROOT=TRUE -it soyabean/scfetch:1.6
 ```
 
 **Notes**:
