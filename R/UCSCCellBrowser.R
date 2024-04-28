@@ -28,6 +28,10 @@ ShowCBDatasets <- function(lazy = TRUE, json.folder = NULL, update = FALSE, quie
     if (is.null(json.folder)) {
       json.folder <- getwd()
     }
+    if (!dir.exists(json.folder)) {
+      message(json.folder, " does not exist, create automatically!")
+      dir.create(json.folder, recursive = TRUE)
+    }
     base.url <- json.folder
     if (update) {
       message("Lazy mode is on (save time for next time), save all json file to ", json.folder)

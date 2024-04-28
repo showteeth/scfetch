@@ -8,7 +8,7 @@ ExtractGEOExpSuppAll(
   acce,
   supp.idx = 1,
   timeout = 3600,
-  supp.type = c("count", "10x"),
+  supp.type = c("count", "10x", "10xSingle"),
   out.folder = NULL,
   gene2feature = TRUE
 )
@@ -20,8 +20,9 @@ ExtractGEOExpSuppAll(
 
 \item{timeout}{Timeout for \code{\link{download.file}}. Default: 3600.}
 
-\item{supp.type}{The type of downloaded supplementary files, choose from count (count matrix file or single count matrix file)
-and 10x (cellranger output files, contains barcodes, genes/features and matrix). Default: count.}
+\item{supp.type}{The type of downloaded supplementary files, choose from count (count matrix file or single count matrix file),
+10x (cellranger output files in tar/gz supplementary files, contains barcodes, genes/features and matrix, e.g. GSE200257)
+and 10xSingle (cellranger output files in supplementary files directly, e.g. GSE236082). Default: count.}
 
 \item{out.folder}{Output folder to save 10x files. Default: NULL (current working directory).}
 

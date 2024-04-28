@@ -131,6 +131,11 @@ ParseZenodo <- function(doi = NULL, file.ext = c("rdata", "rds", "h5ad"), doi.df
   if (is.null(out.folder)) {
     out.folder <- getwd()
   }
+  # create output folder
+  if (!dir.exists(out.folder)) {
+    message(out.folder, " does not exist, create automatically!")
+    dir.create(out.folder, recursive = TRUE)
+  }
   doi.df$filename <- file.path(out.folder, doi.df$filename)
   # set timeout
   env.timeout <- getOption("timeout")

@@ -11,7 +11,7 @@ ParseGEO(
   supp.idx = 1,
   timeout = 3600,
   data.type = c("sc", "bulk"),
-  supp.type = c("count", "10x"),
+  supp.type = c("count", "10x", "10xSingle"),
   out.folder = NULL,
   gene2feature = TRUE,
   merge = TRUE,
@@ -33,8 +33,9 @@ download supplementary files automatically). Default: FALSE.}
 
 \item{data.type}{The data type of the dataset, choose from "sc" (single-cell) and "bulk" (bulk). Default: "sc".}
 
-\item{supp.type}{The type of downloaded supplementary files, choose from count (count matrix file or single count matrix file)
-and 10x (cellranger output files, contains barcodes, genes/features and matrix). Default: count.}
+\item{supp.type}{The type of downloaded supplementary files, choose from count (count matrix file or single count matrix file),
+10x (cellranger output files in tar/gz supplementary files, contains barcodes, genes/features and matrix, e.g. GSE200257)
+and 10xSingle (cellranger output files in supplementary files directly, e.g. GSE236082). Default: count.}
 
 \item{out.folder}{Output folder to save 10x files. Default: NULL (current working directory).}
 
@@ -59,6 +60,11 @@ GSE94820.seu <- ParseGEO(acce = "GSE94820", down.supp = TRUE, supp.idx = 1, supp
 # need users to provide the output folder
 GSE200257.seu <- ParseGEO(
   acce = "GSE200257", down.supp = TRUE, supp.idx = 1, supp.type = "10x",
+  out.folder = "/path/to/output/folder"
+)
+# need users to provide the output folder
+GSE236082.seu <- ParseGEO(
+  acce = "GSE236082", down.supp = TRUE, supp.type = "10xSingle",
   out.folder = "/path/to/output/folder"
 )
 }

@@ -10,7 +10,7 @@ ExtractGEOExp(
   supp.idx = 1,
   down.supp = FALSE,
   timeout = 3600,
-  supp.type = c("count", "10x"),
+  supp.type = c("count", "10x", "10xSingle"),
   out.folder = NULL,
   gene2feature = TRUE
 )
@@ -28,15 +28,16 @@ download supplementary files automatically). Default: FALSE.}
 
 \item{timeout}{Timeout for \code{\link{download.file}}. Default: 3600.}
 
-\item{supp.type}{The type of downloaded supplementary files, choose from count (count matrix file or single count matrix file)
-and 10x (cellranger output files, contains barcodes, genes/features and matrix). Default: count.}
+\item{supp.type}{The type of downloaded supplementary files, choose from count (count matrix file or single count matrix file),
+10x (cellranger output files in tar/gz supplementary files, contains barcodes, genes/features and matrix, e.g. GSE200257)
+and 10xSingle (cellranger output files in supplementary files directly, e.g. GSE236082). Default: count.}
 
 \item{out.folder}{Output folder to save 10x files. Default: NULL (current working directory).}
 
 \item{gene2feature}{Logical value, whether to rename \code{genes.tsv.gz} to \code{features.tsv.gz}. Default: TRUE.}
 }
 \value{
-Count matrix (\code{supp.type} is count) or NULL (\code{supp.type} is 10x).
+Count matrix (\code{supp.type} is count) or NULL (\code{supp.type} is 10x/10xSingle).
 }
 \description{
 Extract Raw Count Matrix or Fortmat Supplementary Files to 10x.

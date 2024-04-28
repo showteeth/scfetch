@@ -1,3 +1,9 @@
+# scfetch 0.5.1
+
+* Create output directory automatically.
+
+-------------------
+
 # scfetch 0.5.0
 
 ## New features
