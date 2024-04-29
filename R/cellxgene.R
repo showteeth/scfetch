@@ -15,33 +15,30 @@
 #' }
 ShowCELLxGENEDatasets <- function() {
   # urls
-  cellxgene.base.url <- "https://api.cellxgene.cziscience.com/dp/v1/"
+  cellxgene.base.url <- "https://api.cellxgene.cziscience.com/curation/v1/"
   cellxgene.collections.url <- paste0(cellxgene.base.url, "collections/")
   # extract all collections
   cellxgene.collections.content <- URLRetrieval(cellxgene.collections.url)
-  cellxgene.collections.df <- cellxgene.collections.content$collections
-  colnames(cellxgene.collections.df) <- c(
-    "collection_created_at", "collection_id",
-    "collection_owner", "collection_visibility"
-  )
+
   # extract all datasets
-  cellxgene.collections.list <- lapply(1:nrow(cellxgene.collections.df), function(x) {
-    cellxgene.collection.df <- cellxgene.collections.df[x, ]
-    rownames(cellxgene.collection.df) <- NULL
-    cellxgene.sc.url <- paste0(cellxgene.collections.url, cellxgene.collections.df[x, "collection_id"])
+  cellxgene.collections.list <- lapply(1:nrow(cellxgene.collections.content), function(x) {
+    cellxgene.collection.content <- cellxgene.collections.content[x, ]
+    rownames(cellxgene.collection.content) <- NULL
+    cellxgene.sc.url <- paste0(cellxgene.collections.url, cellxgene.collections.content[x, "collection_id"])
     cellxgene.sc.content <- URLRetrieval(cellxgene.sc.url)
     cellxgene.sc.datasets <- jsonlite::flatten(cellxgene.sc.content$datasets)
+    colnames(cellxgene.sc.datasets) <- gsub(pattern = "^title$", replacement = "dataset_description", x = colnames(cellxgene.sc.datasets))
     # add metadata
-    cellxgene.collection.df$title <- cellxgene.sc.content$name
-    cellxgene.collection.df$description <- cellxgene.sc.content$description
-    cellxgene.collection.df$contact <- cellxgene.sc.content$contact_name
-    cellxgene.collection.df$contact_email <- cellxgene.sc.content$contact_email
-    cellxgene.collection.df <- cellxgene.collection.df[c(
-      "title", "description", "contact", "contact_email",
-      "collection_created_at", "collection_id",
-      "collection_owner", "collection_visibility"
+    cellxgene.collection.content$title <- cellxgene.sc.content$name
+    cellxgene.collection.content$description <- cellxgene.sc.content$description
+    cellxgene.collection.content$contact <- cellxgene.sc.content$contact_name
+    cellxgene.collection.content$contact_email <- cellxgene.sc.content$contact_email
+    cellxgene.collection.content <- cellxgene.collection.content[c(
+      "title", "description", "doi", "contact", "contact_email",
+      "collection_id", "collection_url", "consortia",
+      "curator_name", "visibility"
     )]
-    cellxgene.collection.final <- cbind(cellxgene.collection.df, cellxgene.sc.datasets) %>% as.data.frame()
+    cellxgene.collection.final <- cbind(cellxgene.collection.content, cellxgene.sc.datasets) %>% as.data.frame()
     return(cellxgene.collection.final)
   })
   # create all datasets dataframe
@@ -57,38 +54,23 @@ ShowCELLxGENEDatasets <- function() {
       ), col = "label"
     )
   cellxgene.collections.datasets.df <-
-    PasteAttrCXG(
-      df = cellxgene.collections.datasets.df,
-      attr = c("dataset_deployments"), col = "url"
-    )
-  cellxgene.collections.datasets.df <-
     PasteAttr(df = cellxgene.collections.datasets.df, attr = c("batch_condition", "suspension_type", "donor_id"))
   # add h5ad and rds information
   cellxgene.collections.datasets.list <- lapply(1:nrow(cellxgene.collections.datasets.df), function(x) {
     x.df <- cellxgene.collections.datasets.df[x, ]
-    x.df.dataset <- x.df$dataset_assets[[1]]
-    # remove duplicated urls
-    x.df.dataset <- x.df.dataset[!duplicated(x.df.dataset$s3_uri), ]
-    x.df$dataset_id <- unique(x.df.dataset$dataset_id)
+    x.df.dataset <- x.df$assets[[1]]
+    # x.df$dataset_id <- unique(x.df.dataset$dataset_id)
     if ("RDS" %in% unique(x.df.dataset$filetype)) {
       x.rds.idx <- which(x.df.dataset$filetype == "RDS")
-      x.df$rds_id <- x.df.dataset$id[x.rds.idx]
-      x.df$rds_s3_uri <- x.df.dataset$s3_uri[x.rds.idx]
-      x.df$rds_user_submitted <- x.df.dataset$user_submitted[x.rds.idx]
+      x.df$rds_id <- x.df.dataset$url[x.rds.idx]
     } else {
       x.df$rds_id <- NA
-      x.df$rds_s3_uri <- NA
-      x.df$rds_user_submitted <- NA
     }
     if ("H5AD" %in% unique(x.df.dataset$filetype)) {
       x.h5ad.idx <- which(x.df.dataset$filetype == "H5AD")
-      x.df$h5ad_id <- x.df.dataset$id[x.h5ad.idx]
-      x.df$h5ad_s3_uri <- x.df.dataset$s3_uri[x.h5ad.idx]
-      x.df$h5ad_user_submitted <- x.df.dataset$user_submitted[x.h5ad.idx]
+      x.df$h5ad_id <- x.df.dataset$url[x.h5ad.idx]
     } else {
       x.df$h5ad_id <- NA
-      x.df$h5ad_s3_uri <- NA
-      x.df$h5ad_user_submitted <- NA
     }
     x.df
   })
@@ -219,6 +201,9 @@ ParseCELLxGENE <- function(meta, file.ext = c("rds", "h5ad"), out.folder = NULL,
   download.df.list <- list()
   # prepare rds
   if ("rds" %in% file.ext) {
+    if (!"rds_id" %in% colnames(meta)) {
+      stop("The meta dataframe you provided doesn't contain rds!")
+    }
     rds.urls.list <- PrepareCELLxGENEUrls(df = meta, fe = "rds")
     rds.urls <- rds.urls.list$urls
     download.df.list <- c(download.df.list, list(rds.urls.list$df))
@@ -226,6 +211,9 @@ ParseCELLxGENE <- function(meta, file.ext = c("rds", "h5ad"), out.folder = NULL,
   }
   # prepare h5ad
   if ("h5ad" %in% file.ext) {
+    if (!"h5ad_id" %in% colnames(meta)) {
+      stop("The meta dataframe you provided doesn't contain h5ad!")
+    }
     h5ad.urls.list <- PrepareCELLxGENEUrls(df = meta, fe = "h5ad")
     h5ad.urls <- h5ad.urls.list$urls
     download.df.list <- c(download.df.list, list(h5ad.urls.list$df))
@@ -235,6 +223,10 @@ ParseCELLxGENE <- function(meta, file.ext = c("rds", "h5ad"), out.folder = NULL,
   # prepare output folder
   if (is.null(out.folder)) {
     out.folder <- getwd()
+  }
+  if (!dir.exists(out.folder)) {
+    message(out.folder, " does not exist, create automatically!")
+    dir.create(out.folder, recursive = TRUE)
   }
   names(download.urls) <- file.path(out.folder, names(download.urls))
   # download urls

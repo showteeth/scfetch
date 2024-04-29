@@ -1,6 +1,7 @@
 # scfetch 0.5.1
 
 * Create output directory automatically.
+* CELLxGENE new [API](https://api.cellxgene.cziscience.com/curation/ui/).
 
 -------------------
 

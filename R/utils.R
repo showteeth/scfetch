@@ -402,18 +402,14 @@ PostDatasetURL <- function(url) {
 # used in cellxgene, prepare download urls with metadata
 # reference: https://gist.github.com/ivirshup/f1a1603db69de3888eacb4bdb6a9317a
 PrepareCELLxGENEUrls <- function(df, fe) {
-  # urls
-  cellxgene.base.url <- "https://api.cellxgene.cziscience.com/dp/v1/"
-  cellxgene.datasets.url <- paste0(cellxgene.base.url, "datasets")
   # file extension column
   fe.id <- paste0(fe, "_id")
-  CheckColumns(df = df, columns = c("dataset_id", fe.id, "name"))
+  CheckColumns(df = df, columns = c("dataset_id", fe.id, "dataset_description"))
   invalid.df <- df[is.na(df[[fe.id]]) | is.na(df$dataset_id) | df$dataset_id == "" | df[[fe.id]] == "", ]
   message("Detect ", nrow(invalid.df), " invalid metadata (", fe.id, "/dataset_id is empty or NA).")
   valid.df <- df[!(is.na(df[[fe.id]]) | is.na(df$dataset_id) | df$dataset_id == "" | df[[fe.id]] == ""), ]
-  valid.preurls <- paste(cellxgene.datasets.url, valid.df$dataset_id, "asset", valid.df[[fe.id]], sep = "/")
-  valid.urls <- sapply(valid.preurls, function(x) PostDatasetURL(x))
-  valid.names <- make.names(valid.df$name, unique = TRUE)
+  valid.urls <- df[[fe.id]]
+  valid.names <- make.names(valid.df$dataset_description, unique = TRUE)
   valid.filenames <- paste0(valid.names, ".", fe)
   names(valid.urls) <- valid.filenames
   return(list(df = valid.df, urls = valid.urls))
