@@ -330,6 +330,10 @@ ParseHCA <- function(meta, file.ext = c("rds", "rdata", "h5", "h5ad", "loom"), o
   if (is.null(out.folder)) {
     out.folder <- getwd()
   }
+  if (!dir.exists(out.folder)) {
+    message(out.folder, " does not exist, create automatically!")
+    dir.create(out.folder, recursive = TRUE)
+  }
   names(download.urls) <- file.path(out.folder, names(download.urls))
   # download urls
   # set timeout
