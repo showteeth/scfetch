@@ -64,6 +64,12 @@ ExportSeurat <- function(seu.obj, assay = NULL, reduction = NULL,
       warning("You do not provide anndata file, generate automatically in current working directory!")
       seu.name <- deparse(substitute(seu.obj))
       anndata.file <- file.path(getwd(), paste0(seu.name, ".h5ad"))
+    } else if (!is.null(anndata.file)) {
+      dir.name <- dirname(anndata.file)
+      if (!dir.exists(dir.name)) {
+        message(dir.name, " does not exist, create automatically!")
+        dir.create(dir.name, recursive = TRUE)
+      }
     }
     # h5Seurat.file <- gsub(pattern = ".h5ad$", replacement = ".h5seurat", x = anndata.file)
     # SeuratDisk::SaveH5Seurat(seu.obj, overwrite = overwrite, filename = h5Seurat.file)
@@ -110,6 +116,12 @@ ExportSeurat <- function(seu.obj, assay = NULL, reduction = NULL,
       warning("You do not provide loom file, generate automatically in current working directory!")
       seu.name <- deparse(substitute(seu.obj))
       loom.file <- file.path(getwd(), paste0(seu.name, ".loom"))
+    } else if (!is.null(loom.file)) {
+      dir.name <- dirname(loom.file)
+      if (!dir.exists(dir.name)) {
+        message(dir.name, " does not exist, create automatically!")
+        dir.create(dir.name, recursive = TRUE)
+      }
     }
     # Convert SingleCellExperiment to loom
     if (!requireNamespace("SeuratDisk", quietly = TRUE)) {
@@ -307,6 +319,12 @@ SCEAnnData <- function(from = c("SingleCellExperiment", "AnnData"),
       warning("You do not provide h5ad file, generate automatically in current working directory!")
       sce.name <- deparse(substitute(sce))
       anndata.file <- file.path(getwd(), paste0(sce.name, ".h5ad"))
+    } else if (!is.null(anndata.file)) {
+      dir.name <- dirname(anndata.file)
+      if (!dir.exists(dir.name)) {
+        message(dir.name, " does not exist, create automatically!")
+        dir.create(dir.name, recursive = TRUE)
+      }
     }
     # Convert SingleCellExperiment to AnnData
     zellkonverter::writeH5AD(sce = sce, file = anndata.file, ...)
@@ -376,9 +394,15 @@ SCELoom <- function(from = c("SingleCellExperiment", "loom"),
       warning("You do not provide loom file, generate automatically in current working directory!")
       sce.name <- deparse(substitute(sce))
       loom.file <- file.path(getwd(), paste0(sce.name, ".loom"))
+    } else if (!is.null(loom.file)) {
+      dir.name <- dirname(loom.file)
+      if (!dir.exists(dir.name)) {
+        message(dir.name, " does not exist, create automatically!")
+        dir.create(dir.name, recursive = TRUE)
+      }
     }
     if (file.exists(loom.file)) {
-      message(loom.file, " exists!")
+      message(loom.file, " exists, stop!")
     } else {
       # Convert SingleCellExperiment to loom
       # sceasy::convertFormat(sce, from = "sce", to = "loom", outFile = loom.file, ...)
