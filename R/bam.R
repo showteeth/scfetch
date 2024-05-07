@@ -97,7 +97,7 @@ RunSamdump <- function(sra, samdump.path, samdump.paras) {
   # sam-dump command
   samdump.cmd <- paste(samdump.path, samdump.paras, sra, "| samtools view -bS - -o ", out.bam)
   # run command
-  message(paste("Calling sam-dump: ", samdump.cmd))
+  message(paste("Calling sam-dump:", samdump.cmd))
   samdump.status <- system(samdump.cmd, intern = TRUE)
   samdump.status.code <- attr(samdump.status, "status")
   if (!is.null(samdump.status.code)) {
@@ -230,7 +230,7 @@ Runbamtofastq <- function(bam.path, bam.type, pair.end, bamtofastq.path, bamtofa
     }
   }
   # run command
-  message(paste("Calling bamtofastq: ", bamtofastq.cmd))
+  message(paste("Calling bamtofastq:", bamtofastq.cmd))
   bamtofastq.status <- system(bamtofastq.cmd, intern = TRUE)
   bamtofastq.status.code <- attr(bamtofastq.status, "status")
   if (!is.null(bamtofastq.status.code)) {
@@ -248,7 +248,7 @@ Runbamtofastq <- function(bam.path, bam.type, pair.end, bamtofastq.path, bamtofa
 #   # bamtofastq command
 #   bamtofastq.cmd <- paste(bamtofastq.path, bamtofastq.paras, bam.path, out.folder)
 #   # run command
-#   message(paste("Calling bamtofastq: ", bamtofastq.cmd))
+#   message(paste("Calling bamtofastq:", bamtofastq.cmd))
 #   bamtofastq.status <- system(bamtofastq.cmd, intern = TRUE)
 #   bamtofastq.status.code <- attr(bamtofastq.status, "status")
 #   if (!is.null(bamtofastq.status.code)) {

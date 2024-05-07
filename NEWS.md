@@ -1,3 +1,12 @@
+# scfetch 0.6.0
+
+## New features
+* Added `RunCellRanger` to run CellRanger on downloaded FASTQ files.
+* Added `RunSTAR` to run STAR on downloaded FASTQ files.
+* Added `Fastq2R` to pipe FASTQ files to `SeuratObject` and `DESeqDataSet`.
+
+-------------------
+
 # scfetch 0.5.1
 
 * Create output directory automatically.

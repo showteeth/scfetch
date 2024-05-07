@@ -124,7 +124,7 @@ RunPrefetch <- function(sra, prefetch.path, out.folder, prefetch.paras) {
   # prefetch command
   prefetch.cmd <- paste(prefetch.path, prefetch.paras, "-O", out.folder, sra)
   # run command
-  message(paste("Calling Prefetch: ", prefetch.cmd))
+  message(paste("Calling Prefetch:", prefetch.cmd))
   prefetch.status <- system(prefetch.cmd, intern = TRUE)
   prefetch.status.code <- attr(prefetch.status, "status")
   if (!is.null(prefetch.status.code)) {
@@ -301,7 +301,7 @@ RunSplit <- function(sra.path, fastq.type, split.cmd.path, sratools.path, split.
     split.cmd <- paste(split.cmd.path, split.cmd.paras, sp, "--gzip", "-O", out.folder, sra.path)
   }
   # run command
-  message(paste("Calling", split.name, ": ", split.cmd))
+  message(paste("Calling", split.name, ":", split.cmd))
   split.status <- system(split.cmd, intern = TRUE)
   split.status.code <- attr(split.status, "status")
   if (!is.null(split.status.code)) {
