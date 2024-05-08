@@ -313,9 +313,9 @@ Check10XFiles <- function(folders, gene2feature) {
   valid.folders <- folders[folders.flag]
   drop.folders <- setdiff(folders, valid.folders)
   if (length(drop.folders) > 0) {
-    if(gene2feature){
+    if (gene2feature) {
       message(paste0(drop.folders, collapse = ", "), " don't contain matrix.mtx.gz, barcodes.tsv.gz, features.tsv.gz.")
-    }else{
+    } else {
       message(paste0(drop.folders, collapse = ", "), " don't contain matrix.mtx.gz, barcodes.tsv.gz, features.tsv.gz/genes.tsv.gz.")
     }
   }

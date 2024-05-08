@@ -142,10 +142,12 @@ RunCellRangerSingle <- function(fq.dir, transcriptome, localcores = 4, localmem 
 #'
 #' @examples
 #' \dontrun{
-#' RunSTAR(sample.dir = "/path/to/fastq",
-#'         ref = "/path/to/star/index",
-#'         out.folder = "/path/to/star/mapping",
-#'         star.path = "/path/to/bin/STAR")
+#' RunSTAR(
+#'   sample.dir = "/path/to/fastq",
+#'   ref = "/path/to/star/index",
+#'   out.folder = "/path/to/star/mapping",
+#'   star.path = "/path/to/bin/STAR"
+#' )
 #' }
 RunSTAR <- function(sample.dir, ref, out.folder = NULL, thread = 4, star.path = NULL,
                     star.paras = "--outBAMsortingThreadN 4 --twopassMode None") {
@@ -266,6 +268,143 @@ RunSTARSingle <- function(fq.dir, ref, out.folder = NULL, thread = 4, star.path 
         message("Finish STAR: ", sample.name)
         return(NULL)
       }
+    }
+  }
+}
+
+#' Pipe FASTQ files to SeuratObject and DESeqDataSet.
+#'
+#' @param sample.dir Directory contains all samples.
+#' @param ref Path of folder containing 10x-compatible transcriptome \code{\link{RunCellRanger}}
+#' STAR \code{\link{RunSTAR}} reference.
+#' @param method Mapping methods, choose from CellRanger (10x Genomics) and STAR (Smart-seq2 or bulk RNA-seq).
+#' Default: CellRanger.
+#' @param localcores The max cores used \code{\link{RunCellRanger}}. Default: 4.
+#' @param localmem The max memory (GB) used \code{\link{RunCellRanger}}. Default: 16.
+#' @param thread The number of threads to use \code{\link{RunSTAR}}. Default: 4.
+#' @param out.folder Output folder. Default: NULL (current working directory).
+#' @param st.path Path to \code{STAR} or \code{cellranger}. Default: NULL (conduct automatic detection).
+#' @param st.paras Parameters for \code{STAR} or \code{cellranger}.
+#' Default: "--chemistry=auto --jobmode=local".
+#' @param merge Logical, whether to merge the SeuratObjects, use when \code{method} is CellRanger. Default: TRUE.
+#' @param count.col Column contains used count data (2: unstranded; 3: \code{stranded=yes}; 4: \code{stranded=reverse}),
+#' use when \code{method} is STAR. Default: 2.
+#' @param meta.data Dataframe contains sample information for DESeqDataSet, use when \code{method} is STAR. Default: NULL.
+#' @param fmu Column of \code{meta.data} contains group information. Default: NULL.
+#'
+#' @return SeuratObject, DESeqDataSet or NULL.
+#' @importFrom magrittr %>%
+#' @importFrom Seurat Read10X CreateSeuratObject
+#' @importFrom methods new
+#' @importFrom data.table fread
+#' @importFrom magrittr %>%
+#' @importFrom stats formula
+#' @importFrom DESeq2 DESeqDataSetFromMatrix
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' # run CellRanger (10x Genomics)
+#' seu <- Fastq2R(
+#'   sample.dir = "/path/to/fastq",
+#'   ref = "/path/to/10x/ref",
+#'   method = "CellRanger",
+#'   out.folder = "/path/to/results",
+#'   st.path = "/path/to/cellranger"
+#' )
+#' # run STAR (Smart-seq2 or bulk RNA-seq)
+#' deobj <- Fastq2R(
+#'   sample.dir = "/path/to/fastq",
+#'   ref = "/path/to/star/ref",
+#'   method = "STAR",
+#'   out.folder = "/path/to/results",
+#'   st.path = "/path/to/STAR",
+#'   st.paras = "--outBAMsortingThreadN 4 --twopassMode None"
+#' )
+#' }
+Fastq2R <- function(sample.dir, ref, method = c("CellRanger", "STAR"), localcores = 4, localmem = 16, thread = 4,
+                    out.folder = NULL, st.path = NULL, st.paras = "--chemistry=auto --jobmode=local",
+                    merge = TRUE, count.col = 2, meta.data = NULL, fmu = NULL) {
+  # check parameters
+  method <- match.arg(arg = method)
+  if (method == "CellRanger") {
+    res <- RunCellRanger(
+      sample.dir = sample.dir, ref = ref, localcores = localcores,
+      localmem = localmem, out.folder = out.folder,
+      cr.path = st.path, cr.paras = st.paras
+    )
+    if (is.null(res)) {
+      all.cr.folder <- dir(out.folder, full.names = TRUE)
+      all.samples.folder <- file.path(all.cr.folder, "outs", "filtered_feature_bc_matrix")
+      # check file
+      valid.samples.folder <- Check10XFiles(folders = all.samples.folder, gene2feature = TRUE)
+      if (length(valid.samples.folder) == 0) {
+        stop("No valid sample folder detected under ", out.folder, ". Please check!")
+      }
+      # load to seurat
+      seu.list <- sapply(valid.samples.folder, function(x) {
+        x.mat <- Seurat::Read10X(data.dir = x)
+        seu.obj <- Seurat::CreateSeuratObject(counts = x.mat, project = basename(x))
+        seu.obj
+      })
+      # merge SeuratObject
+      if (isTRUE(merge)) {
+        out.obj <- mergeExperiments(seu.list)
+      } else {
+        out.obj <- seu.list
+      }
+      return(out.obj)
+    } else {
+      message("Some samples failed to run, skipping loading into Seurat!")
+      return(NULL)
+    }
+  } else if (method == "STAR") {
+    res <- RunSTAR(
+      sample.dir = sample.dir, ref = ref, out.folder = out.folder, thread = thread,
+      star.path = st.path, star.paras = st.paras
+    )
+    if (is.null(res)) {
+      all.txt <- list.files(path = out.folder, pattern = ".txt$", recursive = TRUE, full.names = TRUE)
+      # read files
+      count.list <- lapply(
+        all.txt,
+        function(x) {
+          sample.count <- data.table::fread(file = x, select = c(1, count.col)) %>% as.data.frame()
+          sample.count <- sample.count[!sample.count[[1]] %in% c("N_unmapped", "N_multimapping", "N_noFeature", "N_ambiguous"), ]
+          colnames(sample.count) <- c("GeneName", gsub(pattern = "(.*).txt", replacement = "\\1", x = basename(x)))
+          sample.count
+        }
+      )
+      # create count matrix
+      count.mat <- Reduce(f = function(x, y) {
+        merge.mat <- merge(x, y, by = "GeneName", all = T)
+      }, x = count.list)
+      rownames(count.mat) <- count.mat$GeneName
+      count.mat$GeneName <- NULL
+      # loadding into DESeq2
+      if (is.null(meta.data)) {
+        meta.data <- data.frame(condition = colnames(count.mat))
+        rownames(meta.data) <- colnames(count.mat)
+        meta.data$condition <- as.factor(meta.data$condition)
+        fmu <- "condition"
+      } else {
+        if (all(rownames(meta.data) != colnames(count.mat))) {
+          stop("The columns of the count matrix and the rows of the meta.data are not in the same order!")
+        }
+      }
+      if (is.null(fmu)) {
+        message("The condition column (fmu) is empty, use the first column!")
+        fmu <- colnames(meta.data)[1]
+      }
+      fmu.used <- stats::formula(paste("~", fmu))
+      de.obj <- DESeq2::DESeqDataSetFromMatrix(
+        countData = count.mat,
+        colData = meta.data, design = fmu.used
+      )
+      return(de.obj)
+    } else {
+      message("Some samples failed to run, skipping loading into DESeq2!")
+      return(NULL)
     }
   }
 }
