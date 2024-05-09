@@ -208,6 +208,30 @@ Load2Seurat <- function(exp.file, barcode.url = NULL, feature.url = NULL,
   return(seu.obj)
 }
 
+Loading2DESeq2 <- function(mat, meta, fmu) {
+  # loadding into DESeq2
+  if (is.null(meta)) {
+    meta <- data.frame(condition = colnames(mat))
+    rownames(meta) <- colnames(mat)
+    meta$condition <- as.factor(meta$condition)
+    fmu <- "condition"
+  } else {
+    if (all(rownames(meta) != colnames(mat))) {
+      stop("The columns of the count matrix and the rows of the meta.data are not in the same order!")
+    }
+  }
+  if (is.null(fmu)) {
+    message("The condition column (fmu) is empty, use the first column!")
+    fmu <- colnames(meta)[1]
+  }
+  fmu.used <- stats::formula(paste("~", fmu))
+  de.obj <- DESeq2::DESeqDataSetFromMatrix(
+    countData = mat,
+    colData = meta, design = fmu.used
+  )
+  return(de.obj)
+}
+
 # used in UCSCCellBrowser
 # source: https://github.com/satijalab/seurat/blob/master/R/utilities.R#L1949
 ExtractField <- function(string, field = 1, delim = "_") {

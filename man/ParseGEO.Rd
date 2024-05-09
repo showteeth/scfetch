@@ -15,6 +15,8 @@ ParseGEO(
   out.folder = NULL,
   gene2feature = TRUE,
   merge = TRUE,
+  meta.data = NULL,
+  fmu = NULL,
   ...
 )
 }
@@ -43,11 +45,15 @@ and 10xSingle (cellranger output files in supplementary files directly, e.g. GSE
 
 \item{merge}{Logical value, whether to merge Seurat list when there are multiple 10x files (\code{supp.type} is 10x). Default: FALSE.}
 
+\item{meta.data}{Dataframe contains sample information for DESeqDataSet, use when \code{data.type} is bulk. Default: NULL.}
+
+\item{fmu}{Column of \code{meta.data} contains group information. Default: NULL.}
+
 \item{...}{Parameters for \code{\link{getGEO}}.}
 }
 \value{
 If \code{data.type} is "sc", return Seurat object (if \code{merge} is TRUE) or Seurat object list (if \code{merge} is FALSE).
-If \code{data.type} is "bulk", return count matrix.
+If \code{data.type} is "bulk", return DESeqDataSet.
 }
 \description{
 Download Matrix from GEO and Load to Seurat.

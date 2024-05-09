@@ -45,7 +45,8 @@ Imports:
     httr,
     rlang,
     tidyr,
-    methods
+    methods,
+    DESeq2
 Suggests: 
     knitr,
     rmarkdown,

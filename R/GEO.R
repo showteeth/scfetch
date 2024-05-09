@@ -14,10 +14,12 @@
 #' @param out.folder Output folder to save 10x files. Default: NULL (current working directory).
 #' @param gene2feature Logical value, whether to rename \code{genes.tsv.gz} to \code{features.tsv.gz}. Default: TRUE.
 #' @param merge Logical value, whether to merge Seurat list when there are multiple 10x files (\code{supp.type} is 10x). Default: FALSE.
+#' @param meta.data Dataframe contains sample information for DESeqDataSet, use when \code{data.type} is bulk. Default: NULL.
+#' @param fmu Column of \code{meta.data} contains group information. Default: NULL.
 #' @param ... Parameters for \code{\link{getGEO}}.
 #'
 #' @return If \code{data.type} is "sc", return Seurat object (if \code{merge} is TRUE) or Seurat object list (if \code{merge} is FALSE).
-#' If \code{data.type} is "bulk", return count matrix.
+#' If \code{data.type} is "bulk", return DESeqDataSet.
 #' @importFrom magrittr %>%
 #' @importFrom GEOquery getGEO getGEOSuppFiles gunzip
 #' @importFrom Biobase annotation experimentData pData phenoData notes sampleNames exprs
@@ -27,6 +29,8 @@
 #' @importFrom openxlsx read.xlsx
 #' @importFrom Seurat Read10X CreateSeuratObject
 #' @importFrom methods new
+#' @importFrom stats formula
+#' @importFrom DESeq2 DESeqDataSetFromMatrix
 #' @export
 #'
 #' @examples
@@ -46,7 +50,8 @@
 #' )
 #' }
 ParseGEO <- function(acce, platform = NULL, down.supp = FALSE, supp.idx = 1, timeout = 3600, data.type = c("sc", "bulk"),
-                     supp.type = c("count", "10x", "10xSingle"), out.folder = NULL, gene2feature = TRUE, merge = TRUE, ...) {
+                     supp.type = c("count", "10x", "10xSingle"), out.folder = NULL, gene2feature = TRUE, merge = TRUE,
+                     meta.data = NULL, fmu = NULL, ...) {
   # check parameters
   data.type <- match.arg(arg = data.type)
   supp.type <- match.arg(arg = supp.type)
@@ -72,7 +77,8 @@ ParseGEO <- function(acce, platform = NULL, down.supp = FALSE, supp.idx = 1, tim
     timeout = timeout, supp.type = supp.type, out.folder = out.folder, gene2feature = gene2feature
   )
   if (data.type == "bulk") {
-    return(pf.count)
+    de.obj <- Loading2DESeq2(mat = pf.count, meta = meta.data, fmu = fmu)
+    return(de.obj)
   } else if (data.type == "sc") {
     # load seurat
     # if (is.null(pf.count) && supp.type == "10x") {

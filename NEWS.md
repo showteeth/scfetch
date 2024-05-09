@@ -7,6 +7,11 @@
 
 -------------------
 
+## Minor changes
+* Return `DESeqDataSet` when `data.type` is bulk in `ParseGEO`.
+
+-------------------
+
 # scfetch 0.5.1
 
 * Create output directory automatically.

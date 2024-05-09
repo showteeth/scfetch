@@ -382,25 +382,7 @@ Fastq2R <- function(sample.dir, ref, method = c("CellRanger", "STAR"), localcore
       rownames(count.mat) <- count.mat$GeneName
       count.mat$GeneName <- NULL
       # loadding into DESeq2
-      if (is.null(meta.data)) {
-        meta.data <- data.frame(condition = colnames(count.mat))
-        rownames(meta.data) <- colnames(count.mat)
-        meta.data$condition <- as.factor(meta.data$condition)
-        fmu <- "condition"
-      } else {
-        if (all(rownames(meta.data) != colnames(count.mat))) {
-          stop("The columns of the count matrix and the rows of the meta.data are not in the same order!")
-        }
-      }
-      if (is.null(fmu)) {
-        message("The condition column (fmu) is empty, use the first column!")
-        fmu <- colnames(meta.data)[1]
-      }
-      fmu.used <- stats::formula(paste("~", fmu))
-      de.obj <- DESeq2::DESeqDataSetFromMatrix(
-        countData = count.mat,
-        colData = meta.data, design = fmu.used
-      )
+      de.obj <- Loading2DESeq2(mat = count.mat, meta = meta.data, fmu = fmu)
       return(de.obj)
     } else {
       message("Some samples failed to run, skipping loading into DESeq2!")
