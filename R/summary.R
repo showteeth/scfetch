@@ -4,9 +4,14 @@
 #' and \code{ShowHCAProjects}.
 #' @param filter Vector of attributes.
 #' @param database Database name, choose from "PanglaoDB", "UCSC", "CELLxGENE", "HCA". Default: "PanglaoDB".
+#' @param combine Logical value, whether to combine all attributes in \code{filter} for summarising.
+#' Default: FALSE.
 #'
-#' @return List of attributes information, including attribute, value and number.
+#' @return List of attributes information (attribute, value and number) when \code{combine} is FALSE,
+#' dataframe when \code{combine} is TRUE.
 #' @importFrom magrittr %>%
+#' @importFrom dplyr filter if_all everything group_by_all summarise n
+#' @importFrom tidyr separate_rows all_of
 #' @export
 #'
 #' @examples
@@ -26,7 +31,7 @@
 #' all.hca.projects <- ShowHCAProjects()
 #' StatDBAttribute(df = all.hca.projects, filter = c("organism", "sex"), database = "HCA")
 #' }
-StatDBAttribute <- function(df, filter, database = c("PanglaoDB", "UCSC", "CELLxGENE", "HCA")) {
+StatDBAttribute <- function(df, filter, database = c("PanglaoDB", "UCSC", "CELLxGENE", "HCA"), combine = FALSE) {
   # check parameters
   database <- match.arg(arg = database)
   # prepare filter vector
@@ -57,6 +62,6 @@ StatDBAttribute <- function(df, filter, database = c("PanglaoDB", "UCSC", "CELLx
     stop("The filter you provided is not valid, choose from: ", paste0(names(filter.vec), collapse = ", "))
   }
   # get filter values
-  valid.filter.list <- CheckFilter(df = df, filter = valid.filter, all.filter = filter.vec, database = database)
+  valid.filter.list <- CheckFilter(df = df, filter = valid.filter, all.filter = filter.vec, database = database, combine = combine)
   return(valid.filter.list)
 }

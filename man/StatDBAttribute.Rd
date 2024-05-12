@@ -7,7 +7,8 @@
 StatDBAttribute(
   df,
   filter,
-  database = c("PanglaoDB", "UCSC", "CELLxGENE", "HCA")
+  database = c("PanglaoDB", "UCSC", "CELLxGENE", "HCA"),
+  combine = FALSE
 )
 }
 \arguments{
@@ -17,9 +18,13 @@ and \code{ShowHCAProjects}.}
 \item{filter}{Vector of attributes.}
 
 \item{database}{Database name, choose from "PanglaoDB", "UCSC", "CELLxGENE", "HCA". Default: "PanglaoDB".}
+
+\item{combine}{Logical value, whether to combine all attributes in \code{filter} for summarising.
+Default: FALSE.}
 }
 \value{
-List of attributes information, including attribute, value and number.
+List of attributes information (attribute, value and number) when \code{combine} is FALSE,
+dataframe when \code{combine} is TRUE.
 }
 \description{
 Stat Database Attributes.

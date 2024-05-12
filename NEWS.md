@@ -9,6 +9,7 @@
 
 ## Minor changes
 * Return `DESeqDataSet` when `data.type` is bulk in `ParseGEO`.
+* Support summarising multiple attributes in `StatDBAttribute`.
 
 -------------------
 

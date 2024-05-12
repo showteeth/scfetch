@@ -524,32 +524,67 @@ HCAAttrFilter <- function(df, attr, attr.value) {
 }
 
 # get filter value for "PanglaoDB", "UCSC", "CELLxGENE", "HCA"
-CheckFilter <- function(df, filter, all.filter, database) {
-  filter.list <- lapply(filter, function(x) {
-    filter.values <- df[[all.filter[x]]]
+CheckFilter <- function(df, filter, all.filter, database, combine) {
+  if (combine) {
+    # extract dataframe
+    filter.df <- df[, all.filter[filter]]
+    # filter all empty row
+    filter.df <- dplyr::filter(filter.df, !dplyr::if_all(
+      dplyr::everything(),
+      function(x) {
+        x == "" | is.na(x)
+      }
+    ))
+    # for UCSC, remove parent
     if (database == "UCSC") {
-      filter.values <- gsub("\\|parent$", replacement = "", x = tolower(filter.values))
+      filter.df <- apply(filter.df, 2, FUN = function(x) {
+        gsub("\\|parent$", replacement = "", x = tolower(x))
+      }) %>% as.data.frame()
     }
-    if (database == "PanglaoDB") {
-      vf.df <- strsplit(x = unlist(strsplit(x = filter.values, split = ", ")), split = "\\|") %>%
-        unlist() %>%
-        table() %>%
-        as.data.frame()
-    } else {
-      vf.df <- strsplit(x = unlist(strsplit(x = filter.values, split = ", ")), split = "\\|") %>%
-        unlist() %>%
-        tolower() %>%
-        table() %>%
-        as.data.frame()
+    # split dataframe, a dataset may contain multiple value, eg: multiple organ
+    ## sep is ,
+    for (col in colnames(filter.df)) {
+      filter.df <- tidyr::separate_rows(filter.df, tidyr::all_of(col), sep = ", ")
     }
-    colnames(vf.df) <- c("Value", "Num")
-    vf.df <- vf.df[order(vf.df$Num, decreasing = TRUE), ]
-    vf.df$Key <- x
-    rownames(vf.df) <- NULL
-    return(vf.df)
-  })
-  names(filter.list) <- filter
-  return(filter.list)
+    ## sep is |
+    for (col in colnames(filter.df)) {
+      filter.df <- tidyr::separate_rows(filter.df, tidyr::all_of(col), sep = "\\|")
+    }
+    if (database != "PanglaoDB") {
+      filter.df <- apply(filter.df, 2, tolower) %>% as.data.frame()
+    }
+    # summarise
+    filter.df.stat <- filter.df %>%
+      dplyr::group_by_all() %>%
+      dplyr::summarise(Num = dplyr::n())
+    return(filter.df.stat)
+  } else {
+    filter.list <- lapply(filter, function(x) {
+      filter.values <- df[[all.filter[x]]]
+      if (database == "UCSC") {
+        filter.values <- gsub("\\|parent$", replacement = "", x = tolower(filter.values))
+      }
+      if (database == "PanglaoDB") {
+        vf.df <- strsplit(x = unlist(strsplit(x = filter.values, split = ", ")), split = "\\|") %>%
+          unlist() %>%
+          table() %>%
+          as.data.frame()
+      } else {
+        vf.df <- strsplit(x = unlist(strsplit(x = filter.values, split = ", ")), split = "\\|") %>%
+          unlist() %>%
+          tolower() %>%
+          table() %>%
+          as.data.frame()
+      }
+      colnames(vf.df) <- c("Value", "Num")
+      vf.df <- vf.df[order(vf.df$Num, decreasing = TRUE), ]
+      vf.df$Key <- x
+      rownames(vf.df) <- NULL
+      return(vf.df)
+    })
+    names(filter.list) <- filter
+    return(filter.list)
+  }
 }
 
 # used in hca, extract data information from contributedAnalyses and matrices
