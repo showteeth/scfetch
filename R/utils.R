@@ -1,5 +1,14 @@
-# merge Seurat object: https://github.com/dosorio/rPanglaoDB/blob/master/R/mergeExperiments.R
+# merge Seurat object, modify from: https://github.com/dosorio/rPanglaoDB/blob/master/R/mergeExperiments.R
 mergeExperiments <- function(experimentList) {
+  el.df <- lapply(experimentList, FUN = function(x) {
+    dim(x)
+  })
+  el.df <- as.data.frame(t(as.data.frame(el.df)))
+  rownames(el.df) <- 1:nrow(el.df)
+  el.df.vec <- apply(el.df, 1, function(row) all(row != 0))
+  empty.seu.index <- names(el.df.vec)[el.df.vec == FALSE]
+  message("Detect empty SeuratObject: ", paste0(empty.seu.index, collapse = ", "), ". Skip these!")
+  experimentList <- experimentList[el.df.vec]
   for (i in seq_along(experimentList)[-1]) {
     experimentList[[1]] <- suppressWarnings(merge(experimentList[[1]], experimentList[[i]]))
     experimentList[[i]] <- methods::new("Seurat")
@@ -169,7 +178,8 @@ CheckParas <- function(df, column, para.value, fuzzy.match = TRUE) {
 
 # used in UCSCCellBrowser, create seurat object (add coord to metadata)
 Load2Seurat <- function(exp.file, barcode.url = NULL, feature.url = NULL,
-                        meta.file, coord.file = NULL, name = NULL) {
+                        meta.file, coord.file = NULL, name = NULL, obs.value.filter = NULL,
+                        obs.keys = NULL, include.genes = NULL) {
   # source: https://cellbrowser.readthedocs.io/en/master/load.html
   # read matrix
   if (is.null(barcode.url)) {
@@ -183,14 +193,29 @@ Load2Seurat <- function(exp.file, barcode.url = NULL, feature.url = NULL,
     mat <- Read10XOnline(matrix.url = exp.file, barcode.url = barcode.url, feature.url = feature.url)
   }
   # read metadata
-  meta <- data.frame(data.table::fread(meta.file, check.names = FALSE), row.names = 1)
+  meta <- data.frame(data.table::fread(meta.file, check.names = FALSE), row.names = 1, check.names = FALSE)
+  # filter dataset metadata
+  ## filter cell's metadata values
+  if (!is.null(obs.value.filter)) {
+    meta <- meta %>% dplyr::filter(eval(rlang::parse_expr(obs.value.filter)))
+  }
+  ## filter cell's metadata colnames
+  if (!is.null(obs.keys)) {
+    meta <- meta[obs.keys]
+  }
+  ## filter genes
+  if (!is.null(include.genes)) {
+    mat <- mat[include.genes, rownames(meta)]
+  } else {
+    mat <- mat[, rownames(meta)]
+  }
   if (is.null(coord.file)) {
     seu.obj <- Seurat::CreateSeuratObject(counts = mat, project = name, meta.data = meta)
   } else {
     # prepare coord file
     coord.list <- lapply(1:length(coord.file), function(x) {
       coord.name <- gsub(pattern = ".coords.tsv.gz", replacement = "", x = basename(coord.file[x]))
-      coord.df <- data.frame(data.table::fread(coord.file[x], check.names = FALSE), row.names = 1)
+      coord.df <- data.frame(data.table::fread(coord.file[x], check.names = FALSE), row.names = 1, check.names = FALSE)
       colnames(coord.df) <- paste(coord.name, 1:ncol(coord.df), sep = "_")
       coord.df$Barcode <- rownames(coord.df)
       return(coord.df)

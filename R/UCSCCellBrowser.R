@@ -348,16 +348,21 @@ ExtractCBComposition <- function(json.folder = NULL, sample.df = NULL, all.sampl
 #' @param cell.num Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter. Deault: NULL.
 #' @param timeout Maximum request time when loading data online. Default: 1000.
 #' @param merge Logical value, whether to merge Seurat list. Default: FALSE.
+#' @param obs.value.filter Filter expression for cell's metadata,
+#' e.g., `Louvain Cluster` == 1 & sex == 'M' (use \code{``} to wrap columns with space). Default: NULL.
+#' @param obs.keys Columns to fetch for the cell's metadata. e.g., c("cluster", "Louvain Cluster", "donor","sex"). Default: NULL.
+#' @param include.genes Genes to include. Default: NULL.
 #'
 #' @return Seurat object (if \code{merge} is TRUE) or list of Seurat objects (if \code{merge} is FALSE).
 #' @importFrom magrittr %>%
 #' @importFrom data.table fread
-#' @importFrom dplyr full_join
+#' @importFrom dplyr full_join filter
 #' @importFrom Seurat CreateSeuratObject as.sparse
 #' @importFrom purrr reduce
 #' @importFrom tibble column_to_rownames
 #' @importFrom Matrix readMM
 #' @importFrom methods new
+#' @importFrom rlang parse_expr
 #' @export
 #'
 #' @examples
@@ -376,7 +381,7 @@ ExtractCBComposition <- function(json.folder = NULL, sample.df = NULL, all.sampl
 #' }
 ParseCBDatasets <- function(sample.df = NULL, all.samples.df = NULL, collection = NULL, sub.collection = NULL, organ = NULL,
                             disease = NULL, organism = NULL, project = NULL, fuzzy.match = TRUE, cell.num = NULL,
-                            timeout = 1000, merge = TRUE) {
+                            timeout = 1000, obs.value.filter = NULL, obs.keys = NULL, include.genes = NULL, merge = TRUE) {
   # prepare samples for download
   if (!is.null(sample.df)) {
     # use provided dataframe to download data
@@ -416,7 +421,8 @@ ParseCBDatasets <- function(sample.df = NULL, all.samples.df = NULL, collection 
     coord.file <- paste0(base.url, used.sample.df[rn, "name"], "/", strsplit(x = used.sample.df[rn, "coords"], split = ", ")[[1]])
     seu.obj.list[[rn]] <- Load2Seurat(
       exp.file = exp.url, barcode.url = barcode.url, feature.url = feature.url,
-      meta.file = meta.url, coord.file = coord.file, name = sample.name
+      meta.file = meta.url, coord.file = coord.file, name = sample.name, obs.value.filter = obs.value.filter,
+      obs.keys = obs.keys, include.genes = include.genes
     )
   }
   # merge or not

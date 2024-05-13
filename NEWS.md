@@ -6,12 +6,14 @@
 * Added `Fastq2R` to pipe FASTQ files to `SeuratObject` and `DESeqDataSet`.
 * Updated `StatDBAttribute` to support `cellxgene.census`.
 * Updated `ParseCELLxGENE` to support `cellxgene.census` and return SeuratObject.
+* Updated `ParseCBDatasets` to support subset.
 
 -------------------
 
 ## Minor changes
 * Return `DESeqDataSet` when `data.type` is bulk in `ParseGEO`.
 * Support summarising multiple attributes in `StatDBAttribute`.
+* Fix bugs in `mergeExperiments`.
 
 -------------------
 

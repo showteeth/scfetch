@@ -16,6 +16,9 @@ ParseCBDatasets(
   fuzzy.match = TRUE,
   cell.num = NULL,
   timeout = 1000,
+  obs.value.filter = NULL,
+  obs.keys = NULL,
+  include.genes = NULL,
   merge = TRUE
 )
 }
@@ -48,6 +51,13 @@ of \code{all.samples.df}, obtain available values with \code{StatDBAttribute}. D
 \item{cell.num}{Cell number filter. If NULL, no filter; if one value, lower filter; if two values, low and high filter. Deault: NULL.}
 
 \item{timeout}{Maximum request time when loading data online. Default: 1000.}
+
+\item{obs.value.filter}{Filter expression for cell's metadata,
+e.g., `Louvain Cluster` == 1 & sex == 'M' (use \code{``} to wrap columns with space). Default: NULL.}
+
+\item{obs.keys}{Columns to fetch for the cell's metadata. e.g., c("cluster", "Louvain Cluster", "donor","sex"). Default: NULL.}
+
+\item{include.genes}{Genes to include. Default: NULL.}
 
 \item{merge}{Logical value, whether to merge Seurat list. Default: FALSE.}
 }
