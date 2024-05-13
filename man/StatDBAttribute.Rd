@@ -5,15 +5,18 @@
 \title{Stat Database Attributes.}
 \usage{
 StatDBAttribute(
-  df,
+  df = NULL,
   filter,
   database = c("PanglaoDB", "UCSC", "CELLxGENE", "HCA"),
-  combine = FALSE
+  combine = FALSE,
+  use.census = FALSE,
+  census.version = "stable",
+  organism = NULL
 )
 }
 \arguments{
 \item{df}{All metadata, can be \code{PanglaoDBMeta} and obtained with \code{ShowCBDatasets}, \code{ShowCELLxGENEDatasets},
-and \code{ShowHCAProjects}.}
+and \code{ShowHCAProjects}. Skip when \code{use.census} is TRUE. Default: NULL.}
 
 \item{filter}{Vector of attributes.}
 
@@ -21,6 +24,12 @@ and \code{ShowHCAProjects}.}
 
 \item{combine}{Logical value, whether to combine all attributes in \code{filter} for summarising.
 Default: FALSE.}
+
+\item{use.census}{Logical value, whether to use CZ CELLxGENE Census to summarise metadata. Default: FALSE.}
+
+\item{census.version}{The version of the Census, e.g., "2024-05-13", or "latest" or "stable". Default: stable.}
+
+\item{organism}{Organism, should be in lower case and replace space with '_'. Default: FALSE (human).}
 }
 \value{
 List of attributes information (attribute, value and number) when \code{combine} is FALSE,

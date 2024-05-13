@@ -2,20 +2,30 @@
 % Please edit documentation in R/cellxgene.R
 \name{ParseCELLxGENE}
 \alias{ParseCELLxGENE}
-\title{Download CELLxGENE Datasets.}
+\title{Download CELLxGENE Datasets and Return SeuratObject.}
 \usage{
 ParseCELLxGENE(
-  meta,
+  meta = NULL,
   file.ext = c("rds", "h5ad"),
   out.folder = NULL,
   timeout = 3600,
   quiet = FALSE,
-  parallel = TRUE
+  parallel = TRUE,
+  return.seu = FALSE,
+  merge = TRUE,
+  use.census = FALSE,
+  census.version = "stable",
+  organism = NULL,
+  obs.value.filter = NULL,
+  obs.keys = NULL,
+  var.value.filter = NULL,
+  ...
 )
 }
 \arguments{
 \item{meta}{Metadata used to download, can be from \code{ExtractCELLxGENEMeta},
-should contain dataset_id, rds_id/h5ad_id (depend on \code{file.ext}) and name columns.}
+should contain dataset_id, rds_id/h5ad_id (depend on \code{file.ext}) and name columns.
+Skip when \code{use.census} is TRUE. Default: NULL.}
 
 \item{file.ext}{The valid file extension for download. When NULL, use "rds" and "h5ad". Default: c("rds", "h5ad").}
 
@@ -27,12 +37,35 @@ should contain dataset_id, rds_id/h5ad_id (depend on \code{file.ext}) and name c
 
 \item{parallel}{Logical value, whether to download parallelly. Default: TRUE. When "libcurl" is available for \code{download.file},
 the parallel is done by default (\code{parallel} can be FALSE).}
+
+\item{return.seu}{Logical value, whether to load downloaded datasets to Seurat. Valid when rds in \code{file.ext} and all
+datasets download successfully. Default: FALSE.}
+
+\item{merge}{Logical value, whether to merge Seurat list when there are multiple rds files,
+used when \code{return.seu} is TRUE. Default: FALSE.}
+
+\item{use.census}{Logical value, whether to use CZ CELLxGENE Census to download and subset datasets. Default: FALSE.}
+
+\item{census.version}{The version of the Census, e.g., "2024-05-13", or "latest" or "stable". Default: stable.}
+
+\item{organism}{Organism, should be in lower case and replace space with '_'. Default: FALSE (human).}
+
+\item{obs.value.filter}{Filter expression for cell's metadata,
+e.g., cell_type == 'B cell' & tissue_general == 'lung' & disease == 'COVID-19'. Default: NULL.}
+
+\item{obs.keys}{Columns to fetch for the cell's metadata. e.g., c("cell_type", "tissue_general", "disease", "sex").}
+
+\item{var.value.filter}{Filter expression for cell's feature,
+e.g., feature_id %in% c('ENSG00000161798', 'ENSG00000188229'). Default: NULL.}
+
+\item{...}{Parameters for \code{\link{get_seurat}}.}
 }
 \value{
-Dataframe contains failed datasets or NULL.
+Dataframe contains failed datasets, SeuratObject (\code{return.seu} is TRUE, rds in \code{file.ext}) and
+NULL (\code{return.seu} is FALSE or rds not in \code{file.ext}).
 }
 \description{
-Download CELLxGENE Datasets.
+Download CELLxGENE Datasets and Return SeuratObject.
 }
 \examples{
 \dontrun{

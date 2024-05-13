@@ -556,7 +556,8 @@ CheckFilter <- function(df, filter, all.filter, database, combine) {
     # summarise
     filter.df.stat <- filter.df %>%
       dplyr::group_by_all() %>%
-      dplyr::summarise(Num = dplyr::n())
+      dplyr::summarise(Num = dplyr::n()) %>%
+      dplyr::arrange(dplyr::desc(Num))
     return(filter.df.stat)
   } else {
     filter.list <- lapply(filter, function(x) {

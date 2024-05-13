@@ -57,7 +57,8 @@ Suggests:
     SeuratDisk,
     SeuratWrappers,
     zellkonverter,
-    GEOfastq
+    GEOfastq,
+    cellxgene.census
 VignetteBuilder: knitr
 Additional_repositories: https://showteeth.github.io/drat/
 URL: https://github.com/showteeth/scfetch

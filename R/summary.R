@@ -1,17 +1,21 @@
 #' Stat Database Attributes.
 #'
 #' @param df All metadata, can be \code{PanglaoDBMeta} and obtained with \code{ShowCBDatasets}, \code{ShowCELLxGENEDatasets},
-#' and \code{ShowHCAProjects}.
+#' and \code{ShowHCAProjects}. Skip when \code{use.census} is TRUE. Default: NULL.
 #' @param filter Vector of attributes.
 #' @param database Database name, choose from "PanglaoDB", "UCSC", "CELLxGENE", "HCA". Default: "PanglaoDB".
 #' @param combine Logical value, whether to combine all attributes in \code{filter} for summarising.
 #' Default: FALSE.
+#' @param use.census Logical value, whether to use CZ CELLxGENE Census to summarise metadata. Default: FALSE.
+#' @param census.version The version of the Census, e.g., "2024-05-13", or "latest" or "stable". Default: stable.
+#' @param organism Organism, should be in lower case and replace space with '_'. Default: FALSE (human).
 #'
 #' @return List of attributes information (attribute, value and number) when \code{combine} is FALSE,
 #' dataframe when \code{combine} is TRUE.
 #' @importFrom magrittr %>%
-#' @importFrom dplyr filter if_all everything group_by_all summarise n
+#' @importFrom dplyr filter if_all everything group_by_all summarise n arrange desc
 #' @importFrom tidyr separate_rows all_of
+#' @import cellxgene.census
 #' @export
 #'
 #' @examples
@@ -31,7 +35,8 @@
 #' all.hca.projects <- ShowHCAProjects()
 #' StatDBAttribute(df = all.hca.projects, filter = c("organism", "sex"), database = "HCA")
 #' }
-StatDBAttribute <- function(df, filter, database = c("PanglaoDB", "UCSC", "CELLxGENE", "HCA"), combine = FALSE) {
+StatDBAttribute <- function(df = NULL, filter, database = c("PanglaoDB", "UCSC", "CELLxGENE", "HCA"), combine = FALSE,
+                            use.census = FALSE, census.version = "stable", organism = NULL) {
   # check parameters
   database <- match.arg(arg = database)
   # prepare filter vector
@@ -55,13 +60,66 @@ StatDBAttribute <- function(df, filter, database = c("PanglaoDB", "UCSC", "CELLx
       "protocol", "suspension.type", "cell.type", "sequencing.type"
     )
   }
-  # get valid filter
-  valid.filter <- intersect(filter, names(filter.vec))
-  # check valid filter
-  if (length(valid.filter) == 0) {
-    stop("The filter you provided is not valid, choose from: ", paste0(names(filter.vec), collapse = ", "))
+  # check cell_type
+  if (use.census && database == "CELLxGENE") {
+    message(
+      "The use.census is true, ",
+      "we will use R package cellxgene.census to access CELLxGENE. Please note the Census release date, ",
+      "there may be a delay (control by census.version)!"
+    )
+    # require cellxgene.census
+    if (!require("cellxgene.census", quietly = TRUE, character.only = TRUE)) {
+      stop(
+        "Please install cellxgene.census package! You can try install.packages('cellxgene.census', ",
+        "repos=c('https://chanzuckerberg.r-universe.dev', 'https://cloud.r-project.org'))"
+      )
+    }
+    suppressWarnings(suppressMessages(library("cellxgene.census", character.only = TRUE)))
+    if (is.null(organism)) {
+      message("'cellxgene.census' requires organism, the default is human")
+      organism <- "homo_sapiens"
+    } else {
+      if (grepl(pattern = "^[A-Z]+", x = organism)) {
+        message("Detect upper case in ", organism, ". Convert to lower case!")
+        organism <- tolower(organism)
+      }
+      if (grepl(pattern = "[[:space:]]+", x = organism)) {
+        message("Detect space in ", organism, ". Replace with '_'!")
+        organism <- gsub(pattern = "[[:space:]]+", replacement = "_", x = organism)
+      }
+    }
+    census <- cellxgene.census::open_soma(census_version = census.version)
+    sp <- census$get("census_data")$get(organism)
+    all.cols <- sp$obs$colnames()
+    valid.census.filter <- intersect(filter, all.cols)
+    invalid.census.filter <- setdiff(filter, all.cols)
+    if (length(invalid.census.filter) > 0) {
+      message(
+        "Detect invalid filter: ", paste(invalid.census.filter, collapse = ", "),
+        ", please choose from: ", paste(all.cols, collapse = ", ")
+      )
+    }
+    census.obs.df <- sp$obs$read(column_names = valid.census.filter)
+    census.obs.df <- as.data.frame(census.obs.df$concat())
+    # close census to release memory and other resources
+    census$close()
+    census.obs.df.stat <- census.obs.df %>%
+      dplyr::group_by_all() %>%
+      dplyr::summarise(Num = dplyr::n()) %>%
+      dplyr::arrange(dplyr::desc(Num))
+    return(census.obs.df.stat)
+  } else {
+    if (is.null(df)) {
+      stop("Please provide metadata!")
+    }
+    # get valid filter
+    valid.filter <- intersect(filter, names(filter.vec))
+    # check valid filter
+    if (length(valid.filter) == 0) {
+      stop("The filter you provided is not valid, choose from: ", paste0(names(filter.vec), collapse = ", "))
+    }
+    # get filter values
+    valid.filter.res <- CheckFilter(df = df, filter = valid.filter, all.filter = filter.vec, database = database, combine = combine)
+    return(valid.filter.res)
   }
-  # get filter values
-  valid.filter.list <- CheckFilter(df = df, filter = valid.filter, all.filter = filter.vec, database = database, combine = combine)
-  return(valid.filter.list)
 }

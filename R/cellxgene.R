@@ -153,22 +153,38 @@ ExtractCELLxGENEMeta <- function(all.samples.df, organism = NULL, ethnicity = NU
   return(used.sample.df)
 }
 
-#' Download CELLxGENE Datasets.
+#' Download CELLxGENE Datasets and Return SeuratObject.
 #'
 #' @param meta Metadata used to download, can be from \code{ExtractCELLxGENEMeta},
 #' should contain dataset_id, rds_id/h5ad_id (depend on \code{file.ext}) and name columns.
+#' Skip when \code{use.census} is TRUE. Default: NULL.
 #' @param file.ext The valid file extension for download. When NULL, use "rds" and "h5ad". Default: c("rds", "h5ad").
 #' @param out.folder The output folder. Default: NULL (current working directory).
 #' @param timeout Maximum request time. Default: 3600.
 #' @param quiet Logical value, whether to show downloading progress. Default: FALSE (show).
 #' @param parallel Logical value, whether to download parallelly. Default: TRUE. When "libcurl" is available for \code{download.file},
 #' the parallel is done by default (\code{parallel} can be FALSE).
+#' @param return.seu Logical value, whether to load downloaded datasets to Seurat. Valid when rds in \code{file.ext} and all
+#' datasets download successfully. Default: FALSE.
+#' @param merge Logical value, whether to merge Seurat list when there are multiple rds files,
+#' used when \code{return.seu} is TRUE. Default: FALSE.
+#' @param use.census Logical value, whether to use CZ CELLxGENE Census to download and subset datasets. Default: FALSE.
+#' @param census.version The version of the Census, e.g., "2024-05-13", or "latest" or "stable". Default: stable.
+#' @param organism Organism, should be in lower case and replace space with '_'. Default: FALSE (human).
+#' @param obs.value.filter Filter expression for cell's metadata,
+#' e.g., cell_type == 'B cell' & tissue_general == 'lung' & disease == 'COVID-19'. Default: NULL.
+#' @param obs.keys Columns to fetch for the cell's metadata. e.g., c("cell_type", "tissue_general", "disease", "sex").
+#' @param var.value.filter Filter expression for cell's feature,
+#' e.g., feature_id %in% c('ENSG00000161798', 'ENSG00000188229'). Default: NULL.
+#' @param ... Parameters for \code{\link{get_seurat}}.
 #'
-#' @return Dataframe contains failed datasets or NULL.
+#' @return Dataframe contains failed datasets, SeuratObject (\code{return.seu} is TRUE, rds in \code{file.ext}) and
+#' NULL (\code{return.seu} is FALSE or rds not in \code{file.ext}).
 #' @importFrom httr POST stop_for_status content
 #' @importFrom jsonlite fromJSON
 #' @importFrom parallel detectCores mclapply
 #' @importFrom utils download.file
+#' @import cellxgene.census
 #' @export
 #' @references https://gist.github.com/ivirshup/f1a1603db69de3888eacb4bdb6a9317a
 #'
@@ -185,74 +201,149 @@ ExtractCELLxGENEMeta <- function(all.samples.df, organism = NULL, ethnicity = NU
 #' # download, need to provide the output folder
 #' ParseCELLxGENE(meta = human.10x.cellxgene.meta, out.folder = "/path/to/output")
 #' }
-ParseCELLxGENE <- function(meta, file.ext = c("rds", "h5ad"), out.folder = NULL,
-                           timeout = 3600, quiet = FALSE, parallel = TRUE) {
-  # check file extension
-  if (is.null(file.ext)) {
-    warning("There is no file extension provided, use rds and h5ad.")
-    file.ext <- c("rds", "h5ad")
-  }
-  file.ext <- intersect(file.ext, c("rds", "h5ad"))
-  if (length(file.ext) == 0) {
-    stop("Please provide valid file extension: rds, h5ad.")
-  }
-  # prepare download urls
-  download.urls <- c()
-  download.df.list <- list()
-  # prepare rds
-  if ("rds" %in% file.ext) {
-    if (!"rds_id" %in% colnames(meta)) {
-      stop("The meta dataframe you provided doesn't contain rds!")
+ParseCELLxGENE <- function(meta = NULL, file.ext = c("rds", "h5ad"), out.folder = NULL, timeout = 3600, quiet = FALSE,
+                           parallel = TRUE, return.seu = FALSE, merge = TRUE, use.census = FALSE, census.version = "stable",
+                           organism = NULL, obs.value.filter = NULL, obs.keys = NULL, var.value.filter = NULL, ...) {
+  if (use.census) {
+    message(
+      "The use.census is true, ",
+      "we will use R package cellxgene.census to access CELLxGENE. Please note the Census release date, ",
+      "there may be a delay (control by census.version)!"
+    )
+    # require cellxgene.census
+    if (!require("cellxgene.census", quietly = TRUE, character.only = TRUE)) {
+      stop(
+        "Please install cellxgene.census package! You can try install.packages('cellxgene.census', ",
+        "repos=c('https://chanzuckerberg.r-universe.dev', 'https://cloud.r-project.org'))"
+      )
     }
-    rds.urls.list <- PrepareCELLxGENEUrls(df = meta, fe = "rds")
-    rds.urls <- rds.urls.list$urls
-    download.df.list <- c(download.df.list, list(rds.urls.list$df))
-    download.urls <- c(download.urls, rds.urls)
-  }
-  # prepare h5ad
-  if ("h5ad" %in% file.ext) {
-    if (!"h5ad_id" %in% colnames(meta)) {
-      stop("The meta dataframe you provided doesn't contain h5ad!")
+    suppressWarnings(suppressMessages(library("cellxgene.census", character.only = TRUE)))
+    if (is.null(organism)) {
+      message("'cellxgene.census' requires organism, the default is human")
+      organism <- "Homo sapiens"
+    } else {
+      if (grepl(pattern = "^[a-z]+", x = organism)) {
+        message("Detect lower case in ", organism, ". Convert to title case!")
+        organism <- paste(toupper(substring(organism, 1, 1)),
+          tolower(substring(organism, 2, nchar(organism))),
+          sep = ""
+        )
+      }
+      if (grepl(pattern = "_", x = organism)) {
+        message("Detect '_' in ", organism, ". Replace with spacce!")
+        organism <- gsub(pattern = "_", replacement = " ", x = organism)
+      }
     }
-    h5ad.urls.list <- PrepareCELLxGENEUrls(df = meta, fe = "h5ad")
-    h5ad.urls <- h5ad.urls.list$urls
-    download.df.list <- c(download.df.list, list(h5ad.urls.list$df))
-    download.urls <- c(download.urls, h5ad.urls)
-  }
-  download.df <- data.table::rbindlist(download.df.list, fill = TRUE) %>% as.data.frame()
-  # prepare output folder
-  if (is.null(out.folder)) {
-    out.folder <- getwd()
-  }
-  if (!dir.exists(out.folder)) {
-    message(out.folder, " does not exist, create automatically!")
-    dir.create(out.folder, recursive = TRUE)
-  }
-  names(download.urls) <- file.path(out.folder, names(download.urls))
-  # download urls
-  # set timeout
-  env.timeout <- getOption("timeout")
-  on.exit(options(timeout = env.timeout)) # restore timeout
-  options(timeout = timeout)
-  message("Start downloading!")
-  if (isTRUE(parallel)) {
-    # prepare cores
-    cores.used <- min(parallel::detectCores(), length(download.urls))
-    down.status <- parallel::mclapply(X = 1:length(download.urls), FUN = function(x) {
-      utils::download.file(url = download.urls, destfile = names(download.urls), quiet = quiet, mode = "wb")
-    }, mc.cores = cores.used)
+    census <- cellxgene.census::open_soma(census_version = census.version)
+    message("Access CELLxGENE data and create SeuratObject!")
+    seu.obj <- cellxgene.census::get_seurat(
+      census = census, organism = organism, obs_column_names = obs.keys,
+      var_value_filter = var.value.filter, obs_value_filter = obs.value.filter, ...
+    )
+    # close census to release memory and other resources
+    census$close()
+    return(seu.obj)
   } else {
-    down.status <- utils::download.file(url = download.urls, destfile = names(download.urls), quiet = quiet, mode = "wb")
-  }
-  # process failed datasets
-  down.status <- unlist(down.status)
-  fail.status <- which(down.status != 0)
-  if (length(fail.status) == 0) {
-    message("All datasets downloaded successfully!")
-    return(NULL)
-  } else {
-    fail.datasets.id <- download.df[fail.status, "dataset_id"] %>% unique()
-    fail.meta <- meta[meta$dataset_id %in% fail.datasets.id, ]
-    return(fail.meta)
+    # check file extension
+    if (is.null(file.ext)) {
+      warning("There is no file extension provided, use rds and h5ad.")
+      file.ext <- c("rds", "h5ad")
+    }
+    file.ext <- intersect(file.ext, c("rds", "h5ad"))
+    if (length(file.ext) == 0) {
+      stop("Please provide valid file extension: rds, h5ad.")
+    }
+    # prepare download urls
+    download.urls <- c()
+    download.df.list <- list()
+    # prepare rds
+    if ("rds" %in% file.ext) {
+      if (!"rds_id" %in% colnames(meta)) {
+        stop("The meta dataframe you provided doesn't contain rds!")
+      }
+      rds.urls.list <- PrepareCELLxGENEUrls(df = meta, fe = "rds")
+      rds.urls <- rds.urls.list$urls
+      download.df.list <- c(download.df.list, list(rds.urls.list$df))
+      download.urls <- c(download.urls, rds.urls)
+    }
+    # prepare h5ad
+    if ("h5ad" %in% file.ext) {
+      if (!"h5ad_id" %in% colnames(meta)) {
+        stop("The meta dataframe you provided doesn't contain h5ad!")
+      }
+      h5ad.urls.list <- PrepareCELLxGENEUrls(df = meta, fe = "h5ad")
+      h5ad.urls <- h5ad.urls.list$urls
+      download.df.list <- c(download.df.list, list(h5ad.urls.list$df))
+      download.urls <- c(download.urls, h5ad.urls)
+    }
+    download.df <- data.table::rbindlist(download.df.list, fill = TRUE) %>% as.data.frame()
+    # prepare output folder
+    if (is.null(out.folder)) {
+      out.folder <- getwd()
+    }
+    if (!dir.exists(out.folder)) {
+      message(out.folder, " does not exist, create automatically!")
+      dir.create(out.folder, recursive = TRUE)
+    }
+    names(download.urls) <- file.path(out.folder, names(download.urls))
+    # download urls
+    # set timeout
+    env.timeout <- getOption("timeout")
+    on.exit(options(timeout = env.timeout)) # restore timeout
+    options(timeout = timeout)
+    message("Start downloading!")
+    if (isTRUE(parallel)) {
+      # prepare cores
+      cores.used <- min(parallel::detectCores(), length(download.urls))
+      down.status <- parallel::mclapply(X = 1:length(download.urls), FUN = function(x) {
+        utils::download.file(url = download.urls, destfile = names(download.urls), quiet = quiet, mode = "wb")
+      }, mc.cores = cores.used)
+    } else {
+      down.status <- utils::download.file(url = download.urls, destfile = names(download.urls), quiet = quiet, mode = "wb")
+    }
+    # process failed datasets
+    down.status <- unlist(down.status)
+    fail.status <- which(down.status != 0)
+    if (length(fail.status) == 0) {
+      message("All datasets downloaded successfully!")
+      if (isTRUE(return.seu)) {
+        rds.files <- list.files(path = out.folder, pattern = "rds$", full.names = TRUE)
+        if (length(rds.files) > 0) {
+          message("There is rds in file.ext and return.seu is TRUE, return SeuratOnject!")
+          seu.list <- sapply(X = rds.files, FUN = function(x) {
+            tryCatch(
+              {
+                x.rds <- readRDS(x)
+                if (class(x.rds) == "Seurat") {
+                  x.rds
+                } else {
+                  message(x, " is not SeuratObject, skip!")
+                  NULL
+                }
+              },
+              error = function(cond) {
+                message("Reading ", x, " error:", cond)
+                NULL
+              }
+            )
+          })
+          if (isTRUE(merge)) {
+            seu.obj <- mergeExperiments(seu.list)
+          } else {
+            seu.obj <- seu.list
+          }
+          return(seu.obj)
+        } else {
+          message("There is no rds file under ", out.folder)
+          return(NULL)
+        }
+      } else {
+        return(NULL)
+      }
+    } else {
+      fail.datasets.id <- download.df[fail.status, "dataset_id"] %>% unique()
+      fail.meta <- meta[meta$dataset_id %in% fail.datasets.id, ]
+      return(fail.meta)
+    }
   }
 }

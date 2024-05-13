@@ -4,6 +4,8 @@
 * Added `RunCellRanger` to run CellRanger on downloaded FASTQ files.
 * Added `RunSTAR` to run STAR on downloaded FASTQ files.
 * Added `Fastq2R` to pipe FASTQ files to `SeuratObject` and `DESeqDataSet`.
+* Updated `StatDBAttribute` to support `cellxgene.census`.
+* Updated `ParseCELLxGENE` to support `cellxgene.census` and return SeuratObject.
 
 -------------------
 
