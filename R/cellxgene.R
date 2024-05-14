@@ -174,9 +174,10 @@ ExtractCELLxGENEMeta <- function(all.samples.df, organism = NULL, ethnicity = NU
 #' @param obs.value.filter Filter expression for cell's metadata,
 #' e.g., cell_type == 'B cell' & tissue_general == 'lung' & disease == 'COVID-19'. Default: NULL.
 #' @param obs.keys Columns to fetch for the cell's metadata. e.g., c("cell_type", "tissue_general", "disease", "sex").
-#' @param var.value.filter Filter expression for cell's feature,
-#' e.g., feature_id %in% c('ENSG00000161798', 'ENSG00000188229'). Default: NULL.
-#' @param ... Parameters for \code{\link{get_seurat}}.
+#' @param include.genes Genes to include, e.g, \code{include.genes} = c('ENSG00000161798', 'ENSG00000188229')
+#' same as \code{var_value_filter} = "feature_id %in% c('ENSG00000161798', 'ENSG00000188229')" in \code{\link{get_seurat}}.
+#' Default: NULL.
+#' @param ... Parameters for \code{\link{get_seurat}}, used when \code{use.census} is TRUE.
 #'
 #' @return Dataframe contains failed datasets, SeuratObject (\code{return.seu} is TRUE, rds in \code{file.ext}) and
 #' NULL (\code{return.seu} is FALSE or rds not in \code{file.ext}).
@@ -184,6 +185,8 @@ ExtractCELLxGENEMeta <- function(all.samples.df, organism = NULL, ethnicity = NU
 #' @importFrom jsonlite fromJSON
 #' @importFrom parallel detectCores mclapply
 #' @importFrom utils download.file
+#' @importFrom rlang parse_expr
+#' @importFrom dplyr filter
 #' @import cellxgene.census
 #' @export
 #' @references https://gist.github.com/ivirshup/f1a1603db69de3888eacb4bdb6a9317a
@@ -203,7 +206,7 @@ ExtractCELLxGENEMeta <- function(all.samples.df, organism = NULL, ethnicity = NU
 #' }
 ParseCELLxGENE <- function(meta = NULL, file.ext = c("rds", "h5ad"), out.folder = NULL, timeout = 3600, quiet = FALSE,
                            parallel = TRUE, return.seu = FALSE, merge = TRUE, use.census = FALSE, census.version = "stable",
-                           organism = NULL, obs.value.filter = NULL, obs.keys = NULL, var.value.filter = NULL, ...) {
+                           organism = NULL, obs.value.filter = NULL, obs.keys = NULL, include.genes = NULL, ...) {
   if (use.census) {
     message(
       "The use.census is true, ",
@@ -236,10 +239,19 @@ ParseCELLxGENE <- function(meta = NULL, file.ext = c("rds", "h5ad"), out.folder 
     }
     census <- cellxgene.census::open_soma(census_version = census.version)
     message("Access CELLxGENE data and create SeuratObject!")
-    seu.obj <- cellxgene.census::get_seurat(
-      census = census, organism = organism, obs_column_names = obs.keys,
-      var_value_filter = var.value.filter, obs_value_filter = obs.value.filter, ...
-    )
+    # create gene filter
+    if (!is.null(include.genes)) {
+      include.genes.filter <- paste0("feature_id %in% ", include.genes)
+      seu.obj <- cellxgene.census::get_seurat(
+        census = census, organism = organism, obs_column_names = obs.keys,
+        var_value_filter = include.genes.filter, obs_value_filter = obs.value.filter, ...
+      )
+    } else {
+      seu.obj <- cellxgene.census::get_seurat(
+        census = census, organism = organism, obs_column_names = obs.keys,
+        obs_value_filter = obs.value.filter, ...
+      )
+    }
     # close census to release memory and other resources
     census$close()
     return(seu.obj)
@@ -307,36 +319,11 @@ ParseCELLxGENE <- function(meta = NULL, file.ext = c("rds", "h5ad"), out.folder 
     if (length(fail.status) == 0) {
       message("All datasets downloaded successfully!")
       if (isTRUE(return.seu)) {
-        rds.files <- list.files(path = out.folder, pattern = "rds$", full.names = TRUE)
-        if (length(rds.files) > 0) {
-          message("There is rds in file.ext and return.seu is TRUE, return SeuratOnject!")
-          seu.list <- sapply(X = rds.files, FUN = function(x) {
-            tryCatch(
-              {
-                x.rds <- readRDS(x)
-                if (class(x.rds) == "Seurat") {
-                  x.rds
-                } else {
-                  message(x, " is not SeuratObject, skip!")
-                  NULL
-                }
-              },
-              error = function(cond) {
-                message("Reading ", x, " error:", cond)
-                NULL
-              }
-            )
-          })
-          if (isTRUE(merge)) {
-            seu.obj <- mergeExperiments(seu.list)
-          } else {
-            seu.obj <- seu.list
-          }
-          return(seu.obj)
-        } else {
-          message("There is no rds file under ", out.folder)
-          return(NULL)
-        }
+        seu.obj <- LoadRDS2Seurat(
+          out.folder = out.folder, merge = merge, obs.value.filter = obs.value.filter,
+          obs.keys = obs.keys, include.genes = include.genes
+        )
+        return(seu.obj)
       } else {
         return(NULL)
       }

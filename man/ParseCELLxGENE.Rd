@@ -18,7 +18,7 @@ ParseCELLxGENE(
   organism = NULL,
   obs.value.filter = NULL,
   obs.keys = NULL,
-  var.value.filter = NULL,
+  include.genes = NULL,
   ...
 )
 }
@@ -55,10 +55,11 @@ e.g., cell_type == 'B cell' & tissue_general == 'lung' & disease == 'COVID-19'. 
 
 \item{obs.keys}{Columns to fetch for the cell's metadata. e.g., c("cell_type", "tissue_general", "disease", "sex").}
 
-\item{var.value.filter}{Filter expression for cell's feature,
-e.g., feature_id %in% c('ENSG00000161798', 'ENSG00000188229'). Default: NULL.}
+\item{include.genes}{Genes to include, e.g, \code{include.genes} = c('ENSG00000161798', 'ENSG00000188229')
+same as \code{var_value_filter} = "feature_id %in% c('ENSG00000161798', 'ENSG00000188229')" in \code{\link{get_seurat}}.
+Default: NULL.}
 
-\item{...}{Parameters for \code{\link{get_seurat}}.}
+\item{...}{Parameters for \code{\link{get_seurat}}, used when \code{use.census} is TRUE.}
 }
 \value{
 Dataframe contains failed datasets, SeuratObject (\code{return.seu} is TRUE, rds in \code{file.ext}) and

@@ -2,7 +2,7 @@
 % Please edit documentation in R/Zenodo.R
 \name{ParseZenodo}
 \alias{ParseZenodo}
-\title{Download Data with Zenodo DOI.}
+\title{Download Data with Zenodo DOI and Return SeuratObject.}
 \usage{
 ParseZenodo(
   doi = NULL,
@@ -11,7 +11,9 @@ ParseZenodo(
   out.folder = NULL,
   timeout = 1000,
   quiet = FALSE,
-  parallel = TRUE
+  parallel = TRUE,
+  return.seu = FALSE,
+  merge = TRUE
 )
 }
 \arguments{
@@ -36,7 +38,7 @@ the parallel is done by default (\code{parallel} can be FALSE).}
 When successful, NULL. When MD5 verification failure, a dataframe contains failure terms.
 }
 \description{
-Download Data with Zenodo DOI.
+Download Data with Zenodo DOI and Return SeuratObject.
 }
 \examples{
 \dontrun{

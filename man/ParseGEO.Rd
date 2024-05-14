@@ -2,7 +2,7 @@
 % Please edit documentation in R/GEO.R
 \name{ParseGEO}
 \alias{ParseGEO}
-\title{Download Matrix from GEO and Load to Seurat.}
+\title{Download Matrix from GEO and Load to Seurat/DESeq2.}
 \usage{
 ParseGEO(
   acce,
@@ -56,7 +56,7 @@ If \code{data.type} is "sc", return Seurat object (if \code{merge} is TRUE) or S
 If \code{data.type} is "bulk", return DESeqDataSet.
 }
 \description{
-Download Matrix from GEO and Load to Seurat.
+Download Matrix from GEO and Load to Seurat/DESeq2.
 }
 \examples{
 \dontrun{

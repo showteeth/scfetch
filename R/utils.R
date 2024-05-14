@@ -635,3 +635,49 @@ HCAExtactData <- function(df) {
   df.final <- tidyr::spread(data = df.unlist[c("meta", "type", "value")], key = "type", value = "value")
   return(df.final)
 }
+# used in CELLxGENE, Zenodo
+LoadRDS2Seurat <- function(out.folder, merge, obs.value.filter = NULL, obs.keys = NULL, include.genes = NULL) {
+  rds.files <- list.files(path = out.folder, pattern = "rds$", full.names = TRUE, ignore.case = TRUE)
+  if (length(rds.files) > 0) {
+    message("There is rds in file.ext and return.seu is TRUE, return SeuratOnject!")
+    seu.list <- sapply(X = rds.files, FUN = function(x) {
+      tryCatch(
+        {
+          x.rds <- readRDS(x)
+          if (class(x.rds) == "Seurat") {
+            if (!is.null(obs.value.filter) || !is.null(obs.keys) || !is.null(include.genes)) {
+              x.rds.df <- x.rds@meta.data
+              # filter dataset metadata
+              ## filter cell's metadata values
+              if (!is.null(obs.value.filter)) {
+                x.rds.df <- x.rds.df %>% dplyr::filter(eval(rlang::parse_expr(obs.value.filter)))
+              }
+              ## filter cell's metadata colnames
+              if (!is.null(obs.keys)) {
+                x.rds.df <- x.rds.df[obs.keys]
+              }
+              x.rds <- subset(x = x.rds, cells = rownames(x.rds.df), features = include.genes)
+            }
+            x.rds
+          } else {
+            message(x, " is not SeuratObject, skip!")
+            NULL
+          }
+        },
+        error = function(cond) {
+          message("Reading ", x, " error:", cond)
+          NULL
+        }
+      )
+    })
+    if (isTRUE(merge)) {
+      seu.obj <- mergeExperiments(seu.list)
+    } else {
+      seu.obj <- seu.list
+    }
+    return(seu.obj)
+  } else {
+    message("There is no rds file under ", out.folder)
+    return(NULL)
+  }
+}

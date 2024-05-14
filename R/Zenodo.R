@@ -83,7 +83,7 @@ ExtractZenodoMetaSingle <- function(doi, file.ext = c("rdata", "h5ad")) {
   return(record.files.used.final)
 }
 
-#' Download Data with Zenodo DOI.
+#' Download Data with Zenodo DOI and Return SeuratObject.
 #'
 #' @param doi A vector of Zenodo DOIs to download. Default: NULL.
 #' @param file.ext The valid file extension for download. When NULL, use all files. Default: c("rdata", "rds", "h5ad").
@@ -104,6 +104,7 @@ ExtractZenodoMetaSingle <- function(doi, file.ext = c("rdata", "h5ad")) {
 #' @importFrom parallel detectCores mclapply
 #' @importFrom utils download.file
 #' @importFrom tools md5sum
+#' @importFrom rlang parse_expr
 #' @export
 #'
 #' @examples
@@ -119,7 +120,7 @@ ExtractZenodoMetaSingle <- function(doi, file.ext = c("rdata", "h5ad")) {
 #' )
 #' }
 ParseZenodo <- function(doi = NULL, file.ext = c("rdata", "rds", "h5ad"), doi.df = NULL, out.folder = NULL, timeout = 1000,
-                        quiet = FALSE, parallel = TRUE) {
+                        quiet = FALSE, parallel = TRUE, return.seu = FALSE, merge = TRUE) {
   if (!is.null(doi.df)) {
     doi.df <- doi.df
   } else if (!is.null(doi)) {
@@ -159,7 +160,12 @@ ParseZenodo <- function(doi = NULL, file.ext = c("rdata", "rds", "h5ad"), doi.df
   md5.check <- down.md5 == raw.md5
   if (all(md5.check)) {
     message("Download and MD5 verification successful!")
-    return(NULL)
+    if (isTRUE(return.seu)) {
+      seu.obj <- LoadRDS2Seurat(out.folder = out.folder, merge = merge)
+      return(seu.obj)
+    } else {
+      return(NULL)
+    }
   } else {
     wrong.md5.df <- doi.df[!md5.check, ]
     # restore filename
