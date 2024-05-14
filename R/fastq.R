@@ -297,6 +297,18 @@ RunSplit <- function(sra.path, fastq.type, split.cmd.path, sratools.path, split.
       split.cmd.path, split.cmd.paras, sp, "-O", out.folder,
       "--threads", split.cmd.threads, sra.path
     )
+    pigz.path <- Sys.which("pigz")
+    gzip.path <- Sys.which("gzip")
+    if (pigz.path == "" && gzip.path == "") {
+      split.cmd <- split.cmd
+      message("There is no pigz and gzip detected, return fastq files!")
+    } else if (pigz.path != "") {
+      message("Detected pigz, return fastq.gz files!")
+      split.cmd <- paste(split.cmd, "&& pigz -p 4", file.path(out.folder, "*fastq"))
+    } else if (gzip.path != "") {
+      message("Detected gzip, return fastq.gz files!")
+      split.cmd <- paste(split.cmd, "&& gzip", file.path(out.folder, "*fastq"))
+    }
   } else {
     split.cmd <- paste(split.cmd.path, split.cmd.paras, sp, "--gzip", "-O", out.folder, sra.path)
   }
