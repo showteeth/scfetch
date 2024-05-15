@@ -6,7 +6,7 @@
 \usage{
 ParseHCA(
   meta,
-  file.ext = c("rds", "rdata", "h5", "h5ad", "loom"),
+  file.ext = c("rds", "rdata", "h5", "h5ad", "loom", "tsv"),
   out.folder = NULL,
   timeout = 3600,
   quiet = FALSE,
@@ -17,8 +17,8 @@ ParseHCA(
 \item{meta}{Metadata used to download, can be from \code{ExtractHCAMeta},
 should contain entryId and name catalog.}
 
-\item{file.ext}{The valid file extension for download. When NULL, use "rds", "rdata", "h5", "h5ad", "loom".
-Default: c("rds", "rdata", "h5", "h5ad", "loom").}
+\item{file.ext}{The valid file extension for download. When NULL, use "rds", "rdata", "h5", "h5ad", "loom", "tsv".
+Default: c("rds", "rdata", "h5", "h5ad", "loom", "tsv").}
 
 \item{out.folder}{The output folder. Default: NULL (current working directory).}
 

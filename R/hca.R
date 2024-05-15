@@ -227,8 +227,8 @@ ExtractHCAMeta <- function(all.projects.df, organism = NULL, sex = NULL, organ =
 #'
 #' @param meta Metadata used to download, can be from \code{ExtractHCAMeta},
 #' should contain entryId and name catalog.
-#' @param file.ext The valid file extension for download. When NULL, use "rds", "rdata", "h5", "h5ad", "loom".
-#' Default: c("rds", "rdata", "h5", "h5ad", "loom").
+#' @param file.ext The valid file extension for download. When NULL, use "rds", "rdata", "h5", "h5ad", "loom", "tsv".
+#' Default: c("rds", "rdata", "h5", "h5ad", "loom", "tsv").
 #' @param out.folder The output folder. Default: NULL (current working directory).
 #' @param timeout Maximum request time. Default: 3600.
 #' @param quiet Logical value, whether to show downloading progress. Default: FALSE (show).
@@ -260,7 +260,7 @@ ExtractHCAMeta <- function(all.projects.df, organism = NULL, sex = NULL, organ =
 #' # download, need users to provide the output folder
 #' ParseHCA(meta = all.human.10x.projects, out.folder = "/path/to/output")
 #' }
-ParseHCA <- function(meta, file.ext = c("rds", "rdata", "h5", "h5ad", "loom"), out.folder = NULL,
+ParseHCA <- function(meta, file.ext = c("rds", "rdata", "h5", "h5ad", "loom", "tsv"), out.folder = NULL,
                      timeout = 3600, quiet = FALSE, parallel = TRUE) {
   # file.ext: ignore case, tar.gz, gz
   if (is.null(file.ext)) {
@@ -307,58 +307,62 @@ ParseHCA <- function(meta, file.ext = c("rds", "rdata", "h5", "h5ad", "loom"), o
   file.ext <- c(file.ext, paste0(file.ext, ".tar.gz"), paste0(file.ext, ".gz"))
   projects.datasets.valid.df <- projects.datasets.df[projects.datasets.df$lowerformat %in% file.ext, ]
   projects.datasets.valid.df$lowerformat <- NULL
-  # distinct url
-  projects.datasets.valid.df <- projects.datasets.valid.df %>% dplyr::distinct(.data[["url"]], .keep_all = TRUE)
-  # add name
-  projects.datasets.valid.df$name <- sapply(1:nrow(projects.datasets.valid.df), function(x) {
-    x.pdvd <- projects.datasets.valid.df[x, ]
-    ifelse(is.null(x.pdvd$name),
-      paste0(make.names(x.pdvd$meta), ".", x.pdvd$format),
-      ifelse(is.na(x.pdvd$name),
+  if (nrow(projects.datasets.valid.df) == 0) {
+    stop("There is no file with extension: ", paste(file.ext, collapse = ", "), ". Please check the file.ext!")
+  } else {
+    # distinct url
+    projects.datasets.valid.df <- projects.datasets.valid.df %>% dplyr::distinct(.data[["url"]], .keep_all = TRUE)
+    # add name
+    projects.datasets.valid.df$name <- sapply(1:nrow(projects.datasets.valid.df), function(x) {
+      x.pdvd <- projects.datasets.valid.df[x, ]
+      ifelse(is.null(x.pdvd$name),
         paste0(make.names(x.pdvd$meta), ".", x.pdvd$format),
-        ifelse(x.pdvd$name == "",
+        ifelse(is.na(x.pdvd$name),
           paste0(make.names(x.pdvd$meta), ".", x.pdvd$format),
-          x.pdvd$name
+          ifelse(x.pdvd$name == "",
+            paste0(make.names(x.pdvd$meta), ".", x.pdvd$format),
+            x.pdvd$name
+          )
         )
       )
-    )
-  })
-  # prepare download urls
-  download.urls <- projects.datasets.valid.df$url
-  names(download.urls) <- projects.datasets.valid.df$name
-  # prepare output folder
-  if (is.null(out.folder)) {
-    out.folder <- getwd()
-  }
-  if (!dir.exists(out.folder)) {
-    message(out.folder, " does not exist, create automatically!")
-    dir.create(out.folder, recursive = TRUE)
-  }
-  names(download.urls) <- file.path(out.folder, names(download.urls))
-  # download urls
-  # set timeout
-  env.timeout <- getOption("timeout")
-  on.exit(options(timeout = env.timeout)) # restore timeout
-  options(timeout = timeout)
-  message("Start downloading!")
-  if (isTRUE(parallel)) {
-    # prepare cores
-    cores.used <- min(parallel::detectCores(), length(download.urls))
-    down.status <- parallel::mclapply(X = 1:length(download.urls), FUN = function(x) {
-      utils::download.file(url = download.urls, destfile = names(download.urls), quiet = quiet, mode = "wb")
-    }, mc.cores = cores.used)
-  } else {
-    down.status <- utils::download.file(url = download.urls, destfile = names(download.urls), quiet = quiet, mode = "wb")
-  }
-  # process failed datasets
-  down.status <- unlist(down.status)
-  fail.status <- which(down.status != 0)
-  if (length(fail.status) == 0) {
-    message("All datasets downloaded successfully!")
-    return(NULL)
-  } else {
-    fail.entry.id <- projects.datasets.valid.df[fail.status, "entryId"] %>% unique()
-    fail.meta <- meta[meta$entryId %in% fail.entry.id, ]
-    return(fail.meta)
+    })
+    # prepare download urls
+    download.urls <- projects.datasets.valid.df$url
+    names(download.urls) <- projects.datasets.valid.df$name
+    # prepare output folder
+    if (is.null(out.folder)) {
+      out.folder <- getwd()
+    }
+    if (!dir.exists(out.folder)) {
+      message(out.folder, " does not exist, create automatically!")
+      dir.create(out.folder, recursive = TRUE)
+    }
+    names(download.urls) <- file.path(out.folder, names(download.urls))
+    # download urls
+    # set timeout
+    env.timeout <- getOption("timeout")
+    on.exit(options(timeout = env.timeout)) # restore timeout
+    options(timeout = timeout)
+    message("Start downloading!")
+    if (isTRUE(parallel)) {
+      # prepare cores
+      cores.used <- min(parallel::detectCores(), length(download.urls))
+      down.status <- parallel::mclapply(X = 1:length(download.urls), FUN = function(x) {
+        utils::download.file(url = download.urls, destfile = names(download.urls), quiet = quiet, mode = "wb")
+      }, mc.cores = cores.used)
+    } else {
+      down.status <- utils::download.file(url = download.urls, destfile = names(download.urls), quiet = quiet, mode = "wb")
+    }
+    # process failed datasets
+    down.status <- unlist(down.status)
+    fail.status <- which(down.status != 0)
+    if (length(fail.status) == 0) {
+      message("All datasets downloaded successfully!")
+      return(NULL)
+    } else {
+      fail.entry.id <- projects.datasets.valid.df[fail.status, "entryId"] %>% unique()
+      fail.meta <- meta[meta$entryId %in% fail.entry.id, ]
+      return(fail.meta)
+    }
   }
 }

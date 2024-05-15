@@ -7,7 +7,9 @@ mergeExperiments <- function(experimentList) {
   rownames(el.df) <- 1:nrow(el.df)
   el.df.vec <- apply(el.df, 1, function(row) all(row != 0))
   empty.seu.index <- names(el.df.vec)[el.df.vec == FALSE]
-  message("Detect empty SeuratObject: ", paste0(empty.seu.index, collapse = ", "), ". Skip these!")
+  if (length(empty.seu.index) > 0) {
+    message("Detect empty SeuratObject: ", paste0(empty.seu.index, collapse = ", "), ". Skip these!")
+  }
   experimentList <- experimentList[el.df.vec]
   for (i in seq_along(experimentList)[-1]) {
     experimentList[[1]] <- suppressWarnings(merge(experimentList[[1]], experimentList[[i]]))

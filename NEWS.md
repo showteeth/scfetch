@@ -14,6 +14,7 @@
 * Return `DESeqDataSet` when `data.type` is bulk in `ParseGEO`.
 * Support summarising multiple attributes in `StatDBAttribute`.
 * Fix bugs in `mergeExperiments`.
+* Fix bugs in `ParseHCA` (no file with extension specified by `file.ext`).
 
 -------------------
 

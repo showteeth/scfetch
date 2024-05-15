@@ -241,7 +241,7 @@ ParseCELLxGENE <- function(meta = NULL, file.ext = c("rds", "h5ad"), out.folder 
     message("Access CELLxGENE data and create SeuratObject!")
     # create gene filter
     if (!is.null(include.genes)) {
-      include.genes.filter <- paste0("feature_id %in% ", include.genes)
+      include.genes.filter <- paste0("feature_id %in% c( '", paste(include.genes, collapse = "', '"), "' )")
       seu.obj <- cellxgene.census::get_seurat(
         census = census, organism = organism, obs_column_names = obs.keys,
         var_value_filter = include.genes.filter, obs_value_filter = obs.value.filter, ...
