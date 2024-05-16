@@ -15,6 +15,7 @@
 * Support summarising multiple attributes in `StatDBAttribute`.
 * Fix bugs in `mergeExperiments`.
 * Fix bugs in `ParseHCA` (no file with extension specified by `file.ext`).
+* Optimize `ParseHCA` to return metadata of downloaded files.
 
 -------------------
 

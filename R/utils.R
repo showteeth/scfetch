@@ -637,6 +637,7 @@ HCAExtactData <- function(df) {
   df.final <- tidyr::spread(data = df.unlist[c("meta", "type", "value")], key = "type", value = "value")
   return(df.final)
 }
+
 # used in CELLxGENE, Zenodo
 LoadRDS2Seurat <- function(out.folder, merge, obs.value.filter = NULL, obs.keys = NULL, include.genes = NULL) {
   rds.files <- list.files(path = out.folder, pattern = "rds$", full.names = TRUE, ignore.case = TRUE)

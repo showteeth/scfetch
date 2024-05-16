@@ -30,7 +30,7 @@ Default: c("rds", "rdata", "h5", "h5ad", "loom", "tsv").}
 the parallel is done by default (\code{parallel} can be FALSE).}
 }
 \value{
-Dataframe contains failed projects or NULL.
+List contains files' metadata of downloaded successfully (down.meta) and failed (fail.meta).
 }
 \description{
 Download Human Cell Atlas Datasets.

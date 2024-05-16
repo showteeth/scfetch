@@ -235,7 +235,7 @@ ExtractHCAMeta <- function(all.projects.df, organism = NULL, sex = NULL, organ =
 #' @param parallel Logical value, whether to download parallelly. Default: TRUE. When "libcurl" is available for \code{download.file},
 #' the parallel is done by default (\code{parallel} can be FALSE).
 #'
-#' @return Dataframe contains failed projects or NULL.
+#' @return List contains files' metadata of downloaded successfully (down.meta) and failed (fail.meta).
 #' @importFrom magrittr %>%
 #' @importFrom curl curl_fetch_memory
 #' @importFrom jsonlite fromJSON
@@ -243,7 +243,7 @@ ExtractHCAMeta <- function(all.projects.df, organism = NULL, sex = NULL, organ =
 #' @importFrom parallel detectCores mclapply
 #' @importFrom utils download.file
 #' @importFrom tidyr spread
-#' @importFrom dplyr distinct
+#' @importFrom dplyr distinct relocate any_of last_col select everything
 #' @importFrom rlang .data
 #' @export
 #'
@@ -276,6 +276,7 @@ ParseHCA <- function(meta, file.ext = c("rds", "rdata", "h5", "h5ad", "loom", "t
   # check entryId exists
   CheckColumns(df = meta, columns = c("entryId", "catalog"))
   # filter projects with meta
+  # projects.valid <- merge(hca.projects.df, meta[c("entryId", "catalog")], by = c("entryId", "catalog"))
   projects.valid <- merge(hca.projects.df, meta[c("entryId", "catalog")], by = c("entryId", "catalog"))
 
   # extract data
@@ -302,6 +303,17 @@ ParseHCA <- function(meta, file.ext = c("rds", "rdata", "h5", "h5ad", "loom", "t
     return(x.dataset.df)
   })
   projects.datasets.df <- data.table::rbindlist(projects.datasets.list, fill = TRUE) %>% as.data.frame()
+  # remove unused columns
+  projects.datasets.df$drs_uri <- NULL
+  projects.datasets.df$uuid <- NULL
+  projects.datasets.df <- merge(meta[c(
+    "projectTitle", "projectDescription", "publications",
+    "sampleEntityType", "organPart", "disease", "preservationMethod", "biologicalSex",
+    "nucleicAcidSource", "entryId", "catalog"
+  )], projects.datasets.df, by = c("entryId", "catalog"))
+  projects.datasets.df <- projects.datasets.df %>%
+    dplyr::relocate(dplyr::any_of(c("entryId", "catalog")), .after = dplyr::last_col()) %>%
+    dplyr::select(dplyr::any_of(c("meta", "contentDescription", "name")), dplyr::everything())
   projects.datasets.df$lowerformat <- tolower(projects.datasets.df$format)
   # filter with file.ext
   file.ext <- c(file.ext, paste0(file.ext, ".tar.gz"), paste0(file.ext, ".gz"))
@@ -358,11 +370,15 @@ ParseHCA <- function(meta, file.ext = c("rds", "rdata", "h5", "h5ad", "loom", "t
     fail.status <- which(down.status != 0)
     if (length(fail.status) == 0) {
       message("All datasets downloaded successfully!")
-      return(NULL)
+      res.list <- list(down.meta = projects.datasets.valid.df, fail.meta = NULL)
+      return(res.list)
     } else {
+      message(length(fail.status), " files downloaded failed, please re-run with fail.meta (meta)")
       fail.entry.id <- projects.datasets.valid.df[fail.status, "entryId"] %>% unique()
       fail.meta <- meta[meta$entryId %in% fail.entry.id, ]
-      return(fail.meta)
+      success.meta <- projects.datasets.valid.df[!projects.datasets.valid.df$entryId %in% fail.entry.id, ]
+      res.list <- list(down.meta = success.meta, fail.meta = fail.meta)
+      return(res.list)
     }
   }
 }
