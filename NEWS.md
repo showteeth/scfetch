@@ -1,3 +1,9 @@
+# scfetch 0.6.1
+
+* Fix bugs in `LoadRDS2Seurat`.
+
+-------------------
+
 # scfetch 0.6.0
 
 ## New features

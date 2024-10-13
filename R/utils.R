@@ -653,11 +653,33 @@ LoadRDS2Seurat <- function(out.folder, merge, obs.value.filter = NULL, obs.keys 
               # filter dataset metadata
               ## filter cell's metadata values
               if (!is.null(obs.value.filter)) {
-                x.rds.df <- x.rds.df %>% dplyr::filter(eval(rlang::parse_expr(obs.value.filter)))
+                # TODO: test key of obs.value.filter in colnames(x.rds.df)
+                tryCatch(
+                  {
+                    x.rds.df <- x.rds.df %>% dplyr::filter(eval(rlang::parse_expr(obs.value.filter)))
+                    if (nrow(x.rds.df) == 0) {
+                      message("Please check the value of obs.value.filter, e.g. the 'oligodendrocyte' in cell_type == 'oligodendrocyte'!")
+                      x.rds.df <- x.rds@meta.data
+                    }
+                  },
+                  error = function(cond) {
+                    message("Please check obs.value.filter: ", cond)
+                  }
+                )
               }
               ## filter cell's metadata colnames
               if (!is.null(obs.keys)) {
-                x.rds.df <- x.rds.df[obs.keys]
+                valid.obs.keys <- intersect(colnames(x.rds.df), obs.keys)
+                invalid.obs.keys <- setdiff(obs.keys, colnames(x.rds.df))
+                if (length(invalid.obs.keys) > 0) {
+                  message("Detected invalid obs.keys: ", paste(invalid.obs.keys, collapse = ", "))
+                }
+                if (length(valid.obs.keys) > 0) {
+                  x.rds.df <- x.rds.df[valid.obs.keys]
+                } else {
+                  message("No valid obs.keys, return all obs.keys!")
+                  x.rds.df <- x.rds.df
+                }
               }
               x.rds <- subset(x = x.rds, cells = rownames(x.rds.df), features = include.genes)
             }
@@ -668,15 +690,23 @@ LoadRDS2Seurat <- function(out.folder, merge, obs.value.filter = NULL, obs.keys 
           }
         },
         error = function(cond) {
-          message("Reading ", x, " error:", cond)
+          message("Reading ", x, " error: ", cond)
           NULL
         }
       )
     })
-    if (isTRUE(merge)) {
-      seu.obj <- mergeExperiments(seu.list)
+    if (is.null(seu.list)) {
+      seu.obj <- NULL
     } else {
-      seu.obj <- seu.list
+      empty.seu <- seu.list[sapply(seu.list, is.null)]
+      message(names(empty.seu), " is NULL, drop!")
+      # remove NULL element
+      seu.list[sapply(seu.list, is.null)] <- NULL
+      if (isTRUE(merge)) {
+        seu.obj <- mergeExperiments(seu.list)
+      } else {
+        seu.obj <- seu.list
+      }
     }
     return(seu.obj)
   } else {

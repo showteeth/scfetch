@@ -278,7 +278,6 @@ ParseHCA <- function(meta, file.ext = c("rds", "rdata", "h5", "h5ad", "loom", "t
   # filter projects with meta
   # projects.valid <- merge(hca.projects.df, meta[c("entryId", "catalog")], by = c("entryId", "catalog"))
   projects.valid <- merge(hca.projects.df, meta[c("entryId", "catalog")], by = c("entryId", "catalog"))
-
   # extract data
   # get projects all datasets
   projects.datasets.list <- lapply(1:nrow(projects.valid), function(x) {
@@ -299,29 +298,41 @@ ParseHCA <- function(meta, file.ext = c("rds", "rdata", "h5", "h5ad", "loom", "t
     if (nrow(x.dataset.df) > 0) {
       x.dataset.df$entryId <- x.df$entryId
       x.dataset.df$catalog <- x.df$catalog
+      # filter with file.ext
+      file.ext <- c(file.ext, paste0(file.ext, ".tar.gz"), paste0(file.ext, ".gz"))
+      x.dataset.df$lowerformat <- tolower(x.dataset.df$format)
+      x.dataset.valid.df <- x.dataset.df[x.dataset.df$lowerformat %in% file.ext, ]
+      if (nrow(x.dataset.valid.df) == 0) {
+        message(
+          "There is no file in entryId: ", x.df$entryId, " with extension: ", paste(file.ext, collapse = ", "), ". Available file.ext: ",
+          paste(unique(x.dataset.df$lowerformat), collapse = ", "), "."
+        )
+      }
+    } else {
+      message("There is no file to download in entryId: ", x.df$entryId, ".")
+      x.dataset.valid.df <- x.dataset.df
     }
-    return(x.dataset.df)
+    return(x.dataset.valid.df)
   })
   projects.datasets.df <- data.table::rbindlist(projects.datasets.list, fill = TRUE) %>% as.data.frame()
-  # remove unused columns
-  projects.datasets.df$drs_uri <- NULL
-  projects.datasets.df$uuid <- NULL
-  projects.datasets.df <- merge(meta[c(
-    "projectTitle", "projectDescription", "publications",
-    "sampleEntityType", "organPart", "disease", "preservationMethod", "biologicalSex",
-    "nucleicAcidSource", "entryId", "catalog"
-  )], projects.datasets.df, by = c("entryId", "catalog"))
-  projects.datasets.df <- projects.datasets.df %>%
-    dplyr::relocate(dplyr::any_of(c("entryId", "catalog")), .after = dplyr::last_col()) %>%
-    dplyr::select(dplyr::any_of(c("meta", "contentDescription", "name")), dplyr::everything())
-  projects.datasets.df$lowerformat <- tolower(projects.datasets.df$format)
-  # filter with file.ext
-  file.ext <- c(file.ext, paste0(file.ext, ".tar.gz"), paste0(file.ext, ".gz"))
-  projects.datasets.valid.df <- projects.datasets.df[projects.datasets.df$lowerformat %in% file.ext, ]
-  projects.datasets.valid.df$lowerformat <- NULL
-  if (nrow(projects.datasets.valid.df) == 0) {
-    stop("There is no file with extension: ", paste(file.ext, collapse = ", "), ". Please check the file.ext!")
+  if (nrow(projects.datasets.df) == 0) {
+    stop(
+      "There is no file in entryId: ", paste(projects.valid$entryId, collapse = ", "), " with extension: ",
+      paste(file.ext, collapse = ", "), ". Please check the file.ext!"
+    )
   } else {
+    # remove unused columns
+    projects.datasets.df$drs_uri <- NULL
+    projects.datasets.df$uuid <- NULL
+    projects.datasets.df <- merge(meta[c(
+      "projectTitle", "projectDescription", "publications",
+      "sampleEntityType", "organPart", "disease", "preservationMethod", "biologicalSex",
+      "nucleicAcidSource", "entryId", "catalog"
+    )], projects.datasets.df, by = c("entryId", "catalog"))
+    projects.datasets.df <- projects.datasets.df %>%
+      dplyr::relocate(dplyr::any_of(c("entryId", "catalog")), .after = dplyr::last_col()) %>%
+      dplyr::select(dplyr::any_of(c("meta", "contentDescription", "name")), dplyr::everything())
+    projects.datasets.valid.df$lowerformat <- NULL
     # distinct url
     projects.datasets.valid.df <- projects.datasets.valid.df %>% dplyr::distinct(.data[["url"]], .keep_all = TRUE)
     # add name
