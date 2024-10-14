@@ -234,6 +234,10 @@ ExtractHCAMeta <- function(all.projects.df, organism = NULL, sex = NULL, organ =
 #' @param quiet Logical value, whether to show downloading progress. Default: FALSE (show).
 #' @param parallel Logical value, whether to download parallelly. Default: TRUE. When "libcurl" is available for \code{download.file},
 #' the parallel is done by default (\code{parallel} can be FALSE).
+#' @param return.seu Logical value, whether to load downloaded datasets to Seurat. Valid when rds in \code{file.ext} and all
+#' datasets download successfully. Default: FALSE.
+#' @param merge Logical value, whether to merge Seurat list when there are multiple rds files,
+#' used when \code{return.seu} is TRUE. Default: FALSE.
 #'
 #' @return List contains files' metadata of downloaded successfully (down.meta) and failed (fail.meta).
 #' @importFrom magrittr %>%
@@ -243,8 +247,8 @@ ExtractHCAMeta <- function(all.projects.df, organism = NULL, sex = NULL, organ =
 #' @importFrom parallel detectCores mclapply
 #' @importFrom utils download.file
 #' @importFrom tidyr spread
-#' @importFrom dplyr distinct relocate any_of last_col select everything
-#' @importFrom rlang .data
+#' @importFrom dplyr distinct relocate any_of last_col select everything filter
+#' @importFrom rlang .data parse_expr
 #' @export
 #'
 #' @examples
@@ -261,7 +265,7 @@ ExtractHCAMeta <- function(all.projects.df, organism = NULL, sex = NULL, organ =
 #' ParseHCA(meta = all.human.10x.projects, out.folder = "/path/to/output")
 #' }
 ParseHCA <- function(meta, file.ext = c("rds", "rdata", "h5", "h5ad", "loom", "tsv"), out.folder = NULL,
-                     timeout = 3600, quiet = FALSE, parallel = TRUE) {
+                     timeout = 3600, quiet = FALSE, parallel = TRUE, return.seu = FALSE, merge = TRUE) {
   # file.ext: ignore case, tar.gz, gz
   if (is.null(file.ext)) {
     warning("There is no file extension provided, use all valid (rds, rdata, h5, h5ad and loom).")
@@ -329,7 +333,7 @@ ParseHCA <- function(meta, file.ext = c("rds", "rdata", "h5", "h5ad", "loom", "t
       "sampleEntityType", "organPart", "disease", "preservationMethod", "biologicalSex",
       "nucleicAcidSource", "entryId", "catalog"
     )], projects.datasets.df, by = c("entryId", "catalog"))
-    projects.datasets.df <- projects.datasets.df %>%
+    projects.datasets.valid.df <- projects.datasets.df %>%
       dplyr::relocate(dplyr::any_of(c("entryId", "catalog")), .after = dplyr::last_col()) %>%
       dplyr::select(dplyr::any_of(c("meta", "contentDescription", "name")), dplyr::everything())
     projects.datasets.valid.df$lowerformat <- NULL
@@ -381,8 +385,24 @@ ParseHCA <- function(meta, file.ext = c("rds", "rdata", "h5", "h5ad", "loom", "t
     fail.status <- which(down.status != 0)
     if (length(fail.status) == 0) {
       message("All datasets downloaded successfully!")
-      res.list <- list(down.meta = projects.datasets.valid.df, fail.meta = NULL)
-      return(res.list)
+      if (isTRUE(return.seu)) {
+        rds.gz.files <- list.files(path = out.folder, pattern = "rds.gz$", full.names = TRUE, ignore.case = TRUE)
+        if (length(rds.gz.files) > 0) {
+          message("Detect zip files: ", paste(rds.gz.files, collapse = ", "), ". Unzip!")
+          # unzip
+          unzip.log <- sapply(
+            rds.gz.files,
+            function(x) {
+              GEOquery::gunzip(x, overwrite = TRUE)
+            }
+          )
+        }
+        seu.obj <- LoadRDS2Seurat(out.folder = out.folder, merge = merge)
+        return(seu.obj)
+      } else {
+        res.list <- list(down.meta = projects.datasets.valid.df, fail.meta = NULL)
+        return(res.list)
+      }
     } else {
       message(length(fail.status), " files downloaded failed, please re-run with fail.meta (meta)")
       fail.entry.id <- projects.datasets.valid.df[fail.status, "entryId"] %>% unique()

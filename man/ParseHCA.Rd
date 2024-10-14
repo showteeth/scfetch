@@ -10,7 +10,9 @@ ParseHCA(
   out.folder = NULL,
   timeout = 3600,
   quiet = FALSE,
-  parallel = TRUE
+  parallel = TRUE,
+  return.seu = FALSE,
+  merge = TRUE
 )
 }
 \arguments{
@@ -28,6 +30,12 @@ Default: c("rds", "rdata", "h5", "h5ad", "loom", "tsv").}
 
 \item{parallel}{Logical value, whether to download parallelly. Default: TRUE. When "libcurl" is available for \code{download.file},
 the parallel is done by default (\code{parallel} can be FALSE).}
+
+\item{return.seu}{Logical value, whether to load downloaded datasets to Seurat. Valid when rds in \code{file.ext} and all
+datasets download successfully. Default: FALSE.}
+
+\item{merge}{Logical value, whether to merge Seurat list when there are multiple rds files,
+used when \code{return.seu} is TRUE. Default: FALSE.}
 }
 \value{
 List contains files' metadata of downloaded successfully (down.meta) and failed (fail.meta).

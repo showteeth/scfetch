@@ -1,7 +1,7 @@
 Package: scfetch
 Type: Package
 Title: Access and Format Single-Cell RNA-Seq Datasets from Public Resources 
-Version: 0.6.0
+Version: 0.6.1
 Authors@R: 
     person(given = "Yabing",
            family = "Song",

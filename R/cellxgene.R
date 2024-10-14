@@ -177,6 +177,8 @@ ExtractCELLxGENEMeta <- function(all.samples.df, organism = NULL, ethnicity = NU
 #' @param include.genes Genes to include, e.g, \code{include.genes} = c('ENSG00000161798', 'ENSG00000188229')
 #' same as \code{var_value_filter} = "feature_id %in% c('ENSG00000161798', 'ENSG00000188229')" in \code{\link{get_seurat}}.
 #' Default: NULL.
+#' @param obsm.layers Names of arrays in obsm to add as the cell embeddings. e.g., c("scvi", "geneformer").
+#' Default: FALSE (suppress loading in any dimensional reductions).
 #' @param ... Parameters for \code{\link{get_seurat}}, used when \code{use.census} is TRUE.
 #'
 #' @return Dataframe contains failed datasets, SeuratObject (\code{return.seu} is TRUE, rds in \code{file.ext}) and
@@ -206,7 +208,7 @@ ExtractCELLxGENEMeta <- function(all.samples.df, organism = NULL, ethnicity = NU
 #' }
 ParseCELLxGENE <- function(meta = NULL, file.ext = c("rds", "h5ad"), out.folder = NULL, timeout = 3600, quiet = FALSE,
                            parallel = TRUE, return.seu = FALSE, merge = TRUE, use.census = FALSE, census.version = "stable",
-                           organism = NULL, obs.value.filter = NULL, obs.keys = NULL, include.genes = NULL, ...) {
+                           organism = NULL, obs.value.filter = NULL, obs.keys = NULL, include.genes = NULL, obsm.layers = FALSE,...) {
   if (use.census) {
     message(
       "The use.census is true, ",
@@ -244,12 +246,13 @@ ParseCELLxGENE <- function(meta = NULL, file.ext = c("rds", "h5ad"), out.folder 
       include.genes.filter <- paste0("feature_id %in% c( '", paste(include.genes, collapse = "', '"), "' )")
       seu.obj <- cellxgene.census::get_seurat(
         census = census, organism = organism, obs_column_names = obs.keys,
-        var_value_filter = include.genes.filter, obs_value_filter = obs.value.filter, ...
+        var_value_filter = include.genes.filter, obs_value_filter = obs.value.filter,
+        obsm_layers = obsm.layers, ...
       )
     } else {
       seu.obj <- cellxgene.census::get_seurat(
         census = census, organism = organism, obs_column_names = obs.keys,
-        obs_value_filter = obs.value.filter, ...
+        obs_value_filter = obs.value.filter, obsm_layers = obsm.layers, ...
       )
     }
     # close census to release memory and other resources

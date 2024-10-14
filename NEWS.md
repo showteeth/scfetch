@@ -1,6 +1,9 @@
 # scfetch 0.6.1
 
 * Fix bugs in `LoadRDS2Seurat`.
+* Give a message when there is no file with `file.ext` in `ParseHCA`, `ParseHCA`, `ExtractZenodoMeta`, `ParseZenodo`.
+* Return SeuratObject in `ParseHCA`.
+* Fix bug in `Load2Seurat`.
 
 -------------------
 

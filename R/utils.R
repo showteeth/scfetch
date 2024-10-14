@@ -199,11 +199,34 @@ Load2Seurat <- function(exp.file, barcode.url = NULL, feature.url = NULL,
   # filter dataset metadata
   ## filter cell's metadata values
   if (!is.null(obs.value.filter)) {
-    meta <- meta %>% dplyr::filter(eval(rlang::parse_expr(obs.value.filter)))
+    # TODO: test key of obs.value.filter in colnames(meta)
+    tryCatch(
+      {
+        raw.meta = meta
+        meta <- meta %>% dplyr::filter(eval(rlang::parse_expr(obs.value.filter)))
+        if (nrow(meta) == 0) {
+          message("Please check the value of obs.value.filter, e.g. the 'oligodendrocyte' in cell_type == 'oligodendrocyte'!")
+          meta <- raw.meta
+        }
+      },
+      error = function(cond) {
+        message("Please check obs.value.filter: ", cond)
+      }
+    )
   }
   ## filter cell's metadata colnames
   if (!is.null(obs.keys)) {
-    meta <- meta[obs.keys]
+    valid.obs.keys <- intersect(colnames(meta), obs.keys)
+    invalid.obs.keys <- setdiff(obs.keys, colnames(meta))
+    if (length(invalid.obs.keys) > 0) {
+      message("Detected invalid obs.keys: ", paste(invalid.obs.keys, collapse = ", "))
+    }
+    if (length(valid.obs.keys) > 0) {
+      meta <- meta[valid.obs.keys]
+    } else {
+      message("No valid obs.keys, return all obs.keys!")
+      meta <- meta
+    }
   }
   ## filter genes
   if (!is.null(include.genes)) {
@@ -461,7 +484,8 @@ PrepareCELLxGENEUrls <- function(df, fe) {
   fe.id <- paste0(fe, "_id")
   CheckColumns(df = df, columns = c("dataset_id", fe.id, "dataset_description"))
   invalid.df <- df[is.na(df[[fe.id]]) | is.na(df$dataset_id) | df$dataset_id == "" | df[[fe.id]] == "", ]
-  message("Detect ", nrow(invalid.df), " invalid metadata (", fe.id, "/dataset_id is empty or NA).")
+  # message("Detect ", nrow(invalid.df), " invalid metadata (", fe.id, "/dataset_id is empty or NA).")
+  message("There is no file in dataset_id: ", paste(invalid.df$dataset_id, collapse = ", "), " with extension rds.")
   valid.df <- df[!(is.na(df[[fe.id]]) | is.na(df$dataset_id) | df$dataset_id == "" | df[[fe.id]] == ""), ]
   valid.urls <- df[[fe.id]]
   valid.names <- make.names(valid.df$dataset_description, unique = TRUE)
@@ -699,7 +723,9 @@ LoadRDS2Seurat <- function(out.folder, merge, obs.value.filter = NULL, obs.keys 
       seu.obj <- NULL
     } else {
       empty.seu <- seu.list[sapply(seu.list, is.null)]
-      message(names(empty.seu), " is NULL, drop!")
+      if (length(empty.seu) > 0) {
+        message(paste(names(empty.seu), collapse = ", "), " is NULL, drop!")
+      }
       # remove NULL element
       seu.list[sapply(seu.list, is.null)] <- NULL
       if (isTRUE(merge)) {

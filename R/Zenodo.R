@@ -62,6 +62,10 @@ ExtractZenodoMetaSingle <- function(doi, file.ext = c("rdata", "h5ad")) {
     }
     # check the data
     if (nrow(record.files.used) == 0) {
+      message(
+        "There is no file in doi: ", doi, " with extension: ", paste(file.ext, collapse = ", "), ". Available file.ext: ",
+        paste(unique(record.files$type), collapse = ", "), "."
+      )
       return(NULL)
     }
     # prepare md5sum
@@ -125,6 +129,9 @@ ParseZenodo <- function(doi = NULL, file.ext = c("rdata", "rds", "h5ad"), doi.df
     doi.df <- doi.df
   } else if (!is.null(doi)) {
     doi.df <- ExtractZenodoMeta(doi = doi, file.ext = file.ext)
+    if (is.null(doi.df)) {
+      stop("Please check the doi or file.ext!")
+    }
   } else {
     stop("Please provide either doi or doi.df!")
   }
