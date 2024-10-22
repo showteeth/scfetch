@@ -225,8 +225,21 @@ Runbamtofastq <- function(bam.path, bam.type, pair.end, bamtofastq.path, bamtofa
       fq2.name <- file.path(out.folder, gsub(pattern = ".bam$", replacement = "_2.fastq.gz", x = basename(bam.path)))
       bamtofastq.cmd <- paste(bamtofastq.path, "fastq", bamtofastq.paras, "-1", fq1.name, "-2", fq2.name, "-0 /dev/null -s /dev/null", bam.path)
     } else {
-      fq.name <- file.path(out.folder, gsub(pattern = ".bam$", replacement = ".fastq.gz", x = basename(bam.path)))
-      bamtofastq.cmd <- paste(bamtofastq.path, "fastq", bamtofastq.paras, bam.path, "|gzip - >", fq.name)
+      pigz.path <- Sys.which("pigz")
+      gzip.path <- Sys.which("gzip")
+      if (pigz.path == "" && gzip.path == "") {
+        message("There is no pigz and gzip detected, return fastq files!")
+        fq.name <- file.path(out.folder, gsub(pattern = ".bam$", replacement = ".fastq", x = basename(bam.path)))
+        bamtofastq.cmd <- paste(bamtofastq.path, "fastq", bamtofastq.paras, bam.path, "> ", fq.name)
+      } else if (pigz.path != "") {
+        message("Detected pigz, return fastq.gz files!")
+        fq.name <- file.path(out.folder, gsub(pattern = ".bam$", replacement = ".fastq.gz", x = basename(bam.path)))
+        bamtofastq.cmd <- paste(bamtofastq.path, "fastq", bamtofastq.paras, bam.path, "|pigz -p", sort.thread ,"- >", fq.name)
+      } else if (gzip.path != "") {
+        message("Detected gzip, return fastq.gz files!")
+        fq.name <- file.path(out.folder, gsub(pattern = ".bam$", replacement = ".fastq.gz", x = basename(bam.path)))
+        bamtofastq.cmd <- paste(bamtofastq.path, "fastq", bamtofastq.paras, bam.path, "|gzip - >", fq.name)
+      }
     }
   }
   # run command

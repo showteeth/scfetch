@@ -4,6 +4,7 @@
 * Give a message when there is no file with `file.ext` in `ParseHCA`, `ParseHCA`, `ExtractZenodoMeta`, `ParseZenodo`.
 * Return SeuratObject in `ParseHCA`.
 * Fix bug in `Load2Seurat`.
+* Support `pigz` in `Bam2Fastq`.
 
 -------------------
 
