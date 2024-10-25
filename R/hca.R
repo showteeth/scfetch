@@ -375,7 +375,7 @@ ParseHCA <- function(meta, file.ext = c("rds", "rdata", "h5", "h5ad", "loom", "t
       # prepare cores
       cores.used <- min(parallel::detectCores(), length(download.urls))
       down.status <- parallel::mclapply(X = 1:length(download.urls), FUN = function(x) {
-        utils::download.file(url = download.urls, destfile = names(download.urls), quiet = quiet, mode = "wb")
+        utils::download.file(url = download.urls[x], destfile = names(download.urls)[x], quiet = quiet, mode = "wb")
       }, mc.cores = cores.used)
     } else {
       down.status <- utils::download.file(url = download.urls, destfile = names(download.urls), quiet = quiet, mode = "wb")

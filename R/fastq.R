@@ -12,6 +12,7 @@
 #' @importFrom GEOquery getGEO
 #' @importFrom Biobase annotation experimentData pData phenoData notes sampleNames exprs
 #' @importFrom parallel detectCores
+#' @importFrom GEOfastq crawl_gsms
 #' @export
 #'
 #' @examples
@@ -39,9 +40,11 @@ ExtractRun <- function(gsm = NULL, acce = NULL, platform = NULL, parallel = TRUE
   gsm.run.df <- GEOfastq::crawl_gsms(gsm, max.workers = cores.used)
   if (is.null(gsm.run.df)) {
     stop("There is no valid srr numbers available, please check the raw data available under ", paste0(gsm, collapse = ", "))
-  } else {
-    gsm.run.df <- gsm.run.df[c("title", "gsm_name", "experiment", "run")]
   }
+  # return full metadata
+  # else {
+  #   gsm.run.df <- gsm.run.df[c("title", "gsm_name", "experiment", "run")]
+  # }
   return(gsm.run.df)
 }
 
@@ -129,7 +132,7 @@ RunPrefetch <- function(sra, prefetch.path, out.folder, prefetch.paras) {
   prefetch.status.code <- attr(prefetch.status, "status")
   if (!is.null(prefetch.status.code)) {
     warning("Run prefetch error on: ", sra, ", remove partial files!")
-    do.call(file.remove, list(list.files(out.folder, full.names = TRUE)))
+    do.call(file.remove, list(list.files(out.folder, full.names = TRUE, pattern = "sra.tmp$|sra.prf$|sra.lock$")))
     return(sra)
   } else {
     message("Download successful: ", sra)

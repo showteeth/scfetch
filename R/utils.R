@@ -202,7 +202,7 @@ Load2Seurat <- function(exp.file, barcode.url = NULL, feature.url = NULL,
     # TODO: test key of obs.value.filter in colnames(meta)
     tryCatch(
       {
-        raw.meta = meta
+        raw.meta <- meta
         meta <- meta %>% dplyr::filter(eval(rlang::parse_expr(obs.value.filter)))
         if (nrow(meta) == 0) {
           message("Please check the value of obs.value.filter, e.g. the 'oligodendrocyte' in cell_type == 'oligodendrocyte'!")

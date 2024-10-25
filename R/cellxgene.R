@@ -208,7 +208,7 @@ ExtractCELLxGENEMeta <- function(all.samples.df, organism = NULL, ethnicity = NU
 #' }
 ParseCELLxGENE <- function(meta = NULL, file.ext = c("rds", "h5ad"), out.folder = NULL, timeout = 3600, quiet = FALSE,
                            parallel = TRUE, return.seu = FALSE, merge = TRUE, use.census = FALSE, census.version = "stable",
-                           organism = NULL, obs.value.filter = NULL, obs.keys = NULL, include.genes = NULL, obsm.layers = FALSE,...) {
+                           organism = NULL, obs.value.filter = NULL, obs.keys = NULL, include.genes = NULL, obsm.layers = FALSE, ...) {
   if (use.census) {
     message(
       "The use.census is true, ",
@@ -311,7 +311,7 @@ ParseCELLxGENE <- function(meta = NULL, file.ext = c("rds", "h5ad"), out.folder 
       # prepare cores
       cores.used <- min(parallel::detectCores(), length(download.urls))
       down.status <- parallel::mclapply(X = 1:length(download.urls), FUN = function(x) {
-        utils::download.file(url = download.urls, destfile = names(download.urls), quiet = quiet, mode = "wb")
+        utils::download.file(url = download.urls[x], destfile = names(download.urls)[x], quiet = quiet, mode = "wb")
       }, mc.cores = cores.used)
     } else {
       down.status <- utils::download.file(url = download.urls, destfile = names(download.urls), quiet = quiet, mode = "wb")

@@ -5,6 +5,8 @@
 * Return SeuratObject in `ParseHCA`.
 * Fix bug in `Load2Seurat`.
 * Support `pigz` in `Bam2Fastq`.
+* Return full dataframe in `ExtractRun`.
+* Fix bug in `ParseCELLxGENE`, `ParseHCA`.
 
 -------------------
 
