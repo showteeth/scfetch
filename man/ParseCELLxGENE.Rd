@@ -11,6 +11,7 @@ ParseCELLxGENE(
   timeout = 3600,
   quiet = FALSE,
   parallel = TRUE,
+  use.cores = NULL,
   return.seu = FALSE,
   merge = TRUE,
   use.census = FALSE,
@@ -19,6 +20,7 @@ ParseCELLxGENE(
   obs.value.filter = NULL,
   obs.keys = NULL,
   include.genes = NULL,
+  obsm.layers = FALSE,
   ...
 )
 }
@@ -37,6 +39,9 @@ Skip when \code{use.census} is TRUE. Default: NULL.}
 
 \item{parallel}{Logical value, whether to download parallelly. Default: TRUE. When "libcurl" is available for \code{download.file},
 the parallel is done by default (\code{parallel} can be FALSE).}
+
+\item{use.cores}{The number of cores used. Default: NULL (the minimum value of
+extracted \code{length(download.urls)} and \code{parallel::detectCores()}).}
 
 \item{return.seu}{Logical value, whether to load downloaded datasets to Seurat. Valid when rds in \code{file.ext} and all
 datasets download successfully. Default: FALSE.}
@@ -59,10 +64,13 @@ e.g., cell_type == 'B cell' & tissue_general == 'lung' & disease == 'COVID-19'. 
 same as \code{var_value_filter} = "feature_id %in% c('ENSG00000161798', 'ENSG00000188229')" in \code{\link{get_seurat}}.
 Default: NULL.}
 
+\item{obsm.layers}{Names of arrays in obsm to add as the cell embeddings. e.g., c("scvi", "geneformer").
+Default: FALSE (suppress loading in any dimensional reductions).}
+
 \item{...}{Parameters for \code{\link{get_seurat}}, used when \code{use.census} is TRUE.}
 }
 \value{
-Dataframe contains failed datasets, SeuratObject (\code{return.seu} is TRUE, rds in \code{file.ext}) and
+Dataframe contains failed datasets, SeuratObject (\code{return.seu} is TRUE, rds in \code{file.ext}) or
 NULL (\code{return.seu} is FALSE or rds not in \code{file.ext}).
 }
 \description{

@@ -11,6 +11,7 @@ ParseHCA(
   timeout = 3600,
   quiet = FALSE,
   parallel = TRUE,
+  use.cores = NULL,
   return.seu = FALSE,
   merge = TRUE
 )
@@ -31,6 +32,9 @@ Default: c("rds", "rdata", "h5", "h5ad", "loom", "tsv").}
 \item{parallel}{Logical value, whether to download parallelly. Default: TRUE. When "libcurl" is available for \code{download.file},
 the parallel is done by default (\code{parallel} can be FALSE).}
 
+\item{use.cores}{The number of cores used. Default: NULL (the minimum value of
+extracted \code{length(download.urls)} and \code{parallel::detectCores()}).}
+
 \item{return.seu}{Logical value, whether to load downloaded datasets to Seurat. Valid when rds in \code{file.ext} and all
 datasets download successfully. Default: FALSE.}
 
@@ -38,7 +42,8 @@ datasets download successfully. Default: FALSE.}
 used when \code{return.seu} is TRUE. Default: FALSE.}
 }
 \value{
-List contains files' metadata of downloaded successfully (down.meta) and failed (fail.meta).
+SeuratObject (\code{return.seu} is TRUE, rds in \code{file.ext}) or
+list contains files' metadata of downloaded successfully (down.meta) and failed (fail.meta).
 }
 \description{
 Download Human Cell Atlas Datasets.

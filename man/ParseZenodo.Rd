@@ -12,6 +12,7 @@ ParseZenodo(
   timeout = 1000,
   quiet = FALSE,
   parallel = TRUE,
+  use.cores = NULL,
   return.seu = FALSE,
   merge = TRUE
 )
@@ -33,9 +34,19 @@ It is required to provide either \code{doi} or \code{doi.df}.}
 
 \item{parallel}{Logical value, whether to download parallelly. Default: TRUE. When "libcurl" is available for \code{download.file},
 the parallel is done by default (\code{parallel} can be FALSE).}
+
+\item{use.cores}{The number of cores used. Default: NULL (the minimum value of
+\code{nrow(doi.df)} (specified by \code{doi.df} or extract with \code{doi}) and \code{parallel::detectCores()}).}
+
+\item{return.seu}{Logical value, whether to load downloaded datasets to Seurat. Valid when rds in \code{file.ext} and all
+datasets download successfully. Default: FALSE.}
+
+\item{merge}{Logical value, whether to merge Seurat list when there are multiple rds files,
+used when \code{return.seu} is TRUE. Default: FALSE.}
 }
 \value{
-When successful, NULL. When MD5 verification failure, a dataframe contains failure terms.
+Dataframe contains failed datasets, SeuratObject (\code{return.seu} is TRUE, rds in \code{file.ext}) or
+NULL (\code{return.seu} is FALSE or rds not in \code{file.ext}).
 }
 \description{
 Download Data with Zenodo DOI and Return SeuratObject.

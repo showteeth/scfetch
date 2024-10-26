@@ -234,12 +234,15 @@ ExtractHCAMeta <- function(all.projects.df, organism = NULL, sex = NULL, organ =
 #' @param quiet Logical value, whether to show downloading progress. Default: FALSE (show).
 #' @param parallel Logical value, whether to download parallelly. Default: TRUE. When "libcurl" is available for \code{download.file},
 #' the parallel is done by default (\code{parallel} can be FALSE).
+#' @param use.cores The number of cores used. Default: NULL (the minimum value of
+#' extracted \code{length(download.urls)} and \code{parallel::detectCores()}).
 #' @param return.seu Logical value, whether to load downloaded datasets to Seurat. Valid when rds in \code{file.ext} and all
 #' datasets download successfully. Default: FALSE.
 #' @param merge Logical value, whether to merge Seurat list when there are multiple rds files,
 #' used when \code{return.seu} is TRUE. Default: FALSE.
 #'
-#' @return List contains files' metadata of downloaded successfully (down.meta) and failed (fail.meta).
+#' @return SeuratObject (\code{return.seu} is TRUE, rds in \code{file.ext}) or
+#' list contains files' metadata of downloaded successfully (down.meta) and failed (fail.meta).
 #' @importFrom magrittr %>%
 #' @importFrom curl curl_fetch_memory
 #' @importFrom jsonlite fromJSON
@@ -265,7 +268,7 @@ ExtractHCAMeta <- function(all.projects.df, organism = NULL, sex = NULL, organ =
 #' ParseHCA(meta = all.human.10x.projects, out.folder = "/path/to/output")
 #' }
 ParseHCA <- function(meta, file.ext = c("rds", "rdata", "h5", "h5ad", "loom", "tsv"), out.folder = NULL,
-                     timeout = 3600, quiet = FALSE, parallel = TRUE, return.seu = FALSE, merge = TRUE) {
+                     timeout = 3600, quiet = FALSE, parallel = TRUE, use.cores = NULL, return.seu = FALSE, merge = TRUE) {
   # file.ext: ignore case, tar.gz, gz
   if (is.null(file.ext)) {
     warning("There is no file extension provided, use all valid (rds, rdata, h5, h5ad and loom).")
@@ -373,7 +376,7 @@ ParseHCA <- function(meta, file.ext = c("rds", "rdata", "h5", "h5ad", "loom", "t
     message("Start downloading!")
     if (isTRUE(parallel)) {
       # prepare cores
-      cores.used <- min(parallel::detectCores(), length(download.urls))
+      cores.used <- min(parallel::detectCores(), length(download.urls), use.cores)
       down.status <- parallel::mclapply(X = 1:length(download.urls), FUN = function(x) {
         utils::download.file(url = download.urls[x], destfile = names(download.urls)[x], quiet = quiet, mode = "wb")
       }, mc.cores = cores.used)

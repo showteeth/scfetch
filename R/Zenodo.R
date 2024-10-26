@@ -99,8 +99,15 @@ ExtractZenodoMetaSingle <- function(doi, file.ext = c("rdata", "h5ad")) {
 #' @param quiet Logical value, whether to show downloading progress. Default: FALSE (show).
 #' @param parallel Logical value, whether to download parallelly. Default: TRUE. When "libcurl" is available for \code{download.file},
 #' the parallel is done by default (\code{parallel} can be FALSE).
+#' @param use.cores The number of cores used. Default: NULL (the minimum value of
+#' \code{nrow(doi.df)} (specified by \code{doi.df} or extract with \code{doi}) and \code{parallel::detectCores()}).
+#' @param return.seu Logical value, whether to load downloaded datasets to Seurat. Valid when rds in \code{file.ext} and all
+#' datasets download successfully. Default: FALSE.
+#' @param merge Logical value, whether to merge Seurat list when there are multiple rds files,
+#' used when \code{return.seu} is TRUE. Default: FALSE.
 #'
-#' @return When successful, NULL. When MD5 verification failure, a dataframe contains failure terms.
+#' @return Dataframe contains failed datasets, SeuratObject (\code{return.seu} is TRUE, rds in \code{file.ext}) or
+#' NULL (\code{return.seu} is FALSE or rds not in \code{file.ext}).
 #' @importFrom magrittr %>%
 #' @importFrom curl curl_fetch_memory
 #' @importFrom jsonlite fromJSON
@@ -124,7 +131,7 @@ ExtractZenodoMetaSingle <- function(doi, file.ext = c("rdata", "h5ad")) {
 #' )
 #' }
 ParseZenodo <- function(doi = NULL, file.ext = c("rdata", "rds", "h5ad"), doi.df = NULL, out.folder = NULL, timeout = 1000,
-                        quiet = FALSE, parallel = TRUE, return.seu = FALSE, merge = TRUE) {
+                        quiet = FALSE, parallel = TRUE, use.cores = NULL, return.seu = FALSE, merge = TRUE) {
   if (!is.null(doi.df)) {
     doi.df <- doi.df
   } else if (!is.null(doi)) {
@@ -152,7 +159,7 @@ ParseZenodo <- function(doi = NULL, file.ext = c("rdata", "rds", "h5ad"), doi.df
   message("Start downloading!")
   if (isTRUE(parallel)) {
     # prepare cores
-    cores.used <- min(parallel::detectCores(), nrow(doi.df))
+    cores.used <- min(parallel::detectCores(), nrow(doi.df), use.cores)
     down.status <- parallel::mclapply(X = 1:nrow(doi.df), FUN = function(x) {
       utils::download.file(url = doi.df[x, "url"], destfile = doi.df[x, "filename"], quiet = quiet, mode = "wb")
     }, mc.cores = cores.used)
