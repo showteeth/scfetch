@@ -8,6 +8,7 @@
 * Return full dataframe in `ExtractRun`.
 * Fix bug in `ParseCELLxGENE`, `ParseHCA`.
 * Add `use.cores` in `ParseCELLxGENE`, `ParseHCA`, `ParseZenodo`.
+* Fix bug in `ExtractGEOMeta`.
 
 -------------------
 

@@ -254,9 +254,10 @@ ExtractGEOSubMeta <- function(pf.obj) {
   pf.info.charac <- pf.info[grep(pattern = "^characteristics", x = colnames(pf.info))]
   ## modify colnames
   pf.info.charac.colnames <-
-    unique(apply(pf.info.charac, 2, function(x) {
-      gsub(pattern = "(.*?): (.*)", replacement = "\\1", x = x)
-    }))
+    apply(pf.info.charac, 2, function(x) {
+      x.head <- gsub(pattern = "(.*?): (.*)", replacement = "\\1", x = x)
+      paste(unique(x.head), collapse = ",")
+    })
   colnames(pf.info.charac) <- pf.info.charac.colnames
   ## modify values
   pf.info.charac <- apply(pf.info.charac, 2, function(x) {
