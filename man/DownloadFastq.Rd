@@ -23,14 +23,15 @@ DownloadFastq(
 
 \item{download.method}{Method to download fastq files, chosen from "download.file" and "ascp". Default: "download.file".}
 
-\item{quiet}{Logical value, whether to show downloading progress. Default: FALSE (show).}
+\item{quiet}{Logical value, whether to show downloading progress. Used when \code{download.method} is "download.file".
+Default: FALSE (show).}
 
-\item{timeout}{Maximum request time. Default: 3600.}
+\item{timeout}{Maximum request time. Used when \code{download.method} is "download.file". Default: 3600.}
 
 \item{ascp.path}{Path to ascp (/path/bin/ascp), please ensure that the relative path of asperaweb_id_dsa.openssh file
 (/path/bin/ascp/../etc/asperaweb_id_dsa.openssh). Default: NULL (conduct automatic detection).}
 
-\item{max.rate}{Max transfer rate, used when \code{download.method} is "ascp". Default: 300m.}
+\item{max.rate}{Max transfer rate. Used when \code{download.method} is "ascp". Default: 300m.}
 
 \item{parallel}{Logical value, whether to download parallelly. Default: TRUE.}
 

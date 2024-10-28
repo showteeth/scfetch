@@ -2,6 +2,7 @@
 
 ## New features
 * Added `DownloadFastq` to download FASTQ files directly from ENA.
+* Updated `DownloadSRA` to download sra files directly from ENA.
 
 -------------------
 

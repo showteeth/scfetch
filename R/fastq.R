@@ -51,23 +51,63 @@ ExtractRun <- function(gsm = NULL, acce = NULL, platform = NULL, parallel = TRUE
 #' Download SRA.
 #'
 #' @param gsm.df Dataframe contains GSM and Run numbers, obtained from \code{ExtractRun}.
-#' @param prefetch.path Path to prefetch. Default: NULL (conduct automatic detection).
 #' @param out.folder Output folder. Default: NULL (current working directory).
-#' @param prefetch.paras Parameters for \code{prefetch}. Default: "-X 100G".
+#' @param download.method Method to download sra files, chosen from "prefetch", "download.file", "ascp".
+#' Default: "prefetch".
+#' @param prefetch.path Path to prefetch. Used when \code{ExtractRun} is "prefetch".
+#' Default: NULL (conduct automatic detection).
+#' @param prefetch.paras Parameters for \code{prefetch}. Used when \code{ExtractRun} is "prefetch".
+#' Default: "-X 100G".
+#' @param quiet Logical value, whether to show downloading progress. Used when \code{download.method} is "download.file".
+#' Default: FALSE (show).
+#' @param timeout Maximum request time. Used when \code{download.method} is "download.file". Default: 3600.
+#' @param ascp.path Path to ascp (/path/bin/ascp), please ensure that the relative path of asperaweb_id_dsa.openssh file
+#' (/path/bin/ascp/../etc/asperaweb_id_dsa.openssh). Default: NULL (conduct automatic detection).
+#' @param max.rate Max transfer rate. Used when \code{download.method} is "ascp". Default: 300m.
+#' @param rename Logical value, whether to rename the download sra files. Recommended when \code{download.method} is "ascp".
+#' Default: FALSE (show).
+#' @param parallel Logical value, whether to download parallelly. Used when \code{download.method} is "ascp" or "download.file".
+#' Default: TRUE.
+#' @param use.cores The number of cores used. Used when \code{download.method} is "ascp" or "download.file".
+#' Default: NULL (the minimum value of \code{nrow(gsm.df)} and \code{parallel::detectCores()}).
 #'
 #' @return Dataframe contains failed runs or NULL.
+#' @importFrom magrittr %>%
+#' @importFrom data.table fread
+#' @importFrom dplyr filter
+#' @importFrom rlang .data
+#' @importFrom parallel detectCores mclapply
+#' @importFrom utils download.file
 #' @export
 #'
 #' @examples
 #' \dontrun{
 #' # need users to provide the prefetch.path and out.folder
 #' GSE186003.runs <- ExtractRun(acce = "GSE186003", platform = "GPL24247")
+#' # prefetch
 #' GSE186003.down <- DownloadSRA(
 #'   gsm.df = GSE186003.runs, prefetch.path = "/path/to/prefetch",
 #'   out.folder = "/path/to/output"
 #' )
+#' # download.file
+#' GSE186003.down <- DownloadSRA(
+#'   gsm.df = GSE186003.runs, download.method = "download.file",
+#'   timeout = 3600, out.folder = "/path/to/output",
+#'   parallel = TRUE, use.cores = 2
+#' )
+#' # ascp
+#' GSE186003.down <- DownloadSRA(
+#'   gsm.df = GSE186003.runs, download.method = "ascp",
+#'   ascp.path = "/path/to/ascp", max.rate = "300m",
+#'   rename = TRUE, out.folder = "/path/to/output",
+#'   parallel = TRUE, use.cores = 2
+#' )
 #' }
-DownloadSRA <- function(gsm.df, prefetch.path = NULL, out.folder = NULL, prefetch.paras = "-X 100G") {
+DownloadSRA <- function(gsm.df, out.folder = NULL, download.method = c("prefetch", "download.file", "ascp"),
+                        prefetch.path = NULL, prefetch.paras = "-X 100G", quiet = FALSE, timeout = 3600,
+                        ascp.path = NULL, max.rate = "300m", rename = TRUE, parallel = TRUE, use.cores = NULL) {
+  # check parameter
+  download.method <- match.arg(arg = download.method)
   # check dataframe
   if (nrow(gsm.df) == 0) {
     stop("Please provide valid gsm.df!")
@@ -79,28 +119,61 @@ DownloadSRA <- function(gsm.df, prefetch.path = NULL, out.folder = NULL, prefetc
   if (is.null(out.folder)) {
     out.folder <- getwd()
   }
-  # get prefetch path
-  if (is.null(prefetch.path)) {
-    # specify prefetch path
-    prefetch.path <- Sys.which("prefetch")
-    if (prefetch.path == "") {
-      stop("Can not find prefetch automatically, please specify the path!")
-    }
-  } else {
-    prefetch.path <- prefetch.path
-  }
   # prepare sample output folder
   samples.folder <- file.path(out.folder, gsm.df$gsm_name)
   names(samples.folder) <- gsm.df$run
-  all.runs.down <- sapply(names(samples.folder), function(x) {
-    sf <- samples.folder[x]
-    RunPrefetch(sra = x, prefetch.path = prefetch.path, out.folder = sf, prefetch.paras = prefetch.paras)
-  })
-  # select fail samples
-  fail.flag <- sapply(names(all.runs.down), function(x) {
-    !is.null(all.runs.down[[x]])
-  })
-  fail.run <- names(all.runs.down)[fail.flag]
+  # download
+  if (download.method == "prefetch") {
+    message("Downloading sra with prefetch!")
+    # get prefetch path
+    if (is.null(prefetch.path)) {
+      # specify prefetch path
+      prefetch.path <- Sys.which("prefetch")
+      if (prefetch.path == "") {
+        stop("Can not find prefetch automatically, please specify the path!")
+      }
+    } else {
+      prefetch.path <- prefetch.path
+    }
+    # download
+    all.runs.down <- sapply(names(samples.folder), function(x) {
+      sf <- samples.folder[x]
+      RunPrefetch(sra = x, prefetch.path = prefetch.path, out.folder = sf, prefetch.paras = prefetch.paras)
+    })
+    # select fail samples
+    fail.flag <- sapply(names(all.runs.down), function(x) {
+      !is.null(all.runs.down[[x]])
+    })
+    fail.run <- names(all.runs.down)[fail.flag]
+  } else {
+    # parallel
+    if (parallel) {
+      cores.used <- min(parallel::detectCores(), nrow(gsm.df), use.cores)
+      all.runs.down <- parallel::mclapply(X = 1:nrow(gsm.df), FUN = function(x) {
+        gsm.df.x <- gsm.df[x, ]
+        sf <- samples.folder[x]
+        DownloadSRAfromENA(
+          gsm.df = gsm.df.x, out.folder = sf, download.method = download.method, quiet = quiet,
+          timeout = timeout, ascp.path = ascp.path, max.rate = max.rate, rename = rename
+        )
+      }, mc.cores = cores.used)
+    } else {
+      all.runs.down <- lapply(1:nrow(gsm.df), function(x) {
+        gsm.df.x <- gsm.df[x, ]
+        sf <- samples.folder[x]
+        DownloadSRAfromENA(
+          gsm.df = gsm.df.x, out.folder = sf, download.method = download.method, quiet = quiet,
+          timeout = timeout, ascp.path = ascp.path, max.rate = max.rate, rename = rename
+        )
+      })
+    }
+    # select fail samples
+    fail.flag <- sapply(1:length(all.runs.down), function(x) {
+      !is.null(all.runs.down[[x]])
+    })
+    fail.run <- unlist(all.runs.down[fail.flag])
+  }
+  # return failed run
   if (length(fail.run) > 0) {
     fail.df <- gsm.df[gsm.df$run %in% fail.run, ]
     message(
@@ -136,6 +209,46 @@ RunPrefetch <- function(sra, prefetch.path, out.folder, prefetch.paras) {
     return(sra)
   } else {
     message("Download successful: ", sra)
+    return(NULL)
+  }
+}
+
+# download sra from ena
+DownloadSRAfromENA <- function(gsm.df, out.folder = NULL, download.method = c("download.file", "ascp"),
+                               quiet = FALSE, timeout = 3600, ascp.path = NULL, max.rate = "300m", rename = TRUE) {
+  # prepare output folder
+  if (!dir.exists(out.folder)) {
+    dir.create(path = out.folder, recursive = TRUE)
+  }
+  # download url prefix
+  ftp.url.prefix <- "ftp://ftp.sra.ebi.ac.uk"
+  ascp.url.prefix <- "era-fasp@fasp.sra.ebi.ac.uk:"
+  # get sra url
+  ena.search.url <- "https://www.ebi.ac.uk/ena/portal/api/search?query=run_accession="
+  sra.url <- paste0(ena.search.url, gsm.df$run, "&result=read_run&fields=run_accession,sra_ftp,sra_md5,sra_bytes")
+  # read file info
+  sra.text <- data.table::fread(sra.url, showProgress = F)
+  valid.sra.text <- sra.text %>%
+    dplyr::filter(!is.na(.data[["sra_ftp"]])) %>%
+    as.data.frame()
+  if (nrow(valid.sra.text) > 0) {
+    run.files.ftp <- paste0("ftp://", valid.sra.text$sra_ftp)
+    run.files.name <- paste0(basename(run.files.ftp), ".sra")
+    # prepare urls
+    if (download.method == "download.file") {
+      download.urls <- run.files.ftp
+    } else if (download.method == "ascp") {
+      download.urls <- gsub(pattern = ftp.url.prefix, replacement = ascp.url.prefix, x = run.files.ftp)
+    }
+    # download
+    download.res <- DownloadMethod(
+      rn = gsm.df$run, url.vec = download.urls, name.vec = run.files.name,
+      out.folder = out.folder, download.method = download.method, quiet = quiet,
+      timeout = timeout, ascp.path = ascp.path, max.rate = max.rate, rename = rename
+    )
+    return(download.res)
+  } else {
+    message("There is no valid sra files under run: ", gsm.df$run)
     return(NULL)
   }
 }
@@ -395,11 +508,12 @@ GetFastqLen <- function(fq.file) {
 #' @param gsm.df Dataframe contains GSM and Run numbers, obtained from \code{ExtractRun}.
 #' @param out.folder Output folder. Default: NULL (current working directory).
 #' @param download.method Method to download fastq files, chosen from "download.file" and "ascp". Default: "download.file".
-#' @param quiet Logical value, whether to show downloading progress. Default: FALSE (show).
-#' @param timeout Maximum request time. Default: 3600.
+#' @param quiet Logical value, whether to show downloading progress. Used when \code{download.method} is "download.file".
+#' Default: FALSE (show).
+#' @param timeout Maximum request time. Used when \code{download.method} is "download.file". Default: 3600.
 #' @param ascp.path Path to ascp (/path/bin/ascp), please ensure that the relative path of asperaweb_id_dsa.openssh file
 #' (/path/bin/ascp/../etc/asperaweb_id_dsa.openssh). Default: NULL (conduct automatic detection).
-#' @param max.rate Max transfer rate, used when \code{download.method} is "ascp". Default: 300m.
+#' @param max.rate Max transfer rate. Used when \code{download.method} is "ascp". Default: 300m.
 #' @param parallel Logical value, whether to download parallelly. Default: TRUE.
 #' @param use.cores The number of cores used. Default: NULL (the minimum value of \code{nrow(gsm.df)} and \code{parallel::detectCores()}).
 #'
@@ -409,6 +523,7 @@ GetFastqLen <- function(fq.file) {
 #' @importFrom data.table fread
 #' @importFrom tidyr separate_rows
 #' @importFrom dplyr filter
+#' @importFrom rlang .data
 #' @importFrom parallel detectCores mclapply
 #' @importFrom utils download.file
 #' @export

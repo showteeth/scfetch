@@ -786,3 +786,55 @@ ParseENAxml <- function(run, df.type = c("fastq", "bam")) {
     }
   }
 }
+
+# download files with url (download.file and ascp)
+DownloadMethod <- function(rn, url.vec, name.vec = NULL, out.folder = NULL, download.method = c("download.file", "ascp"),
+                           quiet = FALSE, timeout = 3600, ascp.path = NULL, max.rate = "300m", rename = FALSE) {
+  # download
+  if (download.method == "download.file") {
+    # set timeout
+    env.timeout <- getOption("timeout")
+    on.exit(options(timeout = env.timeout)) # restore timeout
+    options(timeout = timeout)
+    down.status <- utils::download.file(url = url.vec, destfile = file.path(out.folder, name.vec), quiet = quiet, mode = "wb")
+    # failed download
+    fail.status <- which(down.status != 0)
+    if (length(fail.status) == 0) {
+      message("Download successful: ", rn)
+      return(NULL)
+    } else {
+      warning("Run download.file error: ", rn)
+      return(rn)
+    }
+  } else {
+    # get ascp path
+    if (is.null(ascp.path)) {
+      # specify ascp path
+      ascp.path <- Sys.which("ascp")
+      if (ascp.path == "") {
+        stop("Can not find ascp automatically, please specify the path!")
+      }
+    } else {
+      ascp.path <- ascp.path
+    }
+    # get asperaweb_id_dsa.openssh
+    ascp.pubkey <- gsub("bin/ascp$", "etc/asperaweb_id_dsa.openssh", ascp.path)
+    ascp.cmd <- paste(ascp.path, "-QT -k1 -l", max.rate, "-P33001", "-i", ascp.pubkey, url.vec, out.folder)
+    ascp.cmd <- paste(ascp.cmd, collapse = " && ")
+    message(paste("Calling ascp:", ascp.cmd))
+    ascp.status <- system(ascp.cmd, intern = TRUE)
+    ascp.status.code <- attr(ascp.status, "status")
+    if (!is.null(ascp.status.code)) {
+      warning("Run ascp error: ", rn)
+      do.call(file.remove, list(list.files(out.folder, full.names = TRUE, pattern = "partial$|aspera-ckpt$")))
+      return(rn)
+    } else {
+      message("Download successful: ", rn)
+      # rename file
+      if (isTRUE(rename)) {
+        file.rename(file.path(out.folder, basename(url.vec)), file.path(out.folder, name.vec))
+      }
+      return(NULL)
+    }
+  }
+}
