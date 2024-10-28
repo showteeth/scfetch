@@ -1,3 +1,11 @@
+# scfetch 0.7.0
+
+## New features
+* Added `DownloadFastq` to download FASTQ files directly from ENA.
+
+-------------------
+
+
 # scfetch 0.6.1
 
 * Fix bugs in `LoadRDS2Seurat`.

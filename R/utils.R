@@ -740,3 +740,49 @@ LoadRDS2Seurat <- function(out.folder, merge, obs.value.filter = NULL, obs.keys 
     return(NULL)
   }
 }
+
+# parse ENA xml (fastq, bam, sra)
+ParseENAxml <- function(run, df.type = c("fastq", "bam")) {
+  xml.url <- paste0("https://www.ebi.ac.uk/ena/browser/api/xml/", run)
+  # parse xml
+  xml.raw <- curl::curl_fetch_memory(xml.url)
+  xml.content <- rawToChar(xml.raw$content)
+  if (df.type == "fastq") {
+    # extract link
+    fastq.text.url <- gsub(pattern = ".*<DB>ENA-FASTQ-FILES</DB>\n +<ID><!\\[CDATA\\[(.*?)\\]\\]></ID>.*", replacement = "\\1", x = xml.content)
+    # read file info
+    fastq.text <- data.table::fread(fastq.text.url, showProgress = F)
+    fastq.text <- fastq.text %>%
+      tidyr::separate_rows(.data[["fastq_ftp"]], .data[["fastq_md5"]], .data[["fastq_bytes"]],
+        sep = ";", convert = TRUE
+      ) %>%
+      as.data.frame()
+    valid.fastq.text <- fastq.text %>% dplyr::filter(!is.na(.data[["fastq_ftp"]]))
+    if (nrow(valid.fastq.text) > 0) {
+      return(valid.fastq.text)
+    } else {
+      message("There is no valid fastq files under run: ", run)
+      return(NULL)
+    }
+  } else if (df.type == "bam") {
+    # extract link
+    submitted.text.url <- gsub(pattern = ".*<DB>ENA-SUBMITTED-FILES</DB>\n +<ID><!\\[CDATA\\[(.*?)\\]\\]></ID>.*", replacement = "\\1", x = xml.content)
+    # read file info
+    submitted.text <- data.table::fread(submitted.text.url, showProgress = FALSE)
+    submitted.text <- submitted.text %>%
+      tidyr::separate_rows(.data[["submitted_ftp"]], .data[["submitted_md5"]], .data[["submitted_bytes"]],
+        .data[["submitted_format"]],
+        sep = ";", convert = TRUE
+      ) %>%
+      as.data.frame()
+    valid.submitted.text <- submitted.text %>%
+      dplyr::filter(!is.na(.data[["submitted_ftp"]])) %>%
+      dplyr::filter(grepl(pattern = "bam|bai", x = .data[["submitted_format"]], ignore.case = TRUE))
+    if (nrow(valid.submitted.text) > 0) {
+      return(valid.submitted.text)
+    } else {
+      message("There is no valid bam|bai files under run: ", run)
+      return(NULL)
+    }
+  }
+}

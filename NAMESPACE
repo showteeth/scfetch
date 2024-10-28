@@ -2,6 +2,7 @@
 
 export(Bam2Fastq)
 export(DownloadBam)
+export(DownloadFastq)
 export(DownloadSRA)
 export(ExportSeurat)
 export(ExtractCBComposition)

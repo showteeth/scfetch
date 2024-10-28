@@ -389,3 +389,125 @@ GetFastqLen <- function(fq.file) {
   fq.len <- max(sapply(fq.valid, nchar))
   return(fq.len)
 }
+
+#' Download FASTQ Files.
+#'
+#' @param gsm.df Dataframe contains GSM and Run numbers, obtained from \code{ExtractRun}.
+#' @param out.folder Output folder. Default: NULL (current working directory).
+#' @param download.method Method to download fastq files, chosen from "download.file" and "ascp". Default: "download.file".
+#' @param quiet Logical value, whether to show downloading progress. Default: FALSE (show).
+#' @param timeout Maximum request time. Default: 3600.
+#' @param ascp.path Path to ascp (/path/bin/ascp), please ensure that the relative path of asperaweb_id_dsa.openssh file
+#' (/path/bin/ascp/../etc/asperaweb_id_dsa.openssh). Default: NULL (conduct automatic detection).
+#' @param max.rate Max transfer rate, used when \code{download.method} is "ascp". Default: 300m.
+#' @param parallel Logical value, whether to download parallelly. Default: TRUE.
+#' @param use.cores The number of cores used. Default: NULL (the minimum value of \code{nrow(gsm.df)} and \code{parallel::detectCores()}).
+#'
+#' @return Dataframe contains failed \code{gsm.df} of NULL.
+#' @importFrom curl curl_fetch_memory
+#' @importFrom magrittr %>%
+#' @importFrom data.table fread
+#' @importFrom tidyr separate_rows
+#' @importFrom dplyr filter
+#' @importFrom parallel detectCores mclapply
+#' @importFrom utils download.file
+#' @export
+#'
+#' @examples
+#' GSE130636.runs <- ExtractRun(acce = "GSE130636", platform = "GPL20301")
+#' # a small test
+#' GSE130636.runs <- GSE130636.runs[GSE130636.runs$run %in% c("SRR9004325", "SRR9004326"), ]
+#' # use download.file
+#' download.file.res <- DownloadFastq(
+#'   gsm.df = gsm.df, out.folder = "/path/to/output",
+#'   download.method = "download.file", parallel = TRUE, use.cores = 2
+#' )
+#' # use ascp
+#' ascp.res <- DownloadFastq(
+#'   gsm.df = gsm.df, out.folder = "/home/songyabing/data/projects/tmp/scfetch",
+#'   download.method = "ascp", ascp.path = "~/.aspera/connect/bin/ascp", parallel = TRUE, use.cores = 2
+#' )
+DownloadFastq <- function(gsm.df, out.folder = NULL, download.method = c("download.file", "ascp"), quiet = FALSE,
+                          timeout = 3600, ascp.path = NULL, max.rate = "300m", parallel = TRUE, use.cores = NULL) {
+  # check parameter
+  download.method <- match.arg(arg = download.method)
+  # check dataframe
+  if (nrow(gsm.df) == 0) {
+    stop("Please provide valid gsm.df!")
+  }
+  CheckColumns(df = gsm.df, columns = c("gsm_name", "ebi_dir", "run"))
+  # prepare output folder
+  if (is.null(out.folder)) {
+    out.folder <- getwd()
+  }
+  # prepare sample output folder
+  samples.folder <- file.path(out.folder, gsm.df$gsm_name)
+  # parallel
+  if (parallel) {
+    cores.used <- min(parallel::detectCores(), nrow(gsm.df), use.cores)
+    all.runs.down <- parallel::mclapply(X = 1:nrow(gsm.df), FUN = function(x) {
+      gsm.df.x <- gsm.df[x, ]
+      sf <- samples.folder[x]
+      DownloadFastqSingle(
+        gsm.df = gsm.df.x, out.folder = sf, download.method = download.method,
+        quiet = quiet, timeout = timeout, ascp.path = ascp.path, max.rate = max.rate
+      )
+    }, mc.cores = cores.used)
+  } else {
+    all.runs.down <- lapply(1:nrow(gsm.df), function(x) {
+      gsm.df.x <- gsm.df[x, ]
+      sf <- samples.folder[x]
+      DownloadFastqSingle(
+        gsm.df = gsm.df.x, out.folder = sf, download.method = download.method,
+        quiet = quiet, timeout = timeout, ascp.path = ascp.path, max.rate = max.rate
+      )
+    })
+  }
+  # select fail samples
+  fail.flag <- sapply(1:length(all.runs.down), function(x) {
+    !is.null(all.runs.down[[x]])
+  })
+  fail.run <- unlist(all.runs.down[fail.flag])
+  if (length(fail.run) > 0) {
+    fail.df <- gsm.df[gsm.df$run %in% fail.run, ]
+    message(
+      length(fail.run), " samples failed to download: ",
+      paste0(fail.run, collapse = ","), ". Return dataframe contains failed samples, you can re-run!"
+    )
+    return(fail.df)
+  } else {
+    message("All samples downloaded successfully!")
+    return(NULL)
+  }
+}
+
+DownloadFastqSingle <- function(gsm.df, out.folder = NULL, download.method = c("download.file", "ascp"),
+                                quiet = FALSE, timeout = 3600, ascp.path = NULL, max.rate = "300m") {
+  # prepare output folder
+  if (!dir.exists(out.folder)) {
+    dir.create(path = out.folder, recursive = TRUE)
+  }
+  # download url prefix
+  ftp.url.prefix <- "ftp://ftp.sra.ebi.ac.uk"
+  ascp.url.prefix <- "era-fasp@fasp.sra.ebi.ac.uk:"
+  # extract download file
+  run.files.df <- ParseENAxml(run = gsm.df$run, df.type = "fastq")
+  if (is.null(run.files.df)) {
+    return(gsm.df$run)
+  } else {
+    run.files.ftp <- paste0("ftp://", run.files.df$fastq_ftp)
+    # prepare urls
+    if (download.method == "download.file") {
+      download.urls <- run.files.ftp
+    } else if (download.method == "ascp") {
+      download.urls <- gsub(pattern = ftp.url.prefix, replacement = ascp.url.prefix, x = run.files.ftp)
+    }
+    # download
+    download.res <- DownloadMethod(
+      rn = gsm.df$run, url.vec = download.urls, name.vec = basename(download.urls),
+      out.folder = out.folder, download.method = download.method, quiet = quiet,
+      timeout = timeout, ascp.path = ascp.path, max.rate = max.rate, rename = FALSE
+    )
+    return(download.res)
+  }
+}
