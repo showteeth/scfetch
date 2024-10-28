@@ -113,8 +113,6 @@ DownloadSRA <- function(gsm.df, out.folder = NULL, download.method = c("prefetch
     stop("Please provide valid gsm.df!")
   }
   CheckColumns(df = gsm.df, columns = c("gsm_name", "run"))
-  # all samples
-  all.samples <- unique(as.character(gsm.df$gsm_name))
   # prepare output folder
   if (is.null(out.folder)) {
     out.folder <- getwd()

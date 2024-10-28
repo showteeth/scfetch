@@ -6,28 +6,59 @@
 \usage{
 DownloadBam(
   gsm.df,
+  out.folder = NULL,
+  download.method = c("prefetch", "download.file", "ascp"),
   bam.type = c("10x", "other"),
   prefetch.path = NULL,
-  samdump.path = NULL,
-  out.folder = NULL,
   prefetch.paras = "-X 100G",
-  samdump.paras = ""
+  samdump.path = NULL,
+  samdump.paras = "",
+  quiet = FALSE,
+  timeout = 3600,
+  ascp.path = NULL,
+  max.rate = "300m",
+  rename = TRUE,
+  parallel = TRUE,
+  use.cores = NULL
 )
 }
 \arguments{
 \item{gsm.df}{Dataframe contains GSM and Run numbers, obtained from \code{ExtractRun}.}
 
-\item{bam.type}{The source of bam files to download, choose from 10x (e.g. CellRanger) or other. Default: 10x.}
+\item{out.folder}{Output folder. Default: NULL (current working directory).}
+
+\item{download.method}{Method to download sra files, chosen from "prefetch", "download.file", "ascp".
+Default: "prefetch".}
+
+\item{bam.type}{The source of bam files to download, choose from 10x (e.g. CellRanger) or other.
+Used when \code{download.method} is "prefetch". Default: 10x.}
 
 \item{prefetch.path}{Path to prefetch. Default: NULL (conduct automatic detection).}
 
-\item{samdump.path}{Path to sam-dump, used when \code{bam.type} is other. Default: NULL (conduct automatic detection).}
-
-\item{out.folder}{Output folder. Default: NULL (current working directory).}
-
 \item{prefetch.paras}{Parameters for \code{prefetch}. This should not contain --type or -T values. Default: "-X 100G".}
 
+\item{samdump.path}{Path to sam-dump, used when \code{bam.type} is other. Default: NULL (conduct automatic detection).}
+
 \item{samdump.paras}{Parameters for \code{sam-dump}. Default: "".}
+
+\item{quiet}{Logical value, whether to show downloading progress. Used when \code{download.method} is "download.file".
+Default: FALSE (show).}
+
+\item{timeout}{Maximum request time. Used when \code{download.method} is "download.file". Default: 3600.}
+
+\item{ascp.path}{Path to ascp (/path/bin/ascp), please ensure that the relative path of asperaweb_id_dsa.openssh file
+(/path/bin/ascp/../etc/asperaweb_id_dsa.openssh). Default: NULL (conduct automatic detection).}
+
+\item{max.rate}{Max transfer rate. Used when \code{download.method} is "ascp". Default: 300m.}
+
+\item{rename}{Logical value, whether to rename the download sra files. Recommended when \code{download.method} is "ascp".
+Default: FALSE (show).}
+
+\item{parallel}{Logical value, whether to download parallelly. Used when \code{download.method} is "ascp" or "download.file".
+Default: TRUE.}
+
+\item{use.cores}{The number of cores used. Used when \code{download.method} is "ascp" or "download.file".
+Default: NULL (the minimum value of \code{nrow(gsm.df)} and \code{parallel::detectCores()}).}
 }
 \value{
 Dataframe contains failed runs or NULL.
@@ -37,12 +68,24 @@ Download bam.
 }
 \examples{
 \dontrun{
-# need users to provide prefetch.path
 GSE138266.runs <- ExtractRun(acce = "GSE138266", platform = "GPL18573")
+# prefetch
 GSE138266.down <- DownloadBam(
   gsm.df = GSE138266.runs, bam.type = "10x",
-  prefetch.path = "/path/to/prefetch",
-  out.folder = "/path/to/output"
+  prefetch.path = "/path/to/prefetch", out.folder = "/path/to/output"
+)
+# download.file
+GSE138266.down <- DownloadBam(
+  gsm.df = GSE138266.runs, download.method = "download.file",
+  timeout = 3600, out.folder = "/path/to/output",
+  parallel = TRUE, use.cores = 2
+)
+# ascp
+GSE138266.down <- DownloadBam(
+  gsm.df = GSE138266.runs, download.method = "ascp",
+  ascp.path = "/path/to/ascp", max.rate = "300m",
+  rename = TRUE, out.folder = "/path/to/output",
+  parallel = TRUE, use.cores = 2
 )
 }
 }
