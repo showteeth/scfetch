@@ -153,7 +153,8 @@ DownloadBam <- function(gsm.df, out.folder = NULL, download.method = c("prefetch
       cores.used <- min(parallel::detectCores(), nrow(gsm.df), use.cores)
       all.runs.down <- parallel::mclapply(X = 1:nrow(gsm.df), FUN = function(x) {
         gsm.df.x <- gsm.df[x, ]
-        sf <- samples.folder[x]
+        # same with DownloadSRA
+        sf <- file.path(samples.folder[x], gsm.df.x$run)
         DownloadBamSingle(
           gsm.df = gsm.df.x, out.folder = sf, download.method = download.method,
           quiet = quiet, timeout = timeout, ascp.path = ascp.path, max.rate = max.rate, rename = rename
@@ -162,9 +163,8 @@ DownloadBam <- function(gsm.df, out.folder = NULL, download.method = c("prefetch
     } else {
       all.runs.down <- lapply(1:nrow(gsm.df), function(x) {
         gsm.df.x <- gsm.df[x, ]
-        sf <- samples.folder[x]
-        gsm.df.x <- gsm.df[x, ]
-        sf <- samples.folder[x]
+        # same with DownloadSRA
+        sf <- file.path(samples.folder[x], gsm.df.x$run)
         DownloadBamSingle(
           gsm.df = gsm.df.x, out.folder = sf, download.method = download.method,
           quiet = quiet, timeout = timeout, ascp.path = ascp.path, max.rate = max.rate, rename = rename

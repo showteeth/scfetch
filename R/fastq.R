@@ -149,7 +149,8 @@ DownloadSRA <- function(gsm.df, out.folder = NULL, download.method = c("prefetch
       cores.used <- min(parallel::detectCores(), nrow(gsm.df), use.cores)
       all.runs.down <- parallel::mclapply(X = 1:nrow(gsm.df), FUN = function(x) {
         gsm.df.x <- gsm.df[x, ]
-        sf <- samples.folder[x]
+        # same with RunPrefetch
+        sf <- file.path(samples.folder[x], gsm.df.x$run)
         DownloadSRAfromENA(
           gsm.df = gsm.df.x, out.folder = sf, download.method = download.method, quiet = quiet,
           timeout = timeout, ascp.path = ascp.path, max.rate = max.rate, rename = rename
@@ -158,7 +159,8 @@ DownloadSRA <- function(gsm.df, out.folder = NULL, download.method = c("prefetch
     } else {
       all.runs.down <- lapply(1:nrow(gsm.df), function(x) {
         gsm.df.x <- gsm.df[x, ]
-        sf <- samples.folder[x]
+        # same with RunPrefetch
+        sf <- file.path(samples.folder[x], gsm.df.x$run)
         DownloadSRAfromENA(
           gsm.df = gsm.df.x, out.folder = sf, download.method = download.method, quiet = quiet,
           timeout = timeout, ascp.path = ascp.path, max.rate = max.rate, rename = rename
@@ -514,6 +516,8 @@ GetFastqLen <- function(fq.file) {
 #' @param max.rate Max transfer rate. Used when \code{download.method} is "ascp". Default: 300m.
 #' @param parallel Logical value, whether to download parallelly. Default: TRUE.
 #' @param use.cores The number of cores used. Default: NULL (the minimum value of \code{nrow(gsm.df)} and \code{parallel::detectCores()}).
+#' @param format.10x Logical value, whether to format split fastqs to 10x standard format. Default: TRUE.
+#' @param remove.raw Logical value, whether to remove old split fastqs (unformatted), used when \code{format.10x} is TRUE. Default: FALSE.
 #'
 #' @return Dataframe contains failed \code{gsm.df} of NULL.
 #' @importFrom curl curl_fetch_memory
@@ -523,7 +527,7 @@ GetFastqLen <- function(fq.file) {
 #' @importFrom dplyr filter
 #' @importFrom rlang .data
 #' @importFrom parallel detectCores mclapply
-#' @importFrom utils download.file
+#' @importFrom utils download.file read.table
 #' @export
 #'
 #' @examples
@@ -541,7 +545,8 @@ GetFastqLen <- function(fq.file) {
 #'   download.method = "ascp", ascp.path = "~/.aspera/connect/bin/ascp", parallel = TRUE, use.cores = 2
 #' )
 DownloadFastq <- function(gsm.df, out.folder = NULL, download.method = c("download.file", "ascp"), quiet = FALSE,
-                          timeout = 3600, ascp.path = NULL, max.rate = "300m", parallel = TRUE, use.cores = NULL) {
+                          timeout = 3600, ascp.path = NULL, max.rate = "300m", parallel = TRUE, use.cores = NULL,
+                          format.10x = TRUE, remove.raw = FALSE) {
   # check parameter
   download.method <- match.arg(arg = download.method)
   # check dataframe
@@ -560,7 +565,8 @@ DownloadFastq <- function(gsm.df, out.folder = NULL, download.method = c("downlo
     cores.used <- min(parallel::detectCores(), nrow(gsm.df), use.cores)
     all.runs.down <- parallel::mclapply(X = 1:nrow(gsm.df), FUN = function(x) {
       gsm.df.x <- gsm.df[x, ]
-      sf <- samples.folder[x]
+      # same with RunPrefetch
+      sf <- file.path(samples.folder[x], gsm.df.x$run)
       DownloadFastqSingle(
         gsm.df = gsm.df.x, out.folder = sf, download.method = download.method,
         quiet = quiet, timeout = timeout, ascp.path = ascp.path, max.rate = max.rate
@@ -569,7 +575,8 @@ DownloadFastq <- function(gsm.df, out.folder = NULL, download.method = c("downlo
   } else {
     all.runs.down <- lapply(1:nrow(gsm.df), function(x) {
       gsm.df.x <- gsm.df[x, ]
-      sf <- samples.folder[x]
+      # same with RunPrefetch
+      sf <- file.path(samples.folder[x], gsm.df.x$run)
       DownloadFastqSingle(
         gsm.df = gsm.df.x, out.folder = sf, download.method = download.method,
         quiet = quiet, timeout = timeout, ascp.path = ascp.path, max.rate = max.rate
@@ -581,6 +588,16 @@ DownloadFastq <- function(gsm.df, out.folder = NULL, download.method = c("downlo
     !is.null(all.runs.down[[x]])
   })
   fail.run <- unlist(all.runs.down[fail.flag])
+  # format fastqs to 10x standard names
+  if (format.10x) {
+    success.df <- gsm.df[!gsm.df$run %in% fail.run, ]
+    if (nrow(success.df) > 0) {
+      success.run.folders <- file.path(out.folder, success.df$gsm_name, success.df$run)
+      format.flag <- sapply(success.run.folders, function(x) {
+        IdentifyReads(fastq.folder = x, remove = remove.raw)
+      })
+    }
+  }
   if (length(fail.run) > 0) {
     fail.df <- gsm.df[gsm.df$run %in% fail.run, ]
     message(

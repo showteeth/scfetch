@@ -7,6 +7,12 @@
 
 -------------------
 
+## Minor changes
+* Updated `DownloadSRA`, `DownloadFastq`, `DownloadBam` to keep the same file structure.
+* Updated `DownloadFastq` to format the fastqs to 10x format.
+
+-------------------
+
 
 # scfetch 0.6.1
 

@@ -13,7 +13,9 @@ DownloadFastq(
   ascp.path = NULL,
   max.rate = "300m",
   parallel = TRUE,
-  use.cores = NULL
+  use.cores = NULL,
+  format.10x = TRUE,
+  remove.raw = FALSE
 )
 }
 \arguments{
@@ -36,6 +38,10 @@ Default: FALSE (show).}
 \item{parallel}{Logical value, whether to download parallelly. Default: TRUE.}
 
 \item{use.cores}{The number of cores used. Default: NULL (the minimum value of \code{nrow(gsm.df)} and \code{parallel::detectCores()}).}
+
+\item{format.10x}{Logical value, whether to format split fastqs to 10x standard format. Default: TRUE.}
+
+\item{remove.raw}{Logical value, whether to remove old split fastqs (unformatted), used when \code{format.10x} is TRUE. Default: FALSE.}
 }
 \value{
 Dataframe contains failed \code{gsm.df} of NULL.
