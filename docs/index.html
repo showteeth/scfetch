@@ -5,16 +5,16 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="description" content="The goal of scfetch is to access and format scRNA-seq datasets. It can be used to download scRNA-seq
+<meta name="description" content="The goal of GEfetch2R is to access and format scRNA-seq datasets. It can be used to download scRNA-seq
     datasets from widely used public resources, including GEO, Zenodo, CELLxGENE, Human Cell Atlas, PanglaoDB and UCSC Cell Browser.
     And, it can also be used to perform object conversion between SeuratObject, loom,  h5ad, SingleCellExperiment and CellDataSet/cell_data_set.">
-<title>Access and Format Single-cell RNA-seq Datasets from Public Resources  • scfetch</title>
+<title>Access and Format Single-cell RNA-seq Datasets from Public Resources  • GEfetch2R</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Access and Format Single-cell RNA-seq Datasets from Public Resources ">
-<meta property="og:description" content="The goal of scfetch is to access and format scRNA-seq datasets. It can be used to download scRNA-seq
+<meta property="og:description" content="The goal of GEfetch2R is to access and format scRNA-seq datasets. It can be used to download scRNA-seq
     datasets from widely used public resources, including GEO, Zenodo, CELLxGENE, Human Cell Atlas, PanglaoDB and UCSC Cell Browser.
     And, it can also be used to perform object conversion between SeuratObject, loom,  h5ad, SingleCellExperiment and CellDataSet/cell_data_set.">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
@@ -28,7 +28,7 @@
 
     <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary"><div class="container">
 
-    <a class="navbar-brand me-2" href="index.html">scfetch</a>
+    <a class="navbar-brand me-2" href="index.html">GEfetch2R</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
@@ -67,7 +67,7 @@
 
       <ul class="navbar-nav">
 <li class="nav-item">
-  <a class="external-link nav-link" href="https://github.com/showteeth/scfetch">
+  <a class="external-link nav-link" href="https://github.com/showteeth/GEfetch2R">
     <span class="fa fa-github fa-lg"></span>
 
   </a>
@@ -80,13 +80,13 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="scfetch---access-and-format-single-cell-rna-seq-datasets-from-public-resources">scfetch - Access and Format Single-cell RNA-seq Datasets from Public Resources<a class="anchor" aria-label="anchor" href="#scfetch---access-and-format-single-cell-rna-seq-datasets-from-public-resources"></a>
+<div class="page-header"><h1 id="GEfetch2R---access-and-format-single-cell-rna-seq-datasets-from-public-resources">GEfetch2R - Access and Format Single-cell RNA-seq Datasets from Public Resources<a class="anchor" aria-label="anchor" href="#GEfetch2R---access-and-format-single-cell-rna-seq-datasets-from-public-resources"></a>
 </h1></div>
-<p><img src="reference/figures/scfetch.png" align="right" width="200"></p>
+<p><img src="reference/figures/GEfetch2R.png" align="right" width="200"></p>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p><code>scfetch</code> is designed to accelerate users download and prepare single-cell datasets from public resources. It can be used to:</p>
+<p><code>GEfetch2R</code> is designed to accelerate users download and prepare single-cell datasets from public resources. It can be used to:</p>
 <ul>
 <li>
 <strong>Download fastq files</strong> from <code>GEO/SRA</code>, <strong>foramt fastq files</strong> to standard style that can be identified by 10x softwares (e.g. CellRanger).</li>
@@ -110,11 +110,11 @@
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version of <code>scfetch</code> from <a href="https://github.com/showteeth/scfetch" class="external-link">GitHub</a> with:</p>
+<p>You can install the development version of <code>GEfetch2R</code> from <a href="https://github.com/showteeth/GEfetch2R" class="external-link">GitHub</a> with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"showteeth/scfetch"</span><span class="op">)</span></span></code></pre></div>
-<p>For data structures conversion, <code>scfetch</code> requires several python pcakages, you can install with:</p>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"showteeth/GEfetch2R"</span><span class="op">)</span></span></code></pre></div>
+<p>For data structures conversion, <code>GEfetch2R</code> requires several python pcakages, you can install with:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># install python packages</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> install <span class="at">-c</span> bioconda loompy anndata</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># or</span></span>
@@ -127,7 +127,7 @@
 <div class="section level3">
 <h3 id="vignette">Vignette<a class="anchor" aria-label="anchor" href="#vignette"></a>
 </h3>
-<p>Detailed usage is available in <a href="https://showteeth.github.io/scfetch/">website</a>.</p>
+<p>Detailed usage is available in <a href="https://showteeth.github.io/GEfetch2R/">website</a>.</p>
 <hr>
 </div>
 <div class="section level3">
@@ -394,7 +394,7 @@ Summarize datasets in PandlaoDB, UCSC Cell Browser and CELLxGENE based on attrib
 <div class="section level2">
 <h2 id="code-of-conduct">Code of Conduct<a class="anchor" aria-label="anchor" href="#code-of-conduct"></a>
 </h2>
-<p>Please note that the <code>scfetch</code> project is released with a <a href="https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html" class="external-link">Contributor Code of Conduct</a>. By contributing to this project, you agree to abide by its terms.</p>
+<p>Please note that the <code>GEfetch2R</code> project is released with a <a href="https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html" class="external-link">Contributor Code of Conduct</a>. By contributing to this project, you agree to abide by its terms.</p>
 <p><br></p>
 </div>
 </div>
@@ -415,7 +415,7 @@ Summarize datasets in PandlaoDB, UCSC Cell Browser and CELLxGENE based on attrib
 <div class="citation">
 <h2 data-toc-skip>Citation</h2>
 <ul class="list-unstyled">
-<li><a href="authors.html#citation">Citing scfetch</a></li>
+<li><a href="authors.html#citation">Citing GEfetch2R</a></li>
 </ul>
 </div>
 
