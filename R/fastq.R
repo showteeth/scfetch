@@ -541,7 +541,7 @@ GetFastqLen <- function(fq.file) {
 #' )
 #' # use ascp
 #' ascp.res <- DownloadFastq(
-#'   gsm.df = gsm.df, out.folder = "/home/songyabing/data/projects/tmp/scfetch",
+#'   gsm.df = gsm.df, out.folder = "/home/songyabing/data/projects/tmp/GEfetch2R",
 #'   download.method = "ascp", ascp.path = "~/.aspera/connect/bin/ascp", parallel = TRUE, use.cores = 2
 #' )
 DownloadFastq <- function(gsm.df, out.folder = NULL, download.method = c("download.file", "ascp"), quiet = FALSE,

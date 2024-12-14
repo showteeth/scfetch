@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-A common situation is that we need to use a unified software version (e.g. CellRanger) to obtain the count matrix, in order to better integrate and compare multiple datasets. Here, we will use `scfetch` to download fastq and bam files. With bam files, `scfetch` also provides function for user to convert the bam to fastq.
+A common situation is that we need to use a unified software version (e.g. CellRanger) to obtain the count matrix, in order to better integrate and compare multiple datasets. Here, we will use `GEfetch2R` to download fastq and bam files. With bam files, `GEfetch2R` also provides function for user to convert the bam to fastq.
 
 <hr />
 
@@ -24,12 +24,12 @@ A common situation is that we need to use a unified software version (e.g. CellR
 
 ### Prepare run number
 
-For fastq files stored in SRA, `scfetch` can extract sample information and run number with GEO accession number or users can also provide a dataframe contains the run number of interested samples.
+For fastq files stored in SRA, `GEfetch2R` can extract sample information and run number with GEO accession number or users can also provide a dataframe contains the run number of interested samples.
 
 Extract all samples under `GSE130636` and the platform is `GPL20301` (use `platform = NULL` for all platforms):
 ```{r prepare_run}
 # library
-library(scfetch)
+library(GEfetch2R)
 
 GSE130636.runs <- ExtractRun(acce = "GSE130636", platform = "GPL20301")
 head(GSE130636.runs)
@@ -39,7 +39,7 @@ head(GSE130636.runs)
 
 ### Download sra
 
-With the dataframe contains gsm and run number, `scfetch` will download sra files using `prefetch`. The returned result is a dataframe contains failed runs. If not `NULL`, users can re-run `DownloadSRA` by setting `gsm.df` to the returned result.
+With the dataframe contains gsm and run number, `GEfetch2R` will download sra files using `prefetch`. The returned result is a dataframe contains failed runs. If not `NULL`, users can re-run `DownloadSRA` by setting `gsm.df` to the returned result.
 
 ```{r dwonload_sra, eval=FALSE}
 # a small test
@@ -59,7 +59,7 @@ The `out.folder` structure will be: `gsm_number/run_number`.
 
 ### Split fastq
 
-After obtaining the sra files, `scfetch` provides function `SplitSRA` to split sra files to fastq files using `parallel-fastq-dump` (parallel, fastest and gzip output), `fasterq-dump` (parallel, fast but unzipped output) and `fastq-dump` (slowest and gzip output).
+After obtaining the sra files, `GEfetch2R` provides function `SplitSRA` to split sra files to fastq files using `parallel-fastq-dump` (parallel, fastest and gzip output), `fasterq-dump` (parallel, fast but unzipped output) and `fastq-dump` (slowest and gzip output).
 
 For fastqs generated with 10x Genomics, `SplitSRA` can identify read1, read2 and index files and format the read1 and read2 to 10x required format (`sample1_S1_L001_R1_001.fastq.gz` and `sample1_S1_L001_R2_001.fastq.gz`). In detail, the file with read length 26 or 28 is considered as read1, the files with read length 8 or 10 are considered as index files and the remain file is considered as read2. The read length rules is from [Sequencing Requirements for Single Cell 3'](https://www.10xgenomics.com/cn/support/single-cell-gene-expression/documentation/steps/sequencing/sequencing-requirements-for-single-cell-3) and [Sequencing Requirements for Single Cell V(D)J](https://www.10xgenomics.com/cn/support/single-cell-immune-profiling/documentation/steps/sequencing/sequencing-requirements-for-single-cell-v-d-j).
 
@@ -86,7 +86,7 @@ tree /Users/soyabean/Desktop/tmp/scdown/download_fastq
 
 ### Prepare run number
 
-`scfetch` can extract sample information and run number with GEO accession number or users can also provide a dataframe contains the run number of interested samples.
+`GEfetch2R` can extract sample information and run number with GEO accession number or users can also provide a dataframe contains the run number of interested samples.
 
 ```{r prepare_run_bam}
 GSE138266.runs <- ExtractRun(acce = "GSE138266", platform = "GPL18573")
@@ -97,9 +97,9 @@ head(GSE138266.runs)
 
 ### Download bam
 
-With the dataframe contains gsm and run number, `scfetch` provides `DownloadBam` to download bam files using `prefetch`. It suooorts 10x generated bam files and normal bam files.
+With the dataframe contains gsm and run number, `GEfetch2R` provides `DownloadBam` to download bam files using `prefetch`. It suooorts 10x generated bam files and normal bam files.
 
-* 10x generated bam: While bam files generated from 10x softwares (e.g. CellRanger) contain custom tags which are not kept when using default parameters of `prefetch`, `scfetch` adds `--type TenX` to make sure the downloaded bam files contain these tags. 
+* 10x generated bam: While bam files generated from 10x softwares (e.g. CellRanger) contain custom tags which are not kept when using default parameters of `prefetch`, `GEfetch2R` adds `--type TenX` to make sure the downloaded bam files contain these tags. 
 * normal bam: For normal bam files, `DownloadBam` will download sra files first and then convert sra files to bam files with `sam-dump`. After testing the efficiency of `prefetch` + `sam-dump` and `sam-dump`, the former is much faster than the latter (52G sra and 72G bam files):
 ```{bash test_downbam_efficiency}
 # # use prefetch to download sra file
@@ -140,7 +140,7 @@ The `out.folder` structure will be: `gsm_number/run_number`.
 
 ### Convert bam to fastq
 
-With downloaded bam files, `scfetch` provides function `Bam2Fastq` to convert bam files to fastq files. For bam files generated from 10x softwares, `Bam2Fastq` utilizes `bamtofastq` tool developed by 10x Genomics.
+With downloaded bam files, `GEfetch2R` provides function `Bam2Fastq` to convert bam files to fastq files. For bam files generated from 10x softwares, `Bam2Fastq` utilizes `bamtofastq` tool developed by 10x Genomics.
 
 The returned result is a vector of bam files failed to convert to fastq files. If not `NULL`, users can re-run `Bam2Fastq` by setting `bam.path` to the returned result.
 

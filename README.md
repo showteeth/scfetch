@@ -1,15 +1,15 @@
 
-# scfetch - Access and Format Single-cell RNA-seq Datasets from Public Resources 
+# GEfetch2R - Access and Format Single-cell RNA-seq Datasets from Public Resources 
 
-<img src = "man/figures/scfetch.png" align = "right" width = "200"/>
+<img src = "man/figures/GEfetch2R.png" align = "right" width = "200"/>
 
-[![CRAN](https://www.r-pkg.org/badges/version/scfetch?color=orange)](https://cran.r-project.org/package=scfetch)
+[![CRAN](https://www.r-pkg.org/badges/version/GEfetch2R?color=orange)](https://cran.r-project.org/package=GEfetch2R)
 [![License: GPLv3](https://img.shields.io/badge/license-GPLv3-blue.svg)](https://cran.r-project.org/web/licenses/GPLv3)
-[![CODE\_SIZE](https://img.shields.io/github/languages/code-size/showteeth/scfetch.svg)](https://github.com/showteeth/scfetch)
+[![CODE\_SIZE](https://img.shields.io/github/languages/code-size/showteeth/GEfetch2R.svg)](https://github.com/showteeth/GEfetch2R)
 
 ## Introduction
 
-`scfetch` is designed to accelerate users download and prepare single-cell datasets from public resources. It can be used to:
+`GEfetch2R` is designed to accelerate users download and prepare single-cell datasets from public resources. It can be used to:
 
 * **Download fastq files** from `GEO/SRA`, **foramt fastq files** to standard style that can be identified by 10x softwares (e.g. CellRanger).
 * **Download bam files** from `GEO/SRA`, support **downloading original 10x generated bam files (with custom tags) and normal bam files**, and **convert bam files to fastq files**.
@@ -22,21 +22,21 @@
 ## Framework
 
 <div align="center">
-<img src="man/figures/scfetch_workflow.png"  title="scfetch_framework"  alt="scfetch_framework" />
+<img src="man/figures/GEfetch2R_workflow.png"  title="GEfetch2R_framework"  alt="GEfetch2R_framework" />
 </div>
 
 <hr />
 
 ## Installation
 
-`scfetch` is an R package distributed as part of the [CRAN](https://cran.r-project.org/web/packages/scfetch/index.html). To install the package, start R and enter:
+`GEfetch2R` is an R package distributed as part of the [CRAN](https://cran.r-project.org/web/packages/GEfetch2R/index.html). To install the package, start R and enter:
 ```R
 # install via CRAN
-install.packages("scfetch")
+install.packages("GEfetch2R")
 
 # you can also install the development version from GitHub
 # install.packages("devtools")
-devtools::install_github("showteeth/scfetch")
+devtools::install_github("showteeth/GEfetch2R")
 ```
 
 There are some conditionally used packages:
@@ -51,7 +51,7 @@ devtools::install_github("satijalab/seurat-wrappers") # format conversion
 
 **For issues about installation, please refer `INSTALL.md`.**
 
-For data structures conversion and downloading fastq/bam files, `scfetch` requires additional tools, you can install with:
+For data structures conversion and downloading fastq/bam files, `GEfetch2R` requires additional tools, you can install with:
 
 ``` bash
 # install additional packages for format conversion
@@ -69,14 +69,14 @@ wget --quiet https://github.com/10XGenomics/bamtofastq/releases/download/v1.4.1/
 <hr />
 
 ## Docker
-We also provide a [docker image](https://hub.docker.com/repository/docker/soyabean/scfetch) to use:
+We also provide a [docker image](https://hub.docker.com/repository/docker/soyabean/GEfetch2R) to use:
 
 ```bash
 # pull the image
-docker pull soyabean/scfetch:1.6
+docker pull soyabean/GEfetch2R:1.6
 
 # run the image
-docker run --rm -p 8888:8787 -e PASSWORD=passwd -e ROOT=TRUE -it soyabean/scfetch:1.6
+docker run --rm -p 8888:8787 -e PASSWORD=passwd -e ROOT=TRUE -it soyabean/GEfetch2R:1.6
 ```
 
 **Notes**:
@@ -91,7 +91,7 @@ docker run --rm -p 8888:8787 -e PASSWORD=passwd -e ROOT=TRUE -it soyabean/scfetc
 <hr />
 
 ## Vignette
-Detailed usage is available in [website](https://showteeth.github.io/scfetch/).
+Detailed usage is available in [website](https://showteeth.github.io/GEfetch2R/).
 
 <hr />
 
@@ -234,7 +234,7 @@ Since the downloading process is time-consuming, we provide the commands used to
 
 ##### Prepare run number
 
-For fastq files stored in SRA, `scfetch` can extract sample information and run number with GEO accession number or users can also provide a dataframe contains the run number of interested samples.
+For fastq files stored in SRA, `GEfetch2R` can extract sample information and run number with GEO accession number or users can also provide a dataframe contains the run number of interested samples.
 
 Extract all samples under `GSE130636` and the platform is `GPL20301` (use `platform = NULL` for all platforms):
 ```r
@@ -245,7 +245,7 @@ GSE130636.runs <- ExtractRun(acce = "GSE130636", platform = "GPL20301")
 
 ##### Download sra
 
-With the dataframe contains gsm and run number, `scfetch` will download sra files using `prefetch`. The returned result is a dataframe contains failed runs. If not `NULL`, users can re-run `DownloadSRA` by setting `gsm.df` to the returned result.
+With the dataframe contains gsm and run number, `GEfetch2R` will download sra files using `prefetch`. The returned result is a dataframe contains failed runs. If not `NULL`, users can re-run `DownloadSRA` by setting `gsm.df` to the returned result.
 
 ```r
 # a small test
@@ -265,7 +265,7 @@ The `out.folder` structure will be: `gsm_number/run_number`.
 
 ##### Split fastq
 
-After obtaining the sra files, `scfetch` provides function `SplitSRA` to split sra files to fastq files using `parallel-fastq-dump` (parallel, fastest and gzip output), `fasterq-dump` (parallel, fast but unzipped output) and `fastq-dump` (slowest and gzip output).
+After obtaining the sra files, `GEfetch2R` provides function `SplitSRA` to split sra files to fastq files using `parallel-fastq-dump` (parallel, fastest and gzip output), `fasterq-dump` (parallel, fast but unzipped output) and `fastq-dump` (slowest and gzip output).
 
 For fastqs generated with 10x Genomics, `SplitSRA` can identify read1, read2 and index files and format the read1 and read2 to 10x required format (`sample1_S1_L001_R1_001.fastq.gz` and `sample1_S1_L001_R2_001.fastq.gz`). In detail, the file with read length 26 or 28 is considered as read1, the files with read length 8 or 10 are considered as index files and the remain file is considered as read2. The read length rules is from [Sequencing Requirements for Single Cell 3'](https://www.10xgenomics.com/cn/support/single-cell-gene-expression/documentation/steps/sequencing/sequencing-requirements-for-single-cell-3) and [Sequencing Requirements for Single Cell V(D)J](https://www.10xgenomics.com/cn/support/single-cell-immune-profiling/documentation/steps/sequencing/sequencing-requirements-for-single-cell-v-d-j).
 
@@ -287,7 +287,7 @@ GSE130636.split <- SplitSRA(
 
 ##### Prepare run number
 
-`scfetch` can extract sample information and run number with GEO accession number or users can also provide a dataframe contains the run number of interested samples.
+`GEfetch2R` can extract sample information and run number with GEO accession number or users can also provide a dataframe contains the run number of interested samples.
 
 ```r
 GSE138266.runs <- ExtractRun(acce = "GSE138266", platform = "GPL18573")
@@ -297,9 +297,9 @@ GSE138266.runs <- ExtractRun(acce = "GSE138266", platform = "GPL18573")
 
 ##### Download bam
 
-With the dataframe contains gsm and run number, `scfetch` provides `DownloadBam` to download bam files using `prefetch`. It suooorts 10x generated bam files and normal bam files.
+With the dataframe contains gsm and run number, `GEfetch2R` provides `DownloadBam` to download bam files using `prefetch`. It suooorts 10x generated bam files and normal bam files.
 
-* 10x generated bam: While bam files generated from 10x softwares (e.g. CellRanger) contain custom tags which are not kept when using default parameters of `prefetch`, `scfetch` adds `--type TenX` to make sure the downloaded bam files contain these tags. 
+* 10x generated bam: While bam files generated from 10x softwares (e.g. CellRanger) contain custom tags which are not kept when using default parameters of `prefetch`, `GEfetch2R` adds `--type TenX` to make sure the downloaded bam files contain these tags. 
 * normal bam: For normal bam files, `DownloadBam` will download sra files first and then convert sra files to bam files with `sam-dump`. After testing the efficiency of `prefetch` + `sam-dump` and `sam-dump`, the former is much faster than the latter (52G sra and 72G bam files):
 ```bash
 # # use prefetch to download sra file
@@ -340,7 +340,7 @@ The `out.folder` structure will be: `gsm_number/run_number`.
 
 ##### Convert bam to fastq
 
-With downloaded bam files, `scfetch` provides function `Bam2Fastq` to convert bam files to fastq files. For bam files generated from 10x softwares, `Bam2Fastq` utilizes `bamtofastq` tool developed by 10x Genomics.
+With downloaded bam files, `GEfetch2R` provides function `Bam2Fastq` to convert bam files to fastq files. For bam files generated from 10x softwares, `Bam2Fastq` utilizes `bamtofastq` tool developed by 10x Genomics.
 
 The returned result is a vector of bam files failed to convert to fastq files. If not `NULL`, users can re-run `Bam2Fastq` by setting `bam.path` to the returned result.
 
@@ -356,7 +356,7 @@ GSE138266.convert <- Bam2Fastq(
 
 ### Download count matrix
 
-`scfetch` provides functions for users to download **count matrices** and **annotations** (e.g. cell type annotation and composition) from GEO and some single-cell databases (e.g. [PanglaoDB](https://panglaodb.se/index.html) and [UCSC Cell Browser](https://cells.ucsc.edu/?#)). `scfetch` also supports loading the downloaded data to `Seurat`.
+`GEfetch2R` provides functions for users to download **count matrices** and **annotations** (e.g. cell type annotation and composition) from GEO and some single-cell databases (e.g. [PanglaoDB](https://panglaodb.se/index.html) and [UCSC Cell Browser](https://cells.ucsc.edu/?#)). `GEfetch2R` also supports loading the downloaded data to `Seurat`.
 
 Until now, the public resources supported and the returned results:
 
@@ -374,7 +374,7 @@ Until now, the public resources supported and the returned results:
 
 ##### Extract metadata
 
-`scfetch` provides `ExtractGEOMeta` to extract sample metadata, including sample title, source name/tissue, description, cell type, treatment, paper title, paper abstract, organism, protocol, data processing methods, et al.
+`GEfetch2R` provides `ExtractGEOMeta` to extract sample metadata, including sample title, source name/tissue, description, cell type, treatment, paper title, paper abstract, organism, protocol, data processing methods, et al.
 
 ```r
 # extract metadata of specified platform
@@ -412,13 +412,13 @@ GSE94820.seu <- ParseGEO(acce = "GSE94820", platform = NULL, supp.idx = 1, down.
 
 #### PanglaoDB
 
-[PanglaoDB](https://panglaodb.se/index.html) is a database which contains scRNA-seq datasets from mouse and human. Up to now, it contains **5,586,348 cells** from **1368 datasets (1063 from Mus musculus and 305 from	Homo sapiens)**. It has well organized metadata for every dataset, including tissue, protocol, species, number of cells and cell type annotation (computationally identified). Daniel Osorio has developed [rPanglaoDB](https://github.com/dosorio/rPanglaoDB/) to access [PanglaoDB](https://panglaodb.se/index.html) data, the functions of `scfetch` here are based on [rPanglaoDB](https://github.com/dosorio/rPanglaoDB/).
+[PanglaoDB](https://panglaodb.se/index.html) is a database which contains scRNA-seq datasets from mouse and human. Up to now, it contains **5,586,348 cells** from **1368 datasets (1063 from Mus musculus and 305 from	Homo sapiens)**. It has well organized metadata for every dataset, including tissue, protocol, species, number of cells and cell type annotation (computationally identified). Daniel Osorio has developed [rPanglaoDB](https://github.com/dosorio/rPanglaoDB/) to access [PanglaoDB](https://panglaodb.se/index.html) data, the functions of `GEfetch2R` here are based on [rPanglaoDB](https://github.com/dosorio/rPanglaoDB/).
 
-Since [PanglaoDB](https://panglaodb.se/about.html) is no longer maintained, `scfetch` has cached all metadata and cell type composition and use these cached data by default to accelerate, users can access the cached data with `PanglaoDBMeta` (all metadata) and `PanglaoDBComposition` (all cell type composition).
+Since [PanglaoDB](https://panglaodb.se/about.html) is no longer maintained, `GEfetch2R` has cached all metadata and cell type composition and use these cached data by default to accelerate, users can access the cached data with `PanglaoDBMeta` (all metadata) and `PanglaoDBComposition` (all cell type composition).
 
 ##### Summarise attributes
 
-`scfetch` provides `StatDBAttribute` to summary attributes of [PanglaoDB](https://panglaodb.se/index.html):
+`GEfetch2R` provides `StatDBAttribute` to summary attributes of [PanglaoDB](https://panglaodb.se/index.html):
 
 ```r
 # use cached metadata
@@ -429,9 +429,9 @@ StatDBAttribute(df = PanglaoDBMeta, filter = c("species", "protocol"), database 
 
 ##### Extract metadata
 
-`scfetch` provides `ExtractPanglaoDBMeta` to select interested datasets with specified **species**, **protocol**, **tissue** and **cell number** (The available values of these attributes can be obtained with `StatDBAttribute`). User can also choose to whether to add cell type annotation to every dataset with `show.cell.type`.
+`GEfetch2R` provides `ExtractPanglaoDBMeta` to select interested datasets with specified **species**, **protocol**, **tissue** and **cell number** (The available values of these attributes can be obtained with `StatDBAttribute`). User can also choose to whether to add cell type annotation to every dataset with `show.cell.type`.
 
-`scfetch` uses cached metadata and cell type composition by default, users can change this by setting `local.data = FALSE`.
+`GEfetch2R` uses cached metadata and cell type composition by default, users can change this by setting `local.data = FALSE`.
 
 ```r
 hsa.meta <- ExtractPanglaoDBMeta(
@@ -444,7 +444,7 @@ hsa.meta <- ExtractPanglaoDBMeta(
 
 ##### Extract cell type composition
 
-`scfetch` provides `ExtractPanglaoDBComposition` to extract cell type annotation and composition (use cached data by default to accelerate, users can change this by setting `local.data = FALSE`).
+`GEfetch2R` provides `ExtractPanglaoDBComposition` to extract cell type annotation and composition (use cached data by default to accelerate, users can change this by setting `local.data = FALSE`).
 
 ```r
 hsa.composition <- ExtractPanglaoDBComposition(species = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"))
@@ -454,7 +454,7 @@ hsa.composition <- ExtractPanglaoDBComposition(species = "Homo sapiens", protoco
 
 ##### Download matrix and load to Seurat
 
-After manually check the extracted metadata, `scfetch` provides `ParsePanglaoDB` to **download count matrix** and **load the count matrix** to Seurat. With available cell type annotation, uses can filter datasets without specified cell type with `cell.type`. Users can also include/exclude cells expressing specified genes with `include.gene`/`exclude.gene`. 
+After manually check the extracted metadata, `GEfetch2R` provides `ParsePanglaoDB` to **download count matrix** and **load the count matrix** to Seurat. With available cell type annotation, uses can filter datasets without specified cell type with `cell.type`. Users can also include/exclude cells expressing specified genes with `include.gene`/`exclude.gene`. 
 
 With the count matrix, `ParsePanglaoDB` will load the matrix to Seurat automatically. If multiple datasets available, users can choose to merge the SeuratObject with `merge`.
 
@@ -471,7 +471,7 @@ The [UCSC Cell Browser](https://cells.ucsc.edu/?#) is a web-based tool that allo
 
 ##### Show available datasets
 
-`scfetch` provides `ShowCBDatasets` to show all available datasets. Due to the large number of datasets, `ShowCBDatasets` enables users to perform *lazy load* of dataset json files instead of downloading the json files online (time-consuming!!!). This *lazy load* requires users to provide `json.folder` to save json files and set `lazy = TRUE` (for the first time of run, `ShowCBDatasets` will download current json files to `json.folder`, for next time of run, with `lazy = TRUE`, `ShowCBDatasets` will load the downloaded json files from `json.folder`.). And, `ShowCBDatasets` supports updating the local datasets with `update = TRUE`.
+`GEfetch2R` provides `ShowCBDatasets` to show all available datasets. Due to the large number of datasets, `ShowCBDatasets` enables users to perform *lazy load* of dataset json files instead of downloading the json files online (time-consuming!!!). This *lazy load* requires users to provide `json.folder` to save json files and set `lazy = TRUE` (for the first time of run, `ShowCBDatasets` will download current json files to `json.folder`, for next time of run, with `lazy = TRUE`, `ShowCBDatasets` will load the downloaded json files from `json.folder`.). And, `ShowCBDatasets` supports updating the local datasets with `update = TRUE`.
 
 ```r
 json.folder <- tempdir()
@@ -501,7 +501,7 @@ unique(unlist(sapply(unique(gsub(pattern = "\\|parent", replacement = "", x = uc
 
 ##### Summarise attributes
 
-`scfetch` provides `StatDBAttribute` to summary attributes of [UCSC Cell Browser](https://cells.ucsc.edu/?#):
+`GEfetch2R` provides `StatDBAttribute` to summary attributes of [UCSC Cell Browser](https://cells.ucsc.edu/?#):
 
 ```r
 StatDBAttribute(df = ucsc.cb.samples, filter = c("organism", "organ"), database = "UCSC")
@@ -511,7 +511,7 @@ StatDBAttribute(df = ucsc.cb.samples, filter = c("organism", "organ"), database 
 
 ##### Extract metadata
 
-`scfetch` provides `ExtractCBDatasets` to filter metadata with **collection**, **sub-collection**, **organ**, **disease status**, **organism**, **project** and **cell number** (The available values of these attributes can be obtained with `StatDBAttribute` except **cell number**). All attributes except cell number support fuzzy match with `fuzzy.match`, this is useful when selecting datasets.
+`GEfetch2R` provides `ExtractCBDatasets` to filter metadata with **collection**, **sub-collection**, **organ**, **disease status**, **organism**, **project** and **cell number** (The available values of these attributes can be obtained with `StatDBAttribute` except **cell number**). All attributes except cell number support fuzzy match with `fuzzy.match`, this is useful when selecting datasets.
 
 ```{r cb_extract, eval=FALSE}
 hbb.sample.df <- ExtractCBDatasets(all.samples.df = ucsc.cb.samples, organ = c("brain", "blood"), organism = "Human (H. sapiens)", cell.num = c(1000, 2000))
@@ -521,7 +521,7 @@ hbb.sample.df <- ExtractCBDatasets(all.samples.df = ucsc.cb.samples, organ = c("
 
 ##### Extract cell type composition
 
-`scfetch` provides `ExtractCBComposition` to extract cell type annotation and composition.
+`GEfetch2R` provides `ExtractCBComposition` to extract cell type annotation and composition.
 
 ```r
 hbb.sample.ct <- ExtractCBComposition(json.folder = json.folder, sample.df = hbb.sample.df)
@@ -531,7 +531,7 @@ hbb.sample.ct <- ExtractCBComposition(json.folder = json.folder, sample.df = hbb
 
 ##### Load the online datasets to Seurat
 
-After manually check the extracted metadata, `scfetch` provides `ParseCBDatasets` to **load the online count matrix** to Seurat. All the attributes available in `ExtractCBDatasets` are also same here. Please note that the loading process provided by `ParseCBDatasets` will load the online count matrix instead of downloading it to local. If multiple datasets available, users can choose to merge the SeuratObject with `merge`.
+After manually check the extracted metadata, `GEfetch2R` provides `ParseCBDatasets` to **load the online count matrix** to Seurat. All the attributes available in `ExtractCBDatasets` are also same here. Please note that the loading process provided by `ParseCBDatasets` will load the online count matrix instead of downloading it to local. If multiple datasets available, users can choose to merge the SeuratObject with `merge`.
 
 ```r
 hbb.sample.seu <- ParseCBDatasets(sample.df = hbb.sample.df)
@@ -541,7 +541,7 @@ hbb.sample.seu <- ParseCBDatasets(sample.df = hbb.sample.df)
 
 ### Download object
 
-`scfetch` provides functions for users to download processed single-cell RNA-seq data from [Zenodo](https://zenodo.org/), [CELLxGENE](https://cellxgene.cziscience.com/) and [Human Cell Atlas](https://www.humancellatlas.org/), including `RDS`, `RData`, `h5ad`, `h5`, `loom` objects. 
+`GEfetch2R` provides functions for users to download processed single-cell RNA-seq data from [Zenodo](https://zenodo.org/), [CELLxGENE](https://cellxgene.cziscience.com/) and [Human Cell Atlas](https://www.humancellatlas.org/), including `RDS`, `RData`, `h5ad`, `h5`, `loom` objects. 
 
 Until now, the public resources supported and the returned results:
 
@@ -559,7 +559,7 @@ Until now, the public resources supported and the returned results:
 
 ##### Extract metadata
 
-`scfetch` provides `ExtractZenodoMeta` to extract dataset metadata, including dataset title, description, available files and corresponding md5. Please note that when the dataset is restricted access, the returned dataframe will be empty.
+`GEfetch2R` provides `ExtractZenodoMeta` to extract dataset metadata, including dataset title, description, available files and corresponding md5. Please note that when the dataset is restricted access, the returned dataframe will be empty.
 
 ```r
 # single doi
@@ -593,7 +593,7 @@ The [CELLxGENE](https://cellxgene.cziscience.com/) is a web server contains **91
 
 ##### Show available datasets
 
-`scfetch` provides `ShowCELLxGENEDatasets` to extract dataset metadata, including dataset title, description, contact, organism, ethnicity, sex, tissue, disease, assay, suspension type, cell type, et al.
+`GEfetch2R` provides `ShowCELLxGENEDatasets` to extract dataset metadata, including dataset title, description, contact, organism, ethnicity, sex, tissue, disease, assay, suspension type, cell type, et al.
 
 ```r
 # all available datasets
@@ -604,7 +604,7 @@ all.cellxgene.datasets <- ShowCELLxGENEDatasets()
 
 ##### Summarise attributes
 
-`scfetch` provides `StatDBAttribute` to summary attributes of [CELLxGENE](https://cellxgene.cziscience.com/):
+`GEfetch2R` provides `StatDBAttribute` to summary attributes of [CELLxGENE](https://cellxgene.cziscience.com/):
 
 ```r
 StatDBAttribute(df = all.cellxgene.datasets, filter = c("organism", "sex"), database = "CELLxGENE")
@@ -614,7 +614,7 @@ StatDBAttribute(df = all.cellxgene.datasets, filter = c("organism", "sex"), data
 
 ##### Extract metadata
 
-`scfetch` provides `ExtractCELLxGENEMeta` to filter dataset metadata, the available values of attributes can be obtained with `StatDBAttribute` except **cell number**:
+`GEfetch2R` provides `ExtractCELLxGENEMeta` to filter dataset metadata, the available values of attributes can be obtained with `StatDBAttribute` except **cell number**:
 
 ```r
 # human 10x v2 and v3 datasets
@@ -644,7 +644,7 @@ ParseCELLxGENE(
 
 ### Format conversion
 
-There are many tools have been developed to process scRNA-seq data, such as [Scanpy](https://scanpy.readthedocs.io/en/stable/), [Seurat](https://satijalab.org/seurat/), [scran](https://bioconductor.org/packages/release/bioc/html/scran.html) and [Monocle](http://cole-trapnell-lab.github.io/monocle-release/). These tools have their own objects, such as `Anndata` of `Scanpy`, `SeuratObject` of `Seurat`, `SingleCellExperiment` of `scran` and `CellDataSet`/`cell_data_set` of `Monocle2`/`Monocle3`. There are also some file format designed for large omics datasets, such as [loom](http://loompy.org/). To perform a comprehensive scRNA-seq data analysis, we usually need to combine multiple tools, which means we need to perform object conversion frequently. To facilitate user analysis of scRNA-seq data, `scfetch` provides multiple functions to perform object conversion between widely used tools and formats. The object conversion implemented in `scfetch` has two main advantages: 
+There are many tools have been developed to process scRNA-seq data, such as [Scanpy](https://scanpy.readthedocs.io/en/stable/), [Seurat](https://satijalab.org/seurat/), [scran](https://bioconductor.org/packages/release/bioc/html/scran.html) and [Monocle](http://cole-trapnell-lab.github.io/monocle-release/). These tools have their own objects, such as `Anndata` of `Scanpy`, `SeuratObject` of `Seurat`, `SingleCellExperiment` of `scran` and `CellDataSet`/`cell_data_set` of `Monocle2`/`Monocle3`. There are also some file format designed for large omics datasets, such as [loom](http://loompy.org/). To perform a comprehensive scRNA-seq data analysis, we usually need to combine multiple tools, which means we need to perform object conversion frequently. To facilitate user analysis of scRNA-seq data, `GEfetch2R` provides multiple functions to perform object conversion between widely used tools and formats. The object conversion implemented in `GEfetch2R` has two main advantages: 
 
 * **one-step conversion between different objects**. There will be no conversion to intermediate objects, thus preventing unnecessary information loss.
 * **tools used for object conversion are developed by the team of the source/destination object as far as possible**. For example, we use `SeuratDisk` to convert SeuratObject to loom, use `zellkonverter` to perform conversion between `SingleCellExperiment` and `Anndata`. When there is no such tools, we use `sceasy` to perform conversion.
@@ -848,7 +848,7 @@ For any question, feature request or bug report please write an email to `songyb
 
 ## Code of Conduct
   
-Please note that the `scfetch` project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.
+Please note that the `GEfetch2R` project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.
 
 <br />
 

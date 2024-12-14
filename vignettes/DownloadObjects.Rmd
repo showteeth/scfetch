@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-`scfetch` provides functions for users to download processed single-cell RNA-seq data from [Zenodo](https://zenodo.org/), [CELLxGENE](https://cellxgene.cziscience.com/) and [Human Cell Atlas](https://www.humancellatlas.org/), including `RDS`, `RData`, `h5ad`, `h5`, `loom` objects. 
+`GEfetch2R` provides functions for users to download processed single-cell RNA-seq data from [Zenodo](https://zenodo.org/), [CELLxGENE](https://cellxgene.cziscience.com/) and [Human Cell Atlas](https://www.humancellatlas.org/), including `RDS`, `RData`, `h5ad`, `h5`, `loom` objects. 
 
 Until now, the public resources supported and the returned results:
 
@@ -53,11 +53,11 @@ Until now, the public resources supported and the returned results:
 
 ### Extract metadata
 
-`scfetch` provides `ExtractZenodoMeta` to extract dataset metadata, including dataset title, description, available files and corresponding md5. Please note that when the dataset is restricted access, the returned dataframe will be empty.
+`GEfetch2R` provides `ExtractZenodoMeta` to extract dataset metadata, including dataset title, description, available files and corresponding md5. Please note that when the dataset is restricted access, the returned dataframe will be empty.
 
 ```{r zenodo_meta}
 # library
-library(scfetch)
+library(GEfetch2R)
 
 # single doi
 zebrafish.df <- ExtractZenodoMeta(doi = "10.5281/zenodo.7243603")
@@ -96,7 +96,7 @@ The [CELLxGENE](https://cellxgene.cziscience.com/) is a web server contains **91
 
 ### Show available datasets
 
-`scfetch` provides `ShowCELLxGENEDatasets` to extract dataset metadata, including dataset title, description, contact, organism, ethnicity, sex, tissue, disease, assay, suspension type, cell type, et al.
+`GEfetch2R` provides `ShowCELLxGENEDatasets` to extract dataset metadata, including dataset title, description, contact, organism, ethnicity, sex, tissue, disease, assay, suspension type, cell type, et al.
 
 ```{r cellxgene_all}
 # all available datasets
@@ -107,7 +107,7 @@ all.cellxgene.datasets <- ShowCELLxGENEDatasets()
 
 ### Summary attributes
 
-`scfetch` provides `StatDBAttribute` to summary attributes of [CELLxGENE](https://cellxgene.cziscience.com/):
+`GEfetch2R` provides `StatDBAttribute` to summary attributes of [CELLxGENE](https://cellxgene.cziscience.com/):
 
 ```{r cellxgene_summary}
 StatDBAttribute(df = all.cellxgene.datasets, filter = c("organism", "sex"), database = "CELLxGENE")
@@ -117,7 +117,7 @@ StatDBAttribute(df = all.cellxgene.datasets, filter = c("organism", "sex"), data
 
 ### Extract metadata
 
-`scfetch` provides `ExtractCELLxGENEMeta` to filter dataset metadata, the available values of attributes can be obtained with `StatDBAttribute` except **cell number**:
+`GEfetch2R` provides `ExtractCELLxGENEMeta` to filter dataset metadata, the available values of attributes can be obtained with `StatDBAttribute` except **cell number**:
 
 ```{r cellxgene_meta}
 # human 10x v2 and v3 datasets
@@ -156,7 +156,7 @@ The [Human Cell Atlas](https://www.humancellatlas.org/) aims to map every cell t
 
 ### Show available datasets
 
-`scfetch` provides `ShowHCAProjects` to extract detailed project metadata, including project title, description, organism, sex, organ/organPart, disease, assay, preservation method, sample type, suspension type, cell type, development stage, et al.
+`GEfetch2R` provides `ShowHCAProjects` to extract detailed project metadata, including project title, description, organism, sex, organ/organPart, disease, assay, preservation method, sample type, suspension type, cell type, development stage, et al.
 
 There are **397 unique projects** under *five different catalogs (`dcp29`, `dcp30`, `dcp1`, `lm2`, `lm3`)*:
 
@@ -169,7 +169,7 @@ head(all.hca.projects)
 
 ### Summary attributes
 
-`scfetch` provides `StatDBAttribute` to summary attributes of [Human Cell Atlas](https://www.humancellatlas.org/):
+`GEfetch2R` provides `StatDBAttribute` to summary attributes of [Human Cell Atlas](https://www.humancellatlas.org/):
 
 ```{r hca_summary}
 StatDBAttribute(df = all.hca.projects, filter = c("organism", "sex"), database = "HCA")
@@ -179,7 +179,7 @@ StatDBAttribute(df = all.hca.projects, filter = c("organism", "sex"), database =
 
 ### Extract metadata
 
-`scfetch` provides `ExtractHCAMeta` to filter projects metadata, the available values of attributes can be obtained with `StatDBAttribute` except **cell number**:
+`GEfetch2R` provides `ExtractHCAMeta` to filter projects metadata, the available values of attributes can be obtained with `StatDBAttribute` except **cell number**:
 
 ```{r hca_meta}
 # human 10x v2 and v3 datasets

@@ -1,4 +1,4 @@
-# scfetch 0.7.0
+# GEfetch2R 0.7.0
 
 ## New features
 * Added `DownloadFastq` to download FASTQ files directly from ENA.
@@ -14,7 +14,7 @@
 -------------------
 
 
-# scfetch 0.6.1
+# GEfetch2R 0.6.1
 
 * Fix bugs in `LoadRDS2Seurat`.
 * Give a message when there is no file with `file.ext` in `ParseHCA`, `ParseHCA`, `ExtractZenodoMeta`, `ParseZenodo`.
@@ -28,7 +28,7 @@
 
 -------------------
 
-# scfetch 0.6.0
+# GEfetch2R 0.6.0
 
 ## New features
 * Added `RunCellRanger` to run CellRanger on downloaded FASTQ files.
@@ -49,14 +49,14 @@
 
 -------------------
 
-# scfetch 0.5.1
+# GEfetch2R 0.5.1
 
 * Create output directory automatically.
 * CELLxGENE new [API](https://api.cellxgene.cziscience.com/curation/ui/).
 
 -------------------
 
-# scfetch 0.5.0
+# GEfetch2R 0.5.0
 
 ## New features
 * Added `ExtractCELLxGENEMeta` to extract metadata of CELLxGENE datasets.
@@ -86,7 +86,7 @@
 
 -------------------
 
-# scfetch 0.4.0
+# GEfetch2R 0.4.0
 
 ## New features
 * Added `ExportSeurat` to convert SeuratObject to other scRNA-seq formats.
@@ -110,7 +110,7 @@
 
 -------------------
 
-# scfetch 0.3.0
+# GEfetch2R 0.3.0
 
 ## New features
 * Added `ExtractRun` to extract run number from GEO.
@@ -126,7 +126,7 @@
 
 -------------------
 
-# scfetch 0.2.0
+# GEfetch2R 0.2.0
 
 ## New features
 * Provided APIs for GEO.
@@ -150,6 +150,6 @@
 
 -------------------
 
-# scfetch 0.1.0
+# GEfetch2R 0.1.0
 
 * Provided APIs for Zenodo, PanglaoDB and UCSC Cell Browser.

@@ -1,4 +1,4 @@
-Package: scfetch
+Package: GEfetch2R
 Type: Package
 Title: Access and Format Single-Cell RNA-Seq Datasets from Public Resources 
 Version: 0.7.0
@@ -8,7 +8,7 @@ Authors@R:
            role = c("aut", "cre"),
            email = "songyb0519@gmail.com")
 Maintainer: Yabing Song <songyb0519@gmail.com>
-Description: The goal of 'scfetch' is to access and format single-cell RNA-seq datasets. It can be used to download single-cell RNA-seq
+Description: The goal of 'GEfetch2R' is to access and format single-cell RNA-seq datasets. It can be used to download single-cell RNA-seq
     datasets from widely used public resources, including GEO <https://www.ncbi.nlm.nih.gov/geo/>, Zenodo <https://zenodo.org/>, 
     CELLxGENE <https://cellxgene.cziscience.com/>, Human Cell Atlas <https://www.humancellatlas.org/>, PanglaoDB <https://panglaodb.se/index.html> 
     and UCSC Cell Browser <https://cells.ucsc.edu/>. And, it can also be used to perform object conversion between SeuratObject <https://satijalab.org/seurat/>, 
@@ -61,7 +61,7 @@ Suggests:
     cellxgene.census
 VignetteBuilder: knitr
 Additional_repositories: https://showteeth.github.io/drat/
-URL: https://github.com/showteeth/scfetch
-BugReports: https://github.com/showteeth/scfetch/issues
+URL: https://github.com/showteeth/GEfetch2R
+BugReports: https://github.com/showteeth/GEfetch2R/issues
 Depends: 
     R (>= 2.10)
