@@ -1,3 +1,15 @@
+# GEfetch2R 0.7.1
+
+## New features
+* Added `Seu2AD`/`SCE2AD`/`AD2Seu`/`AD2SCE` for benchmark (data IO).
+
+-------------------
+
+## Minor changes
+* Added `timeout` in `ShowCBDatasets`.
+
+-------------------
+
 # GEfetch2R 0.7.0
 
 ## New features

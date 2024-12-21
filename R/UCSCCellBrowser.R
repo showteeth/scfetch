@@ -5,6 +5,7 @@
 #' @param update Logical value, whther to update local datasets json. Default: FALSE. For the first time, you should set \code{lazy} TRUE and
 #' \code{update} TRUE to save json files.
 #' @param quiet Logical value, whether to show downloading progress. Default: FALSE (show).
+#' @param timeout Timeout for data access. Default: 3600.
 #'
 #' @return Dataframe contains all available datasets.
 #' @importFrom magrittr %>%
@@ -22,7 +23,14 @@
 #' # second time run (lazy mode), need users to provide json folder
 #' ucsc.cb.samples <- ShowCBDatasets(lazy = TRUE, update = FALSE)
 #' }
-ShowCBDatasets <- function(lazy = TRUE, json.folder = NULL, update = FALSE, quiet = FALSE) {
+ShowCBDatasets <- function(lazy = TRUE, json.folder = NULL, update = FALSE, quiet = FALSE, timeout = 3600) {
+  # get current timeout
+  if (!is.null(timeout)) {
+    message("Change Timeout to: ", timeout)
+    env.timeout <- getOption("timeout")
+    on.exit(options(timeout = env.timeout)) # restore timeout
+    options(timeout = timeout)
+  }
   # parse all datasets json
   if (lazy) {
     if (is.null(json.folder)) {

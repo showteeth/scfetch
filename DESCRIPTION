@@ -1,7 +1,7 @@
 Package: GEfetch2R
 Type: Package
 Title: Access and Format Single-Cell RNA-Seq Datasets from Public Resources 
-Version: 0.7.0
+Version: 0.7.1
 Authors@R: 
     person(given = "Yabing",
            family = "Song",
@@ -58,7 +58,10 @@ Suggests:
     SeuratWrappers,
     zellkonverter,
     GEOfastq,
-    cellxgene.census
+    cellxgene.census,
+    dior,
+    hdf5r,
+    schard
 VignetteBuilder: knitr
 Additional_repositories: https://showteeth.github.io/drat/
 URL: https://github.com/showteeth/GEfetch2R
