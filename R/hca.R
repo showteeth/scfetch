@@ -396,7 +396,7 @@ ParseHCA <- function(meta, file.ext = c("rds", "rdata", "h5", "h5ad", "loom", "t
           unzip.log <- sapply(
             rds.gz.files,
             function(x) {
-              GEOquery::gunzip(x, overwrite = TRUE)
+              Gunzip(x, overwrite = TRUE)
             }
           )
         }

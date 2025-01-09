@@ -21,7 +21,7 @@
 #' @return If \code{data.type} is "sc", return Seurat object (if \code{merge} is TRUE) or Seurat object list (if \code{merge} is FALSE).
 #' If \code{data.type} is "bulk", return DESeqDataSet.
 #' @importFrom magrittr %>%
-#' @importFrom GEOquery getGEO getGEOSuppFiles gunzip
+#' @importFrom GEOquery getGEO getGEOSuppFiles
 #' @importFrom Biobase annotation experimentData pData phenoData notes sampleNames exprs
 #' @importFrom tools file_ext
 #' @importFrom utils untar
@@ -310,7 +310,7 @@ ExtractGEOExpSupp <- function(acce, timeout = 3600, supp.idx = 1) {
   file.ext <- tools::file_ext(supp.file.path)
   if (file.ext == "gz") {
     # gunzip file
-    GEOquery::gunzip(supp.file.path, overwrite = TRUE)
+    Gunzip(supp.file.path, overwrite = TRUE)
     supp.file.path <- gsub(pattern = "\\.gz", replacement = "", x = supp.file.path)
     # update file extension
     file.ext <- tools::file_ext(supp.file.path)
@@ -322,7 +322,7 @@ ExtractGEOExpSupp <- function(acce, timeout = 3600, supp.idx = 1) {
     unzip.log <- sapply(
       list.files(file.path(tmp.folder, acce, "sample"), full.names = TRUE, pattern = "gz$"),
       function(x) {
-        GEOquery::gunzip(x, overwrite = TRUE)
+        Gunzip(x, overwrite = TRUE)
       }
     )
     # read files
@@ -400,7 +400,7 @@ ExtractGEOExpSupp10x <- function(acce, supp.idx = 1, timeout = 3600,
   file.ext <- tools::file_ext(supp.file.path)
   if (file.ext == "gz") {
     # gunzip file
-    GEOquery::gunzip(supp.file.path, overwrite = TRUE)
+    Gunzip(supp.file.path, overwrite = TRUE)
     supp.file.path <- gsub(pattern = "\\.gz", replacement = "", x = supp.file.path)
     # update file extension
     file.ext <- tools::file_ext(supp.file.path)

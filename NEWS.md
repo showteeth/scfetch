@@ -7,6 +7,7 @@
 
 ## Minor changes
 * Added `timeout` in `ShowCBDatasets`.
+* Added `Gunzip` to deal with the removal of `gunzip` in package `GEOquery`.
 
 -------------------
 

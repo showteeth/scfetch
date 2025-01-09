@@ -838,3 +838,39 @@ DownloadMethod <- function(rn, url.vec, name.vec = NULL, out.folder = NULL, down
     }
   }
 }
+
+# gunzip a file
+# source: https://github.com/seandavi/GEOquery/blob/026c655561dbcf1b99551a8093642750c48ed038/R/getGEOfile.R
+Gunzip <- function(filename, destname = gsub("[.]gz$", "", filename), overwrite = FALSE, remove = TRUE, BFR.SIZE = 1e7) {
+  if (filename == destname) {
+    stop(sprintf("Argument 'filename' and 'destname' are identical: %s", filename))
+  }
+  if (!overwrite && file.exists(destname)) {
+    stop(sprintf("File already exists: %s", destname))
+  }
+
+  inn <- gzfile(filename, "rb")
+  on.exit(if (!is.null(inn)) close(inn))
+
+  out <- file(destname, "wb")
+  on.exit(close(out), add = TRUE)
+
+  nbytes <- 0
+  repeat {
+    bfr <- readBin(inn, what = raw(0), size = 1, n = BFR.SIZE)
+    n <- length(bfr)
+    if (n == 0) {
+      break
+    }
+    nbytes <- nbytes + n
+    writeBin(bfr, con = out, size = 1)
+  }
+
+  if (remove) {
+    close(inn)
+    inn <- NULL
+    file.remove(filename)
+  }
+
+  invisible(nbytes)
+}
