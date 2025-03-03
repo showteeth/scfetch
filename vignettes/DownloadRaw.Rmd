@@ -16,22 +16,34 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-A common situation is that we need to use a unified software version (e.g. CellRanger) to obtain the count matrix, in order to better integrate and compare multiple datasets. Here, we will use `GEfetch2R` to download fastq and bam files. With bam files, `GEfetch2R` also provides function for user to convert the bam to fastq.
+A common situation is that we need to use a unified software version (e.g. CellRanger) to obtain the count matrix, in order to better integrate and compare multiple datasets. Here, we will use `GEfetch2R` to download raw data (`sra/fastq/bam`). With `bam` files, `GEfetch2R` also provides function for user to convert the `bam` to `fastq` files.
+
+> `GEfetch2R` supports downloading raw data (`sra/fastq/bam`) from `SRA` and `ENA` with **GEO accessions**. In general, downloading raw data from ENA is much faster than SRA, because of `ascp` and **parallel** support.
+
+```{r echo=FALSE, results='hide',message=FALSE}
+library(GEfetch2R)
+load("/Volumes/soyabean/GEfetch2R/GEfetch2R_scrna-seq_download.RData")
+```
 
 <hr />
 
-## Download fastq
+## Download sra
 
-### Prepare run number
+### Extract all samples (runs)
 
-For fastq files stored in SRA, `GEfetch2R` can extract sample information and run number with GEO accession number or users can also provide a dataframe contains the run number of interested samples.
+For `fastq` files stored in `SRA/ENA`, `GEfetch2R` can extract sample information and run number with **GEO accessions** or users can also **provide a dataframe containing the run number of interested samples**.
 
 Extract all samples under `GSE130636` and the platform is `GPL20301` (use `platform = NULL` for all platforms):
-```{r prepare_run}
+```{r prepare_run, eval=FALSE}
 # library
 library(GEfetch2R)
-
 GSE130636.runs <- ExtractRun(acce = "GSE130636", platform = "GPL20301")
+# a small test
+GSE130636.runs <- GSE130636.runs[GSE130636.runs$run %in% c("SRR9004346", "SRR9004351"), ]
+```
+
+Show the sample information:
+```{r prepare_run_show}
 head(GSE130636.runs)
 ```
 
@@ -39,17 +51,38 @@ head(GSE130636.runs)
 
 ### Download sra
 
-With the dataframe contains gsm and run number, `GEfetch2R` will download sra files using `prefetch`. The returned result is a dataframe contains failed runs. If not `NULL`, users can re-run `DownloadSRA` by setting `gsm.df` to the returned result.
+With the dataframe contains gsm and run number, `GEfetch2R` will use `prefetch` to download `sra` files from `SRA` or using `ascp/download.file` to download `sra` files from `ENA`. The returned value is a dataframe contains failed runs. If not `NULL`, users can re-run `DownloadSRA` by setting `gsm.df` to the returned value.
 
+Download from `SRA`:
 ```{r dwonload_sra, eval=FALSE}
-# a small test
-GSE130636.runs <- GSE130636.runs[GSE130636.runs$run %in% c("SRR9004346", "SRR9004351"), ]
+
 # download
 GSE130636.down <- DownloadSRA(
   gsm.df = GSE130636.runs,
   prefetch.path = "/Users/soyabean/software/sratoolkit.3.0.6-mac64/bin/prefetch",
-  out.folder = "/Users/soyabean/Desktop/tmp/scdown/download_fastq"
+  out.folder = "/Volumes/soyabean/GEfetch2R/download_fastq"
 )
+# GSE130636.down is null or dataframe contains failed runs
+```
+
+Download from `ENA` (**parallel**):
+```{r dwonload_sra_ena, eval=FALSE}
+out.folder <- tempdir()
+# download from ENA using download.file
+GSE130636.down <- DownloadSRA(
+  gsm.df = GSE130636.runs, download.method = "download.file",
+  timeout = 3600, out.folder = "/path/to/download_fastq",
+  parallel = TRUE, use.cores = 2
+)
+
+# download from ENA using ascp
+GSE130636.down <- DownloadSRA(
+  gsm.df = GSE130636.runs, download.method = "ascp",
+  ascp.path = "~/.aspera/connect/bin/ascp", max.rate = "300m",
+  rename = TRUE, out.folder = "/path/to/download_fastq",
+  parallel = TRUE, use.cores = 2
+)
+
 # GSE130636.down is null or dataframe contains failed runs
 ```
 
@@ -57,50 +90,80 @@ The `out.folder` structure will be: `gsm_number/run_number`.
 
 <hr />
 
-### Split fastq
+## Download fastq
 
-After obtaining the sra files, `GEfetch2R` provides function `SplitSRA` to split sra files to fastq files using `parallel-fastq-dump` (parallel, fastest and gzip output), `fasterq-dump` (parallel, fast but unzipped output) and `fastq-dump` (slowest and gzip output).
+### Split sra to generate fastq
+
+
+After obtaining the `sra` files, `GEfetch2R` provides function `SplitSRA` to split `sra` files to fastq files using `parallel-fastq-dump` (**parallel, fastest and gzip output**), `fasterq-dump` (**parallel, fast but unzipped output**) and `fastq-dump` (**slowest and gzip output**).
 
 For fastqs generated with 10x Genomics, `SplitSRA` can identify read1, read2 and index files and format the read1 and read2 to 10x required format (`sample1_S1_L001_R1_001.fastq.gz` and `sample1_S1_L001_R2_001.fastq.gz`). In detail, the file with read length 26 or 28 is considered as read1, the files with read length 8 or 10 are considered as index files and the remain file is considered as read2. The read length rules is from [Sequencing Requirements for Single Cell 3'](https://www.10xgenomics.com/cn/support/single-cell-gene-expression/documentation/steps/sequencing/sequencing-requirements-for-single-cell-3) and [Sequencing Requirements for Single Cell V(D)J](https://www.10xgenomics.com/cn/support/single-cell-immune-profiling/documentation/steps/sequencing/sequencing-requirements-for-single-cell-v-d-j).
 
-The returned result is a vector of failed sra files. If not `NULL`, users can re-run `SplitSRA` by setting `sra.path` to the returned result.
+The returned value is a vector of failed `sra` files. If not `NULL`, users can re-run `SplitSRA` by setting `sra.path` to the returned value.
 
 ```{r split_sra, eval=FALSE}
 # parallel-fastq-dump requires sratools.path
 GSE130636.split <- SplitSRA(
-  sra.folder = "/Users/soyabean/Desktop/tmp/scdown/download_fastq",
+  sra.folder = "/Volumes/soyabean/GEfetch2R/download_fastq",
   fastq.type = "10x",
   split.cmd.path = "/Applications/anaconda3/bin/parallel-fastq-dump",
-  sratools.path = "/usr/local/bin", split.cmd.threads = 4
+  sratools.path = "/usr/local/bin", split.cmd.paras = "--gzip",
+  split.cmd.threads = 4
 )
 ```
 
 The final `out.folder` structure will be: 
 ```{bash split_structure}
-tree /Users/soyabean/Desktop/tmp/scdown/download_fastq
+tree /Volumes/soyabean/GEfetch2R/download_fastq
+```
+
+<hr />
+
+### Download fastq directly from ENA
+
+Alternatively, `GEfetch2R` provides function `DownloadFastq` to download `fastq` files directly from `ENA` (**parallel, faster than the above method**). The returned value is a dataframe contains failed runs. If not `NULL`, users can re-run `DownloadFastq` by setting `gsm.df` to the returned value.
+
+```{r download_fastq_ena, eval=FALSE}
+# use download.file
+GSE130636.down.fastq <- DownloadFastq(
+  gsm.df = GSE130636.runs, out.folder = "/path/to/download_fastq",
+  download.method = "download.file",
+  parallel = TRUE, use.cores = 2
+)
+
+# use ascp
+GSE130636.down.fastq <- DownloadFastq(
+  gsm.df = GSE130636.runs, out.folder = "/path/to/download_fastq",
+  download.method = "ascp", ascp.path = "~/.aspera/connect/bin/ascp", max.rate = "300m",
+  parallel = TRUE, use.cores = 2
+)
 ```
 
 <hr />
 
 ## Download bam
 
-### Prepare run number
+### Extract all samples (runs)
 
-`GEfetch2R` can extract sample information and run number with GEO accession number or users can also provide a dataframe contains the run number of interested samples.
+`GEfetch2R` can extract sample information and run number with **GEO accessions** or users can also **provide a dataframe containing the run number of interested samples**.
 
-```{r prepare_run_bam}
+```{r prepare_run_bam, eval=FALSE}
 GSE138266.runs <- ExtractRun(acce = "GSE138266", platform = "GPL18573")
+```
+
+Show the sample information:
+```{r prepare_run_bam_show}
 head(GSE138266.runs)
 ```
 
 <hr />
 
-### Download bam
+### Download bam from SRA
 
-With the dataframe contains gsm and run number, `GEfetch2R` provides `DownloadBam` to download bam files using `prefetch`. It suooorts 10x generated bam files and normal bam files.
+With the dataframe contains gsm and run number, `GEfetch2R` provides `DownloadBam` to download `bam` files using `prefetch`. It supports 10x generated `bam` files and normal `bam` files.
 
-* 10x generated bam: While bam files generated from 10x softwares (e.g. CellRanger) contain custom tags which are not kept when using default parameters of `prefetch`, `GEfetch2R` adds `--type TenX` to make sure the downloaded bam files contain these tags. 
-* normal bam: For normal bam files, `DownloadBam` will download sra files first and then convert sra files to bam files with `sam-dump`. After testing the efficiency of `prefetch` + `sam-dump` and `sam-dump`, the former is much faster than the latter (52G sra and 72G bam files):
+* **10x generated bam**: While `bam` files generated from 10x softwares (e.g. CellRanger) contain custom tags which are not kept when using default parameters of `prefetch`, `GEfetch2R` adds `--type TenX` to make sure the downloaded `bam` files contain these tags. 
+* **normal bam**: For normal bam files, `DownloadBam` will download `sra` files first and then convert `sra` files to `bam` files with `sam-dump`. After testing the efficiency of `prefetch` + `sam-dump` and `sam-dump`, the former is much faster than the latter (52G `sra` and 72G `bam` files):
 ```{bash test_downbam_efficiency}
 # # use prefetch to download sra file
 # prefetch -X 60G SRR1976036
@@ -120,7 +183,7 @@ With the dataframe contains gsm and run number, `GEfetch2R` provides `DownloadBa
 # # more than 36hrs only get ~3G bam files, too slow
 ```
 
-The returned result is a dataframe containing failed runs (either failed to download sra files or failed to convert to bam files for normal bam; failed to download bam files for 10x generated bam). If not `NULL`, users can re-run `DownloadBam` by setting `gsm.df` to the returned result. The following is an example to download 10x generated bam file:
+The returned value is a dataframe containing failed runs (either failed to download `sra` files or failed to convert to `bam` files for normal `bam`; failed to download `bam` files for 10x generated `bam`). If not `NULL`, users can re-run `DownloadBam` by setting `gsm.df` to the returned value. The following is an example to download 10x generated `bam` file:
 
 ```{r dwonload_bam, eval=FALSE}
 # a small test
@@ -129,7 +192,7 @@ GSE138266.runs <- GSE138266.runs[GSE138266.runs$run %in% c("SRR10211566"), ]
 GSE138266.down <- DownloadBam(
   gsm.df = GSE138266.runs,
   prefetch.path = "/Users/soyabean/software/sratoolkit.3.0.6-mac64/bin/prefetch",
-  out.folder = "/Users/soyabean/Desktop/tmp/scdown/download_bam"
+  out.folder = "/Volumes/soyabean/GEfetch2R/download_bam"
 )
 # GSE138266.down is null or dataframe contains failed runs
 ```
@@ -138,15 +201,37 @@ The `out.folder` structure will be: `gsm_number/run_number`.
 
 <hr />
 
+### Download bam from ENA
+
+The returned value is a dataframe containing failed runs. If not `NULL`, users can re-run `DownloadBam` by setting `gsm.df` to the returned value. The following is an example to download 10x generated `bam` file from `ENA`:
+```{r dwonload_bam_ena, eval=FALSE}
+# download.file
+GSE138266.down <- DownloadBam(
+  gsm.df = GSE138266.runs, download.method = "download.file",
+  timeout = 3600, out.folder = "/path/to/download_bam",
+  parallel = TRUE, use.cores = 2
+)
+# ascp
+GSE138266.down <- DownloadBam(
+  gsm.df = GSE138266.runs, download.method = "ascp",
+  ascp.path = "~/.aspera/connect/bin/ascp", max.rate = "300m",
+  rename = TRUE, out.folder = "/path/to/download_bam",
+  parallel = TRUE, use.cores = 2
+)
+```
+
+<hr />
+
+
 ### Convert bam to fastq
 
-With downloaded bam files, `GEfetch2R` provides function `Bam2Fastq` to convert bam files to fastq files. For bam files generated from 10x softwares, `Bam2Fastq` utilizes `bamtofastq` tool developed by 10x Genomics.
+With downloaded `bam` files, `GEfetch2R` provides function `Bam2Fastq` to convert `bam` files to `fastq` files. For `bam` files generated from 10x softwares, `Bam2Fastq` utilizes `bamtofastq` tool developed by 10x Genomics, otherwise, `samtools` is utilized.
 
-The returned result is a vector of bam files failed to convert to fastq files. If not `NULL`, users can re-run `Bam2Fastq` by setting `bam.path` to the returned result.
+The returned value is a vector of `bam` files failed to convert to `fastq` files. If not `NULL`, users can re-run `Bam2Fastq` by setting `bam.path` to the returned value.
 
 ```{r convert_bam_fastq, eval=FALSE}
 GSE138266.convert <- Bam2Fastq(
-  bam.folder = "/Users/soyabean/Desktop/tmp/scdown/download_bam",
+  bam.folder = "/Volumes/soyabean/GEfetch2R/download_bam", bam.type = "10x",
   bamtofastq.path = "/Users/soyabean/software/bamtofastq_macos",
   bamtofastq.paras = "--nthreads 4"
 )
@@ -154,12 +239,37 @@ GSE138266.convert <- Bam2Fastq(
 
 The final `out.folder` structure will be: 
 ```{bash convert_structure}
-tree /Users/soyabean/Desktop/tmp/scdown/download_bam
+tree /Volumes/soyabean/GEfetch2R/download_bam
 ```
 
 <hr />
 
+## Load fastq to R
 
+With downloaded/converted `fastq` files, `GEfetch2R` provides function `Fastq2R` to align them to reference genome with [CellRanger](https://www.10xgenomics.com/cn/support/software/cell-ranger/latest/tutorials/cr-tutorial-ct) (10x-generated `fastq` files) or [STAR](https://github.com/alexdobin/STAR/tree/master) (Smart-seq2 or bulk RNA-seq data), and load the output to `Seurat` (10x-generated `fastq` files) or `DESEq2` (Smart-seq2 or bulk RNA-seq data).
 
+Here, we use the downloaded `fastq` files as an example. There are two runs (`SRR9004346` and `SRR9004351`) corresponding to sample name `GSM3745993`. When running `CellRanger`, we will process `SRR9004346` and `SRR9004351` as a single merged sample by specifying `--sample=SRR9004346,SRR9004351`:
+```{r load_fastq_toR, eval=FALSE}
+# run CellRanger (10x Genomics)
+seu <- Fastq2R(
+  sample.dir = "/Volumes/soyabean/GEfetch2R/download_fastq",
+  ref = "/path/to/10x/ref",
+  method = "CellRanger",
+  out.folder = "/path/to/results",
+  st.path = "/path/to/cellranger",
+  st.paras = "--chemistry=auto --jobmode=local"
+)
+# run STAR (Smart-seq2 or bulk RNA-seq)
+deobj <- Fastq2R(
+  sample.dir = "/path/to/fastq",
+  ref = "/path/to/star/ref",
+  method = "STAR",
+  out.folder = "/path/to/results",
+  st.path = "/path/to/STAR",
+  st.paras = "--outBAMsortingThreadN 4 --twopassMode None"
+)
+```
 
+Since `fastq` files from Smart-seq2 or bulk RNA-seq data are usually included in a single run, the `sample.dir` should specify the parent directory of run (`sample.dir = "/Volumes/soyabean/GEfetch2R/download_fastq/GSM3745993"` in the above example).
 
+<hr />

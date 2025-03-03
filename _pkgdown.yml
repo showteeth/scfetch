@@ -12,13 +12,13 @@ navbar:
       href: index.html
     - text: Articles
       menu:
-      - text: Download fastq/bam files
+      - text: Download raw data (sra/fastq/bam)
         href: articles/DownloadRaw.html
-      - text: Download count matrices
+      - text: Download count matrix and annotation
         href: articles/DownloadMatrices.html
-      - text: Download processed objects
+      - text: Download processed object
         href: articles/DownloadObjects.html
-      - text: Convert formats between objects
+      - text: Format conversion and benchmark
         href: articles/ObjectConversion.html
     - text: Reference
       href: reference/index.html

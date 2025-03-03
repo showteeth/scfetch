@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">GEfetch2R</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -27,10 +27,10 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/DownloadRaw.html">Download fastq/bam files</a>
-    <a class="dropdown-item" href="../articles/DownloadMatrices.html">Download count matrices</a>
-    <a class="dropdown-item" href="../articles/DownloadObjects.html">Download processed objects</a>
-    <a class="dropdown-item" href="../articles/ObjectConversion.html">Convert formats between objects</a>
+    <a class="dropdown-item" href="../articles/DownloadRaw.html">Download raw data (sra/fastq/bam)</a>
+    <a class="dropdown-item" href="../articles/DownloadMatrices.html">Download count matrix and annotation</a>
+    <a class="dropdown-item" href="../articles/DownloadObjects.html">Download processed object</a>
+    <a class="dropdown-item" href="../articles/ObjectConversion.html">Format conversion and benchmark</a>
   </div>
 </li>
 <li class="nav-item">
@@ -56,11 +56,74 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Changelog</h1>
-      
+      <small>Source: <a href="https://github.com/showteeth/GEfetch2R/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.5.0" id="GEfetch2R-050">GEfetch2R 0.5.0<a class="anchor" aria-label="anchor" href="#GEfetch2R-050"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.7.1" id="gefetch2r-071">GEfetch2R 0.7.1<a class="anchor" aria-label="anchor" href="#gefetch2r-071"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-7-1">New features<a class="anchor" aria-label="anchor" href="#new-features-0-7-1"></a></h3>
+<ul><li>Added <code>Seu2AD</code>/<code>SCE2AD</code>/<code>AD2Seu</code>/<code>AD2SCE</code> for benchmark (data IO).</li>
+</ul><hr></div>
+<div class="section level3">
+<h3 id="minor-changes-0-7-1">Minor changes<a class="anchor" aria-label="anchor" href="#minor-changes-0-7-1"></a></h3>
+<ul><li>Added <code>timeout</code> in <code>ShowCBDatasets</code>.</li>
+<li>Added <code>Gunzip</code> to deal with the removal of <code>gunzip</code> in package <code>GEOquery</code>.</li>
+</ul><hr></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.7.0" id="gefetch2r-070">GEfetch2R 0.7.0<a class="anchor" aria-label="anchor" href="#gefetch2r-070"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-7-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-7-0"></a></h3>
+<ul><li>Added <code>DownloadFastq</code> to download FASTQ files directly from ENA.</li>
+<li>Updated <code>DownloadSRA</code> to download sra files directly from ENA.</li>
+<li>Updated <code>DownloadBam</code> to download bam files directly from ENA.</li>
+</ul><hr></div>
+<div class="section level3">
+<h3 id="minor-changes-0-7-0">Minor changes<a class="anchor" aria-label="anchor" href="#minor-changes-0-7-0"></a></h3>
+<ul><li>Updated <code>DownloadSRA</code>, <code>DownloadFastq</code>, <code>DownloadBam</code> to keep the same file structure.</li>
+<li>Updated <code>DownloadFastq</code> to format the fastqs to 10x format.</li>
+</ul><hr></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.6.1" id="gefetch2r-061">GEfetch2R 0.6.1<a class="anchor" aria-label="anchor" href="#gefetch2r-061"></a></h2>
+<ul><li>Fix bugs in <code>LoadRDS2Seurat</code>.</li>
+<li>Give a message when there is no file with <code>file.ext</code> in <code>ParseHCA</code>, <code>ParseHCA</code>, <code>ExtractZenodoMeta</code>, <code>ParseZenodo</code>.</li>
+<li>Return SeuratObject in <code>ParseHCA</code>.</li>
+<li>Fix bug in <code>Load2Seurat</code>.</li>
+<li>Support <code>pigz</code> in <code>Bam2Fastq</code>.</li>
+<li>Return full dataframe in <code>ExtractRun</code>.</li>
+<li>Fix bug in <code>ParseCELLxGENE</code>, <code>ParseHCA</code>.</li>
+<li>Add <code>use.cores</code> in <code>ParseCELLxGENE</code>, <code>ParseHCA</code>, <code>ParseZenodo</code>.</li>
+<li>Fix bug in <code>ExtractGEOMeta</code>.</li>
+</ul><hr></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.6.0" id="gefetch2r-060">GEfetch2R 0.6.0<a class="anchor" aria-label="anchor" href="#gefetch2r-060"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-6-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-6-0"></a></h3>
+<ul><li>Added <code>RunCellRanger</code> to run CellRanger on downloaded FASTQ files.</li>
+<li>Added <code>RunSTAR</code> to run STAR on downloaded FASTQ files.</li>
+<li>Added <code>Fastq2R</code> to pipe FASTQ files to <code>SeuratObject</code> and <code>DESeqDataSet</code>.</li>
+<li>Updated <code>StatDBAttribute</code> to support <code>cellxgene.census</code>.</li>
+<li>Updated <code>ParseCELLxGENE</code> to support <code>cellxgene.census</code> and return SeuratObject.</li>
+<li>Updated <code>ParseCBDatasets</code> to support subset.</li>
+</ul><hr></div>
+<div class="section level3">
+<h3 id="minor-changes-0-6-0">Minor changes<a class="anchor" aria-label="anchor" href="#minor-changes-0-6-0"></a></h3>
+<ul><li>Return <code>DESeqDataSet</code> when <code>data.type</code> is bulk in <code>ParseGEO</code>.</li>
+<li>Support summarising multiple attributes in <code>StatDBAttribute</code>.</li>
+<li>Fix bugs in <code>mergeExperiments</code>.</li>
+<li>Fix bugs in <code>ParseHCA</code> (no file with extension specified by <code>file.ext</code>).</li>
+<li>Optimize <code>ParseHCA</code> to return metadata of downloaded files.</li>
+</ul><hr></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.5.1" id="gefetch2r-051">GEfetch2R 0.5.1<a class="anchor" aria-label="anchor" href="#gefetch2r-051"></a></h2>
+<ul><li>Create output directory automatically.</li>
+<li>CELLxGENE new <a href="https://api.cellxgene.cziscience.com/curation/ui/" class="external-link">API</a>.</li>
+</ul><hr></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.5.0" id="gefetch2r-050">GEfetch2R 0.5.0<a class="anchor" aria-label="anchor" href="#gefetch2r-050"></a></h2>
 <div class="section level3">
 <h3 id="new-features-0-5-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-5-0"></a></h3>
 <ul><li>Added <code>ExtractCELLxGENEMeta</code> to extract metadata of CELLxGENE datasets.</li>
@@ -70,6 +133,7 @@
 <li>Added <code>ShowCELLxGENEDatasets</code> to show all available CELLxGENE datasets.</li>
 <li>Added <code>StatDBAttribute</code>to stat database attributes.</li>
 <li>Added <code>ParseHCA</code> to download objects from Human Cell Atlas.</li>
+<li>docker image added.</li>
 </ul><hr></div>
 <div class="section level3">
 <h3 id="minor-changes-0-5-0">Minor changes<a class="anchor" aria-label="anchor" href="#minor-changes-0-5-0"></a></h3>
@@ -78,10 +142,17 @@
 <li>Added filters to <code>ExtractHCAMeta</code>.</li>
 <li>Added <code>catalog</code> in <code>ShowHCAProjects</code>.</li>
 <li>Fixed bug in <code>ParseCELLxGENE</code> and returned failed dataframe when downloading error.</li>
+<li>Fixed bug in <code>ImportSeurat</code>.</li>
+<li>Fixed bug in <code>ExportSeurat</code>.</li>
+<li>Resolved installation.</li>
+<li>Fixed bug in <code>ExtractZenodoMeta</code> (API changed).</li>
+<li>Fixed bug in <code>ShowCBDatasets</code> (added <code>--no-check-certificate</code> when downloading json files).</li>
+<li>Fixed bug in <code>ShowCELLxGENEDatasets</code>.</li>
+<li>Supported GEO of 10x (separate files).</li>
 </ul><hr></div>
 </div>
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.4.0" id="GEfetch2R-040">GEfetch2R 0.4.0<a class="anchor" aria-label="anchor" href="#GEfetch2R-040"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.4.0" id="gefetch2r-040">GEfetch2R 0.4.0<a class="anchor" aria-label="anchor" href="#gefetch2r-040"></a></h2>
 <div class="section level3">
 <h3 id="new-features-0-4-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-4-0"></a></h3>
 <ul><li>Added <code>ExportSeurat</code> to convert SeuratObject to other scRNA-seq formats.</li>
@@ -106,7 +177,7 @@
 </ul><hr></div>
 </div>
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.3.0" id="GEfetch2R-030">GEfetch2R 0.3.0<a class="anchor" aria-label="anchor" href="#GEfetch2R-030"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.3.0" id="gefetch2r-030">GEfetch2R 0.3.0<a class="anchor" aria-label="anchor" href="#gefetch2r-030"></a></h2>
 <div class="section level3">
 <h3 id="new-features-0-3-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-3-0"></a></h3>
 <ul><li>Added <code>ExtractRun</code> to extract run number from GEO.</li>
@@ -121,7 +192,7 @@
 </ul><hr></div>
 </div>
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.2.0" id="GEfetch2R-020">GEfetch2R 0.2.0<a class="anchor" aria-label="anchor" href="#GEfetch2R-020"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.2.0" id="gefetch2r-020">GEfetch2R 0.2.0<a class="anchor" aria-label="anchor" href="#gefetch2r-020"></a></h2>
 <div class="section level3">
 <h3 id="new-features-0-2-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-2-0"></a></h3>
 <ul><li>Provided APIs for GEO.</li>
@@ -145,7 +216,7 @@
 </ul><hr></div>
 </div>
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.1.0" id="GEfetch2R-010">GEfetch2R 0.1.0<a class="anchor" aria-label="anchor" href="#GEfetch2R-010"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.1.0" id="gefetch2r-010">GEfetch2R 0.1.0<a class="anchor" aria-label="anchor" href="#gefetch2r-010"></a></h2>
 <ul><li>Provided APIs for Zenodo, PanglaoDB and UCSC Cell Browser.</li>
 </ul></div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

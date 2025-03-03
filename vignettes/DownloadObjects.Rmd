@@ -12,7 +12,12 @@ knitr::opts_chunk$set(echo = TRUE)
 
 `GEfetch2R` provides functions for users to download processed single-cell RNA-seq data from [Zenodo](https://zenodo.org/), [CELLxGENE](https://cellxgene.cziscience.com/) and [Human Cell Atlas](https://www.humancellatlas.org/), including `RDS`, `RData`, `h5ad`, `h5`, `loom` objects. 
 
-Until now, the public resources supported and the returned results:
+```{r echo=FALSE, results='hide',message=FALSE}
+library(GEfetch2R)
+load("/Volumes/soyabean/GEfetch2R/GEfetch2R_scrna-seq_download.RData")
+```
+
+Until now, the public resources supported and the returned values:
 
 <table>
 <thead>
@@ -20,7 +25,7 @@ Until now, the public resources supported and the returned results:
     <th>Resources</th>
     <th>URL</th>
     <th>Download Type</th>
-    <th>Returned results</th>
+    <th>Returned values</th>
   </tr>
 </thead>
 <tbody>
@@ -28,19 +33,19 @@ Until now, the public resources supported and the returned results:
     <td>Zenodo</td>
     <td>https://zenodo.org/</td>
     <td>count matrix, rds, rdata, h5ad, et al.</td>
-    <td>NULL or failed datasets</td>
+    <td>SeuratObject(rds) or failed datasets</td>
   </tr>
   <tr>
     <td>CELLxGENE</td>
     <td>https://cellxgene.cziscience.com/</td>
     <td>rds, h5ad</td>
-    <td>NULL or failed datasets</td>
+    <td>SeuratObject(rds) or failed datasets</td>
   </tr>
   <tr>
     <td>Human Cell Atlas</td>
     <td>https://www.humancellatlas.org/</td>
     <td>rds, rdata, h5, h5ad, loom</td>
-    <td>NULL or failed projects</td>
+    <td>SeuratObject(rds) or failed projects</td>
   </tr>
 </tbody>
 </table>
@@ -55,52 +60,79 @@ Until now, the public resources supported and the returned results:
 
 `GEfetch2R` provides `ExtractZenodoMeta` to extract dataset metadata, including dataset title, description, available files and corresponding md5. Please note that when the dataset is restricted access, the returned dataframe will be empty.
 
-```{r zenodo_meta}
+```{r zenodo_meta, eval=FALSE}
 # library
 library(GEfetch2R)
 
 # single doi
 zebrafish.df <- ExtractZenodoMeta(doi = "10.5281/zenodo.7243603")
-head(zebrafish.df)
-
 # vector dois
 multi.dois <- ExtractZenodoMeta(doi = c("1111", "10.5281/zenodo.7243603", "10.5281/zenodo.7244441"))
-head(multi.dois)
+```
+
+Show the metadata:
+```{r zenodo_meta_show}
+# single doi
+zebrafish.df
+# vector dois
+multi.dois
 ```
 
 <hr />
 
-### Download object
+### Download object and load to R
 
 After manually check the extracted metadata, users can **download the specified objects** with `ParseZenodo`. The downloaded objects are controlled by `file.ext` and **the provided object formats should be in lower case (e.g. rds/rdata/h5ad).**
 
-The returned result is a dataframe containing failed objects. If not `NULL`, users can re-run `ParseZenodo` by setting `doi.df` to the returned result.
+The returned value is a dataframe containing failed objects or a `SeuratObject` (if `file.ext` is `rds`). If dataframe, users can re-run `ParseZenodo` by setting `doi.df` to the returned value.
 
 ```{r zenodo_parse, eval=FALSE}
+# download objects
 multi.dois.parse <- ParseZenodo(
   doi = c("1111", "10.5281/zenodo.7243603", "10.5281/zenodo.7244441"),
-  file.ext = c("rdata", "rds"), out.folder = "/Users/soyabean/Desktop/tmp/scdown/download_zenodo"
+  file.ext = c("rdata"),
+  out.folder = "/Volumes/soyabean/GEfetch2R/download_zenodo"
+)
+
+# return SeuratObject
+sinle.doi.parse.seu <- ParseZenodo(
+  doi = "10.5281/zenodo.8011282",
+  file.ext = c("rds"), return.seu = TRUE,
+  out.folder = "/Volumes/soyabean/GEfetch2R/download_zenodo"
 )
 ```
 
+Show the returned `SeuratObject`:
+```{r zenodo_parse_show}
+sinle.doi.parse.seu
+```
+
+
 The structure of downloaded objects:
 ```{bash zenodo_parse_structure}
-tree /Users/soyabean/Desktop/tmp/scdown/download_zenodo
+tree /Volumes/soyabean/GEfetch2R/download_zenodo
 ```
 
 <hr />
 
 ## CELLxGENE
 
-The [CELLxGENE](https://cellxgene.cziscience.com/) is a web server contains **910** single-cell datasets, users can explore, download and upload own datasets. The downloaded datasets provided by [CELLxGENE](https://cellxgene.cziscience.com/) have two formats: `h5ad (AnnData v0.8)` and `rds (Seurat v4)`.
+The [CELLxGENE](https://cellxgene.cziscience.com/) is a web server contains **1598** single-cell datasets, users can explore, download and upload own datasets. The downloaded datasets provided by [CELLxGENE](https://cellxgene.cziscience.com/) have two formats: `h5ad (AnnData v0.8)` and `rds (Seurat v4)`.
+
+[CELLxGENE](https://cellxgene.cziscience.com/) provides an R package ([cellxgene.census](https://github.com/chanzuckerberg/cellxgene-census)) to access the data, but sometimes it's not timely updated. `GEfetch2R` also supports users to access [CELLxGENE](https://cellxgene.cziscience.com/) via [cellxgene.census](https://github.com/chanzuckerberg/cellxgene-census) (`use.census = TRUE`).
 
 ### Show available datasets
 
 `GEfetch2R` provides `ShowCELLxGENEDatasets` to extract dataset metadata, including dataset title, description, contact, organism, ethnicity, sex, tissue, disease, assay, suspension type, cell type, et al.
 
-```{r cellxgene_all}
+```{r cellxgene_all, eval=FALSE}
 # all available datasets
 all.cellxgene.datasets <- ShowCELLxGENEDatasets()
+```
+
+Show the metadata:
+```{r cellxgene_all_show}
+head(all.cellxgene.datasets)
 ```
 
 <hr />
@@ -110,7 +142,13 @@ all.cellxgene.datasets <- ShowCELLxGENEDatasets()
 `GEfetch2R` provides `StatDBAttribute` to summary attributes of [CELLxGENE](https://cellxgene.cziscience.com/):
 
 ```{r cellxgene_summary}
-StatDBAttribute(df = all.cellxgene.datasets, filter = c("organism", "sex"), database = "CELLxGENE")
+StatDBAttribute(
+  df = all.cellxgene.datasets, filter = c("organism", "sex", "disease"),
+  database = "CELLxGENE", combine = TRUE
+)
+# # use cellxgene.census
+# StatDBAttribute(filter = c("disease", "tissue", "cell_type"), database = "CELLxGENE",
+#                 use.census = TRUE, organism = "homo_sapiens")
 ```
 
 <hr />
@@ -119,49 +157,89 @@ StatDBAttribute(df = all.cellxgene.datasets, filter = c("organism", "sex"), data
 
 `GEfetch2R` provides `ExtractCELLxGENEMeta` to filter dataset metadata, the available values of attributes can be obtained with `StatDBAttribute` except **cell number**:
 
-```{r cellxgene_meta}
+```{r cellxgene_meta, eval=FALSE}
 # human 10x v2 and v3 datasets
 human.10x.cellxgene.meta <- ExtractCELLxGENEMeta(
   all.samples.df = all.cellxgene.datasets,
   assay = c("10x 3' v2", "10x 3' v3"), organism = "Homo sapiens"
 )
-head(human.10x.cellxgene.meta)
+# subset
+cellxgene.down.meta <- human.10x.cellxgene.meta[human.10x.cellxgene.meta$cell_type == "oligodendrocyte" &
+  human.10x.cellxgene.meta$tissue == "entorhinal cortex", ]
+```
+
+Show the metadata:
+```{r cellxgene_meta_show}
+head(cellxgene.down.meta)
 ```
 
 <hr />
 
-### Download object
+### Download object and load to R
 
 After manually check the extracted metadata, users can **download the specified objects** with `ParseCELLxGENE`. The downloaded objects are controlled by `file.ext` (choose from `"rds"` and `"h5ad"`).
 
-The returned result is a dataframe containing failed datasets. If not `NULL`, users can re-run `ParseCELLxGENE` by setting `meta` to the returned result.
+The returned value is a dataframe containing failed objects or a `SeuratObject` (if `file.ext` is `rds`). If dataframe, users can re-run `ParseCELLxGENE` by setting `meta` to the returned value.
+
+**When using `cellxgene.census`, users can subset metadata and gene**.
 
 ```{r cellxgene_parse, eval=FALSE}
-ParseCELLxGENE(
-  meta = human.10x.cellxgene.meta[1:5, ], file.ext = "rds",
-  out.folder = "/Users/soyabean/Desktop/tmp/scdown/download_cellxgene"
+# download objects
+cellxgene.down <- ParseCELLxGENE(
+  meta = cellxgene.down.meta, file.ext = "rds",
+  out.folder = "/Volumes/soyabean/GEfetch2R/download_cellxgene"
 )
+
+# retuen SeuratObject
+cellxgene.down.seu <- ParseCELLxGENE(
+  meta = cellxgene.down.meta, file.ext = "rds", return.seu = TRUE,
+  obs.value.filter = "cell_type == 'oligodendrocyte' & disease == 'Alzheimer disease'",
+  obs.keys = c("cell_type", "disease", "sex", "suspension_type", "development_stage"),
+  out.folder = "/Volumes/soyabean/GEfetch2R/download_cellxgene"
+)
+
+# use cellxgene.census (support subset, but update is not timely)
+cellxgene.down.census <- ParseCELLxGENE(
+  use.census = TRUE, organism = "Homo sapiens",
+  obs.value.filter = "cell_type == 'B cell' & tissue_general == 'lung' & disease == 'COVID-19'",
+  obs.keys = c("cell_type", "tissue_general", "disease", "sex"),
+  include.genes = c("ENSG00000161798", "ENSG00000188229")
+)
+```
+
+Show the returned `SeuratObject`:
+```{r cellxgene_parse_show1}
+cellxgene.down.seu
+```
+
+Show the returned `SeuratObject` (cellxgene.census):
+```{r cellxgene_parse_show2}
+cellxgene.down.census
 ```
 
 The structure of downloaded objects:
 ```{bash cellxgene_parse_structure}
-tree /Users/soyabean/Desktop/tmp/scdown/download_cellxgene
+tree /Volumes/soyabean/GEfetch2R/download_cellxgene
 ```
 
 <hr />
 
 ## Human Cell Atlas
 
-The [Human Cell Atlas](https://www.humancellatlas.org/) aims to map every cell type in the human body, it contains **397 projects**, most of which are from `Homo sapiens` (also includes projects from `Mus musculus`, `Macaca mulatta` and `canis lupus familiaris`).
+The [Human Cell Atlas](https://www.humancellatlas.org/) aims to map every cell type in the human body, it contains **484 projects**, most of which are from `Homo sapiens` (also includes projects from `Mus musculus`, `Macaca mulatta` and `canis lupus familiaris`).
 
 ### Show available datasets
 
 `GEfetch2R` provides `ShowHCAProjects` to extract detailed project metadata, including project title, description, organism, sex, organ/organPart, disease, assay, preservation method, sample type, suspension type, cell type, development stage, et al.
 
-There are **397 unique projects** under *five different catalogs (`dcp29`, `dcp30`, `dcp1`, `lm2`, `lm3`)*:
+There are **484 unique projects** under *five different catalogs (`dcp29`, `dcp30`, `dcp1`, `lm2`, `lm3`)*:
 
-```{r hca_all}
+```{r hca_all, eval=FALSE}
 all.hca.projects <- ShowHCAProjects()
+```
+
+Show the metadata:
+```{r hca_all_show}
 head(all.hca.projects)
 ```
 
@@ -181,34 +259,49 @@ StatDBAttribute(df = all.hca.projects, filter = c("organism", "sex"), database =
 
 `GEfetch2R` provides `ExtractHCAMeta` to filter projects metadata, the available values of attributes can be obtained with `StatDBAttribute` except **cell number**:
 
-```{r hca_meta}
+```{r hca_meta, eval=FALSE}
 # human 10x v2 and v3 datasets
 hca.human.10x.projects <- ExtractHCAMeta(
   all.projects.df = all.hca.projects, organism = "Homo sapiens",
   protocol = c("10x 3' v2", "10x 3' v3")
 )
+```
+
+Show the metadata:
+```{r hca_meta_show}
 head(hca.human.10x.projects)
 ```
 
 <hr />
 
-### Download object
+### Download object and load to R
 
 After manually check the extracted metadata, users can **download the specified objects** with `ParseHCA`. The downloaded objects are controlled by `file.ext` (choose from `"rds"`, `"rdata"`, `"h5"`, `"h5ad"` and `"loom"`).
 
-The returned result is a dataframe containing failed projects. If not `NULL`, users can re-run `ParseHCA` by setting `meta` to the returned result.
+The returned value is a dataframe containing failed objects or a `SeuratObject` (if `file.ext` is `rds`). If dataframe, users can re-run `ParseHCA` by setting `meta` to the returned value.
 
 ```{r hca_parse, eval=FALSE}
-# no-run
-ParseHCA(
-  meta = all.human.10x.projects,
-  out.folder = "/Users/soyabean/Desktop/tmp/scdown/download_hca"
+# download objects
+hca.down <- ParseHCA(
+  meta = hca.human.10x.projects[1:4, ], out.folder = "/Volumes/soyabean/GEfetch2R/download_hca",
+  file.ext = c("h5ad", "rds")
 )
+
+# return SeuratObject
+hca.down.seu <- ParseHCA(
+  meta = hca.human.10x.projects[1:4, ], out.folder = "/Volumes/soyabean/GEfetch2R/download_hca",
+  file.ext = c("h5ad", "rds"), return.seu = TRUE
+)
+```
+
+Show the returned `SeuratObject`:
+```{r hca_parse_show}
+hca.down.seu
 ```
 
 The example structure of downloaded objects:
 ```{bash hca_parse_structure}
-tree /Users/soyabean/Desktop/tmp/scdown/download_hca
+tree /Volumes/soyabean/GEfetch2R/download_hca
 ```
 
 <hr />

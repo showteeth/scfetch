@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">GEfetch2R</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -27,10 +27,10 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/DownloadRaw.html">Download fastq/bam files</a>
-    <a class="dropdown-item" href="../articles/DownloadMatrices.html">Download count matrices</a>
-    <a class="dropdown-item" href="../articles/DownloadObjects.html">Download processed objects</a>
-    <a class="dropdown-item" href="../articles/ObjectConversion.html">Convert formats between objects</a>
+    <a class="dropdown-item" href="../articles/DownloadRaw.html">Download raw data (sra/fastq/bam)</a>
+    <a class="dropdown-item" href="../articles/DownloadMatrices.html">Download count matrix and annotation</a>
+    <a class="dropdown-item" href="../articles/DownloadObjects.html">Download processed object</a>
+    <a class="dropdown-item" href="../articles/ObjectConversion.html">Format conversion and benchmark</a>
   </div>
 </li>
 <li class="active nav-item">
@@ -56,7 +56,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Extract GEO Study Information.</h1>
-      
+      <small class="dont-index">Source: <a href="https://github.com/showteeth/GEfetch2R/blob/HEAD/R/GEO.R" class="external-link"><code>R/GEO.R</code></a></small>
       <div class="d-none name"><code>ExtractGEOInfo.Rd</code></div>
     </div>
 
@@ -86,13 +86,6 @@
 <p>A dataframe.</p>
     </div>
 
-    <div class="section level2">
-    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># pf.obj = GEOobj(acce = "GSE94820", platform = "GPL16791")</span></span></span>
-<span class="r-in"><span><span class="co"># pf.info = ExtractGEOInfo(pf.obj)</span></span></span>
-<span class="r-in"></span>
-</code></pre></div>
-    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 

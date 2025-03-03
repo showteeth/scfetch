@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 `GEfetch2R` provides functions for users to download **count matrices** and **annotations** (e.g. cell type annotation and composition) from GEO and some single-cell databases (e.g. [PanglaoDB](https://panglaodb.se/index.html) and [UCSC Cell Browser](https://cells.ucsc.edu/?#)). `GEfetch2R` also supports loading the downloaded data to `Seurat`.
 
-Until now, the public resources supported and the returned results:
+Until now, the public resources supported and the returned values:
 
 <table>
 <thead>
@@ -20,7 +20,7 @@ Until now, the public resources supported and the returned results:
     <th>Resources</th>
     <th>URL</th>
     <th>Download Type</th>
-    <th>Returned results</th>
+    <th>Returned values</th>
   </tr>
 </thead>
 <tbody>
@@ -33,13 +33,13 @@ Until now, the public resources supported and the returned results:
   <tr>
     <td>PanglaoDB</td>
     <td>https://panglaodb.se/index.html</td>
-    <td>count matrix</td>
+    <td>count matrix and annotation</td>
     <td>SeuratObject</td>
   </tr>
   <tr>
     <td>UCSC Cell Browser</td>
     <td>https://cells.ucsc.edu/</td>
-    <td>count matrix</td>
+    <td>count matrix and annotation</td>
     <td>SeuratObject</td>
   </tr>
 </tbody>
@@ -51,11 +51,16 @@ Until now, the public resources supported and the returned results:
 
 [GEO is an international public repository that archives and freely distributes microarray, next-generation sequencing, and other forms of high-throughput functional genomics data submitted by the research community.](https://www.ncbi.nlm.nih.gov/geo/info/overview.html) It provides a very convenient way for users to explore and select interested scRNA-seq datasets. 
 
+```{r echo=FALSE, results='hide',message=FALSE}
+library(GEfetch2R)
+load("/Volumes/soyabean/GEfetch2R/GEfetch2R_scrna-seq_download.RData")
+```
+
 ### Extract metadata
 
 `GEfetch2R` provides `ExtractGEOMeta` to extract sample metadata, including sample title, source name/tissue, description, cell type, treatment, paper title, paper abstract, organism, protocol, data processing methods, et al.
 
-```{r geo_meta}
+```{r geo_meta, eval=FALSE}
 # library
 library(GEfetch2R)
 
@@ -65,6 +70,10 @@ GSE200257.meta <- ExtractGEOMeta(acce = "GSE200257", platform = "GPL24676")
 Sys.setenv("VROOM_CONNECTION_SIZE" = 131072 * 60)
 # extract metadata of all platforms
 GSE94820.meta <- ExtractGEOMeta(acce = "GSE94820", platform = NULL)
+```
+
+Show the metadata:
+```{r geo_meta_show, eval=FALSE}
 head(GSE94820.meta)
 ```
 
@@ -79,18 +88,35 @@ For count matrix, `ParseGEO` supports downloading the matrix from **supplementar
 With the count matrix, `ParseGEO` will load the matrix to Seurat automatically. If multiple samples available, users can choose to merge the SeuratObject with `merge`.
 
 ```{r geo_parse, eval=FALSE}
-# for cellranger output
+# cellranger out
 GSE200257.seu <- ParseGEO(
-  acce = "GSE200257", platform = NULL, supp.idx = 1, down.supp = TRUE, supp.type = "10x",
-  out.folder = "/Users/soyabean/Desktop/tmp/scdown/dwonload_geo"
+  acce = "GSE200257", platform = NULL, supp.idx = 1,
+  down.supp = TRUE, supp.type = "10x",
+  out.folder = "/Volumes/soyabean/GEfetch2R/dwonload_geo"
 )
-# for count matrix, no need to specify out.folder, download count matrix to tmp folder
-GSE94820.seu <- ParseGEO(acce = "GSE94820", platform = NULL, supp.idx = 1, down.supp = TRUE, supp.type = "count")
+# count matrix
+GSE94820.seu <- ParseGEO(
+  acce = "GSE94820", platform = NULL,
+  supp.idx = 1, down.supp = TRUE,
+  supp.type = "count"
+)
 ```
 
-The structure of downloaded matrix for 10x:
+Show the `GSE200257.seu`:
+```{r geo_parse_show1, eval=FALSE}
+# for cellranger output
+GSE200257.seu
+```
+
+Show the `GSE94820.seu`:
+```{r geo_parse_show2, eval=FALSE}
+# for count matrix
+GSE94820.seu
+```
+
+The structure of downloaded count matrix for 10x:
 ```{bash geo_parse_structure}
-tree /Users/soyabean/Desktop/tmp/scdown/dwonload_geo
+tree /Volumes/soyabean/GEfetch2R/dwonload_geo
 ```
 
 **For bulk RNA-seq**, set `data.type = "bulk"` in `ParseGEO`, this will return count matrix.
@@ -120,8 +146,15 @@ StatDBAttribute(df = PanglaoDBMeta, filter = c("species", "protocol"), database 
 
 `GEfetch2R` uses cached metadata and cell type composition by default, users can change this by setting `local.data = FALSE`.
 
-```{r panglaodb_meta}
-hsa.meta <- ExtractPanglaoDBMeta(species = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"), show.cell.type = TRUE, cell.num = c(1000, 2000))
+```{r panglaodb_meta, eval=FALSE}
+hsa.meta <- ExtractPanglaoDBMeta(
+  species = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"),
+  show.cell.type = TRUE, cell.num = c(1000, 2000)
+)
+```
+
+Show the metadata:
+```{r panglaodb_meta_show}
 head(hsa.meta)
 ```
 
@@ -131,8 +164,15 @@ head(hsa.meta)
 
 `GEfetch2R` provides `ExtractPanglaoDBComposition` to extract cell type annotation and composition (use cached data by default to accelerate, users can change this by setting `local.data = FALSE`).
 
-```{r panglaodb_celltype}
-hsa.composition <- ExtractPanglaoDBComposition(species = "Homo sapiens", protocol = c("Smart-seq2", "10x chromium"))
+```{r panglaodb_celltype, eval=FALSE}
+hsa.composition <- ExtractPanglaoDBComposition(
+  species = "Homo sapiens",
+  protocol = c("Smart-seq2", "10x chromium")
+)
+```
+
+Show the extracted cell type annotation and composition:
+```{r panglaodb_celltype_show}
 head(hsa.composition)
 ```
 
@@ -148,26 +188,35 @@ With the count matrix, `ParsePanglaoDB` will load the matrix to Seurat automatic
 hsa.seu <- ParsePanglaoDB(hsa.meta[1:3, ], merge = TRUE)
 ```
 
+Show the returned `SeuratObject`:
+```{r panglaodb_parse_show}
+hsa.seu
+```
+
 <hr />
 
 ## UCSC Cell Browser
 
-The [UCSC Cell Browser](https://cells.ucsc.edu/?#) is a web-based tool that allows scientists to interactively visualize scRNA-seq datasets. It contains **1040 single cell datasets** from **17 different species**. And, it is **organized with the hierarchical structure**, which can help users quickly locate the datasets they are interested in.
+The [UCSC Cell Browser](https://cells.ucsc.edu/?#) is a web-based tool that allows scientists to interactively visualize scRNA-seq datasets. It contains **1267 single cell datasets** from **25 different species**. And, it is **organized with the hierarchical structure**, which can help users quickly locate the datasets they are interested in.
 
 ### Show available datasets
 
 `GEfetch2R` provides `ShowCBDatasets` to show all available datasets. Due to the large number of datasets, `ShowCBDatasets` enables users to perform *lazy load* of dataset json files instead of downloading the json files online (time-consuming!!!). This *lazy load* requires users to provide `json.folder` to save json files and set `lazy = TRUE` (for the first time of run, `ShowCBDatasets` will download current json files to `json.folder`, for next time of run, with `lazy = TRUE`, `ShowCBDatasets` will load the downloaded json files from `json.folder`.). And, `ShowCBDatasets` supports updating the local datasets with `update = TRUE`.
 
-```{r cb_show}
+```{r cb_show, eval=FALSE}
 # first time run, the json files are stored under json.folder
-# ucsc.cb.samples = ShowCBDatasets(lazy = TRUE, json.folder = "/Users/soyabean/Desktop/tmp/scdown/cell_browser/json", update = TRUE)
+# ucsc.cb.samples = ShowCBDatasets(lazy = TRUE, json.folder = "/Volumes/soyabean/GEfetch2R/cell_browser/json", update = TRUE)
 
 # second time run, load the downloaded json files
-ucsc.cb.samples <- ShowCBDatasets(lazy = TRUE, json.folder = "/Users/soyabean/Desktop/tmp/scdown/cell_browser/json", update = FALSE)
-head(ucsc.cb.samples)
+ucsc.cb.samples <- ShowCBDatasets(lazy = TRUE, json.folder = "/Volumes/soyabean/GEfetch2R/cell_browser/json", update = FALSE)
 
 # always read online
 # ucsc.cb.samples = ShowCBDatasets(lazy = FALSE)
+```
+
+Show the metadata:
+```{r cb_show_show}
+head(ucsc.cb.samples)
 ```
 
 The number of datasets and all available species:
@@ -189,7 +238,10 @@ unique(unlist(sapply(unique(gsub(pattern = "\\|parent", replacement = "", x = uc
 `GEfetch2R` provides `StatDBAttribute` to summary attributes of [UCSC Cell Browser](https://cells.ucsc.edu/?#):
 
 ```{r cb_summary}
-StatDBAttribute(df = ucsc.cb.samples, filter = c("organism", "organ"), database = "UCSC")
+StatDBAttribute(
+  df = ucsc.cb.samples, filter = c("organism", "organ"),
+  database = "UCSC", combine = TRUE
+)
 ```
 
 <hr />
@@ -198,8 +250,15 @@ StatDBAttribute(df = ucsc.cb.samples, filter = c("organism", "organ"), database 
 
 `GEfetch2R` provides `ExtractCBDatasets` to filter metadata with **collection**, **sub-collection**, **organ**, **disease status**, **organism**, **project** and **cell number** (The available values of these attributes can be obtained with `StatDBAttribute` except **cell number**). All attributes except cell number support fuzzy match with `fuzzy.match`, this is useful when selecting datasets.
 
-```{r cb_extract}
-hbb.sample.df <- ExtractCBDatasets(all.samples.df = ucsc.cb.samples, organ = c("brain", "blood"), organism = "Human (H. sapiens)", cell.num = c(1000, 2000))
+```{r cb_extract, eval=FALSE}
+hbb.sample.df <- ExtractCBDatasets(
+  all.samples.df = ucsc.cb.samples, organ = c("skeletal muscle"),
+  organism = "Human (H. sapiens)", cell.num = c(1000, 2000)
+)
+```
+
+Show the metadata:
+```{r cb_extract_show}
 head(hbb.sample.df)
 ```
 
@@ -209,8 +268,15 @@ head(hbb.sample.df)
 
 `GEfetch2R` provides `ExtractCBComposition` to extract cell type annotation and composition.
 
-```{r cb_celltype}
-hbb.sample.ct <- ExtractCBComposition(json.folder = "/Users/soyabean/Desktop/tmp/scdown/cell_browser/json", sample.df = hbb.sample.df)
+```{r cb_celltype, eval=FALSE}
+hbb.sample.ct <- ExtractCBComposition(
+  json.folder = "/Volumes/soyabean/GEfetch2R/cell_browser/json",
+  sample.df = hbb.sample.df
+)
+```
+
+Show the extracted cell type annotation and composition:
+```{r cb_celltype_show}
 head(hbb.sample.ct)
 ```
 
@@ -220,8 +286,24 @@ head(hbb.sample.ct)
 
 After manually check the extracted metadata, `GEfetch2R` provides `ParseCBDatasets` to **load the online count matrix** to Seurat. All the attributes available in `ExtractCBDatasets` are also same here. Please note that the loading process provided by `ParseCBDatasets` will load the online count matrix instead of downloading it to local. If multiple datasets available, users can choose to merge the SeuratObject with `merge`.
 
+`ParseCBDatasets` supports **extracting subset with metadata and gene**:
+
 ```{r cb_parse, eval=FALSE}
+# parse the whole datasets
 hbb.sample.seu <- ParseCBDatasets(sample.df = hbb.sample.df)
+# subset metadata and gene
+hbb.sample.seu <- ParseCBDatasets(
+  sample.df = hbb.sample.df, obs.value.filter = "Cell.Type == 'MP' & Phase == 'G2M'",
+  include.genes = c(
+    "PAX7", "MYF5", "C1QTNF3", "MYOD1", "MYOG", "RASSF4", "MYH3", "MYL4",
+    "TNNT3", "PDGFRA", "OGN", "COL3A1"
+  )
+)
+```
+
+Show the returned `SeuratObject`:
+```{r cb_parse_show}
+hbb.sample.seu
 ```
 
 <hr />

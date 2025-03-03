@@ -1,150 +1,180 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://showteeth.github.io/scfetch/404.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/404.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/CODE_OF_CONDUCT.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/CODE_OF_CONDUCT.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/LICENSE-text.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/INSTALL.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/LICENSE.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/LICENSE.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/articles/DownloadMatrices.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/articles/DownloadMatrices.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/articles/DownloadObjects.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/articles/DownloadObjects.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/articles/DownloadRaw.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/articles/DownloadRaw.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/articles/ObjectConversion.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/articles/GEfetch2R.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/articles/index.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/articles/ObjectConversion.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/authors.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/articles/index.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/index.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/authors.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/news/index.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/index.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/Bam2Fastq.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/news/index.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/DownloadBam.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/AD2SCE.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/DownloadSRA.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/AD2Seu.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/ExportSeurat.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/Bam2Fastq.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/ExtractCBComposition.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/DownloadBam.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/ExtractCBDatasets.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/DownloadFastq.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/ExtractCELLxGENEMeta.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/DownloadSRA.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/ExtractGEOExp.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/ExportSeurat.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/ExtractGEOExpSupp.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/ExtractCBComposition.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/ExtractGEOExpSupp10x.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/ExtractCBDatasets.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/ExtractGEOExpSuppAll.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/ExtractCELLxGENEMeta.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/ExtractGEOInfo.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/ExtractGEOExp.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/ExtractGEOMeta.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/ExtractGEOExpSupp.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/ExtractGEOSubMeta.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/ExtractGEOExpSupp10x.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/ExtractHCAMeta.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/ExtractGEOExpSupp10xSingle.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/ExtractPanglaoDBComposition.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/ExtractGEOExpSuppAll.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/ExtractPanglaoDBMeta.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/ExtractGEOInfo.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/ExtractRun.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/ExtractGEOMeta.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/ExtractZenodoMeta.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/ExtractGEOSubMeta.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/ImportSeurat.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/ExtractHCAMeta.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/PanglaoDBComposition.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/ExtractPanglaoDBComposition.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/PanglaoDBMeta.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/ExtractPanglaoDBMeta.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/ParseCBDatasets.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/ExtractRun.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/ParseCELLxGENE.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/ExtractZenodoMeta.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/ParseGEO.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/Fastq2R.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/ParseHCA.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/ImportSeurat.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/ParsePanglaoDB.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/PanglaoDBComposition.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/ParseZenodo.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/PanglaoDBMeta.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/SCEAnnData.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/ParseCBDatasets.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/SCELoom.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/ParseCELLxGENE.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/ShowCBDatasets.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/ParseGEO.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/ShowCELLxGENEDatasets.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/ParseHCA.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/ShowHCAProjects.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/ParsePanglaoDB.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/SplitSRA.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/ParseZenodo.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/StatDBAttribute.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/RunCellRanger.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/hello.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/RunSTAR.html</loc>
   </url>
   <url>
-    <loc>https://showteeth.github.io/scfetch/reference/index.html</loc>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/SCE2AD.html</loc>
+  </url>
+  <url>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/SCEAnnData.html</loc>
+  </url>
+  <url>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/SCELoom.html</loc>
+  </url>
+  <url>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/Seu2AD.html</loc>
+  </url>
+  <url>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/ShowCBDatasets.html</loc>
+  </url>
+  <url>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/ShowCELLxGENEDatasets.html</loc>
+  </url>
+  <url>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/ShowHCAProjects.html</loc>
+  </url>
+  <url>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/SplitSRA.html</loc>
+  </url>
+  <url>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/StatDBAttribute.html</loc>
+  </url>
+  <url>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/hello.html</loc>
+  </url>
+  <url>
+    <loc>https://showteeth.github.io/GEfetch2R/reference/index.html</loc>
   </url>
 </urlset>

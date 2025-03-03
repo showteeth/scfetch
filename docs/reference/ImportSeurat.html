@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">GEfetch2R</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -27,10 +27,10 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/DownloadRaw.html">Download fastq/bam files</a>
-    <a class="dropdown-item" href="../articles/DownloadMatrices.html">Download count matrices</a>
-    <a class="dropdown-item" href="../articles/DownloadObjects.html">Download processed objects</a>
-    <a class="dropdown-item" href="../articles/ObjectConversion.html">Convert formats between objects</a>
+    <a class="dropdown-item" href="../articles/DownloadRaw.html">Download raw data (sra/fastq/bam)</a>
+    <a class="dropdown-item" href="../articles/DownloadMatrices.html">Download count matrix and annotation</a>
+    <a class="dropdown-item" href="../articles/DownloadObjects.html">Download processed object</a>
+    <a class="dropdown-item" href="../articles/ObjectConversion.html">Format conversion and benchmark</a>
   </div>
 </li>
 <li class="active nav-item">
@@ -56,7 +56,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Convert Other Formats to SeuratObject.</h1>
-      
+      <small class="dont-index">Source: <a href="https://github.com/showteeth/GEfetch2R/blob/HEAD/R/DataIO.R" class="external-link"><code>R/DataIO.R</code></a></small>
       <div class="d-none name"><code>ImportSeurat.Rd</code></div>
     </div>
 
@@ -122,8 +122,8 @@ used when <code>from</code> is "SCE" or cell_data_set. Default: logcounts.</p></
 
 
 <dt>...</dt>
-<dd><p>Parameter for <code>as.Seurat</code>, <code>sceasy::convertFormat</code>, <code>as.Seurat</code>, <code>as.Seurat</code>,
-<code>as.Seurat</code>, corresponding to <code>from</code>.</p></dd>
+<dd><p>Parameter for <code><a href="https://rdrr.io/pkg/SeuratObject/man/as.Seurat.html" class="external-link">as.Seurat</a></code>, <code>sceasy::convertFormat</code>, <code><a href="https://rdrr.io/pkg/SeuratObject/man/as.Seurat.html" class="external-link">as.Seurat</a></code>, <code><a href="https://rdrr.io/pkg/SeuratObject/man/as.Seurat.html" class="external-link">as.Seurat</a></code>,
+<code><a href="https://rdrr.io/pkg/SeuratObject/man/as.Seurat.html" class="external-link">as.Seurat</a></code>, corresponding to <code>from</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -135,17 +135,24 @@ used when <code>from</code> is "SCE" or cell_data_set. Default: logcounts.</p></
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># import data from SingleCellExperiment</span></span></span>
-<span class="r-in"><span><span class="co"># seu.obj = ImportSeurat(obj=sce.obj, from="SCE", count.assay="counts", data.assay="logcounts", assay="RNA")</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="co"># import data from SingleCellExperiment</span></span></span>
+<span class="r-in"><span><span class="va">seu.obj</span> <span class="op">&lt;-</span> <span class="fu">ImportSeurat</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  obj <span class="op">=</span> <span class="va">sce.obj</span>, from <span class="op">=</span> <span class="st">"SCE"</span>, count.assay <span class="op">=</span> <span class="st">"counts"</span>,</span></span>
+<span class="r-in"><span>  data.assay <span class="op">=</span> <span class="st">"logcounts"</span>, assay <span class="op">=</span> <span class="st">"RNA"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># import data from CellDataSet</span></span></span>
-<span class="r-in"><span><span class="co"># seu.obj = ImportSeurat(obj=cds.obj, from="CellDataSet", count.assay="counts", assay = "RNA")</span></span></span>
+<span class="r-in"><span><span class="va">seu.obj</span> <span class="op">&lt;-</span> <span class="fu">ImportSeurat</span><span class="op">(</span>obj <span class="op">=</span> <span class="va">cds.obj</span>, from <span class="op">=</span> <span class="st">"CellDataSet"</span>, count.assay <span class="op">=</span> <span class="st">"counts"</span>, assay <span class="op">=</span> <span class="st">"RNA"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># import data from cell_data_set</span></span></span>
-<span class="r-in"><span><span class="co"># seu.obj = ImportSeurat(obj=sce.obj, from="cell_data_set", count.assay="counts", data.assay="logcounts", assay="RNA")</span></span></span>
-<span class="r-in"><span><span class="co"># import data from AnnData</span></span></span>
-<span class="r-in"><span><span class="co"># seu.obj = ImportSeurat(anndata.file = 'path/to/h5ad', from="AnnData", assay = "RNA")</span></span></span>
-<span class="r-in"><span><span class="co"># import data from loom</span></span></span>
-<span class="r-in"><span><span class="co"># seu.obj = ImportSeurat(loom.file = 'path/to/loom', from="loom")</span></span></span>
-<span class="r-in"></span>
+<span class="r-in"><span><span class="va">seu.obj</span> <span class="op">&lt;-</span> <span class="fu">ImportSeurat</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  obj <span class="op">=</span> <span class="va">sce.obj</span>, from <span class="op">=</span> <span class="st">"cell_data_set"</span>, count.assay <span class="op">=</span> <span class="st">"counts"</span>,</span></span>
+<span class="r-in"><span>  data.assay <span class="op">=</span> <span class="st">"logcounts"</span>, assay <span class="op">=</span> <span class="st">"RNA"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># import data from AnnData, need users to provide the file for conversion</span></span></span>
+<span class="r-in"><span><span class="va">seu.obj</span> <span class="op">&lt;-</span> <span class="fu">ImportSeurat</span><span class="op">(</span>anndata.file <span class="op">=</span> <span class="st">"path/to/h5ad"</span>, from <span class="op">=</span> <span class="st">"AnnData"</span>, assay <span class="op">=</span> <span class="st">"RNA"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># import data from loom, need users to provide the file for conversion</span></span></span>
+<span class="r-in"><span><span class="va">seu.obj</span> <span class="op">&lt;-</span> <span class="fu">ImportSeurat</span><span class="op">(</span>loom.file <span class="op">=</span> <span class="st">"path/to/loom"</span>, from <span class="op">=</span> <span class="st">"loom"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

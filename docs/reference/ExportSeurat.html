@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">GEfetch2R</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -27,10 +27,10 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/DownloadRaw.html">Download fastq/bam files</a>
-    <a class="dropdown-item" href="../articles/DownloadMatrices.html">Download count matrices</a>
-    <a class="dropdown-item" href="../articles/DownloadObjects.html">Download processed objects</a>
-    <a class="dropdown-item" href="../articles/ObjectConversion.html">Convert formats between objects</a>
+    <a class="dropdown-item" href="../articles/DownloadRaw.html">Download raw data (sra/fastq/bam)</a>
+    <a class="dropdown-item" href="../articles/DownloadMatrices.html">Download count matrix and annotation</a>
+    <a class="dropdown-item" href="../articles/DownloadObjects.html">Download processed object</a>
+    <a class="dropdown-item" href="../articles/ObjectConversion.html">Format conversion and benchmark</a>
   </div>
 </li>
 <li class="active nav-item">
@@ -56,7 +56,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Export SeuratObject to Other Formats.</h1>
-      
+      <small class="dont-index">Source: <a href="https://github.com/showteeth/GEfetch2R/blob/HEAD/R/DataIO.R" class="external-link"><code>R/DataIO.R</code></a></small>
       <div class="d-none name"><code>ExportSeurat.Rd</code></div>
     </div>
 
@@ -85,7 +85,7 @@
 
 
 <dt>assay</dt>
-<dd><p>Which assay to use. Default: NULL (get with <code>DefaultAssay</code>).</p></dd>
+<dd><p>Which assay to use. Default: NULL (get with <code><a href="https://rdrr.io/pkg/SeuratObject/man/DefaultAssay.html" class="external-link">DefaultAssay</a></code>).</p></dd>
 
 
 <dt>reduction</dt>
@@ -110,7 +110,7 @@ Default: "SCE".</p></dd>
 
 
 <dt>...</dt>
-<dd><p>Parameter for <code>as.SingleCellExperiment</code>, <code>sceasy::convertFormat</code>, <code>as.CellDataSet</code>,
+<dd><p>Parameter for <code><a href="https://satijalab.org/seurat/reference/as.SingleCellExperiment.html" class="external-link">as.SingleCellExperiment</a></code>, <code>sceasy::convertFormat</code>, <code><a href="https://satijalab.org/seurat/reference/as.CellDataSet.html" class="external-link">as.CellDataSet</a></code>,
 <code>as.cell_data_set</code>, <code>SaveLoom</code>, corresponding to <code>to</code>.</p></dd>
 
 </dl></div>
@@ -121,6 +121,29 @@ Default: "SCE".</p></dd>
 <p>Object corresponding to <code>to</code>.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://satijalab.org/seurat" class="external-link">Seurat</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># export to SingleCellExperiment</span></span></span>
+<span class="r-in"><span><span class="va">sce.obj</span> <span class="op">&lt;-</span> <span class="fu">ExportSeurat</span><span class="op">(</span>seu.obj <span class="op">=</span> <span class="va">pbmc_small</span>, assay <span class="op">=</span> <span class="st">"RNA"</span>, to <span class="op">=</span> <span class="st">"SCE"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># export to CellDataSet</span></span></span>
+<span class="r-in"><span><span class="va">cds.obj</span> <span class="op">&lt;-</span> <span class="fu">ExportSeurat</span><span class="op">(</span>seu.obj <span class="op">=</span> <span class="va">pbmc_small</span>, assay <span class="op">=</span> <span class="st">"RNA"</span>, reduction <span class="op">=</span> <span class="st">"tsne"</span>, to <span class="op">=</span> <span class="st">"CellDataSet"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># export to cell_data_set</span></span></span>
+<span class="r-in"><span><span class="va">cds3.obj</span> <span class="op">&lt;-</span> <span class="fu">ExportSeurat</span><span class="op">(</span>seu.obj <span class="op">=</span> <span class="va">pbmc_small</span>, assay <span class="op">=</span> <span class="st">"RNA"</span>, to <span class="op">=</span> <span class="st">"cell_data_set"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># export to AnnData, need users to provide the conda path and the output file</span></span></span>
+<span class="r-in"><span><span class="fu">ExportSeurat</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  seu.obj <span class="op">=</span> <span class="va">pbmc_small</span>, assay <span class="op">=</span> <span class="st">"RNA"</span>, to <span class="op">=</span> <span class="st">"AnnData"</span>, conda.path <span class="op">=</span> <span class="st">"/path/to/anaconda3"</span>,</span></span>
+<span class="r-in"><span>  anndata.file <span class="op">=</span> <span class="st">"/path/to/pbmc_small.h5ad"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># export to loom, need users to provide the output file</span></span></span>
+<span class="r-in"><span><span class="fu">ExportSeurat</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  seu.obj <span class="op">=</span> <span class="va">pbmc_small</span>, assay <span class="op">=</span> <span class="st">"RNA"</span>, to <span class="op">=</span> <span class="st">"loom"</span>,</span></span>
+<span class="r-in"><span>  loom.file <span class="op">=</span> <span class="st">"/path/to/pbmc_small.loom"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 

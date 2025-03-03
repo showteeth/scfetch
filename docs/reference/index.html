@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">GEfetch2R</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -27,10 +27,10 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/DownloadRaw.html">Download fastq/bam files</a>
-    <a class="dropdown-item" href="../articles/DownloadMatrices.html">Download count matrices</a>
-    <a class="dropdown-item" href="../articles/DownloadObjects.html">Download processed objects</a>
-    <a class="dropdown-item" href="../articles/ObjectConversion.html">Convert formats between objects</a>
+    <a class="dropdown-item" href="../articles/DownloadRaw.html">Download raw data (sra/fastq/bam)</a>
+    <a class="dropdown-item" href="../articles/DownloadMatrices.html">Download count matrix and annotation</a>
+    <a class="dropdown-item" href="../articles/DownloadObjects.html">Download processed object</a>
+    <a class="dropdown-item" href="../articles/ObjectConversion.html">Format conversion and benchmark</a>
   </div>
 </li>
 <li class="active nav-item">
@@ -71,6 +71,16 @@
 
       <dl><dt>
           
+          <code><a href="AD2SCE.html">AD2SCE()</a></code> 
+        </dt>
+        <dd>Convert AnnData to SingleCellExperiemnt using scDIOR/zellkonverter/schard.</dd>
+      </dl><dl><dt>
+          
+          <code><a href="AD2Seu.html">AD2Seu()</a></code> 
+        </dt>
+        <dd>Convert AnnData to SeuratObject using SeuratDisk/sceasy/scDIOR/schard/SeuratDisk+scDIOR.</dd>
+      </dl><dl><dt>
+          
           <code><a href="Bam2Fastq.html">Bam2Fastq()</a></code> 
         </dt>
         <dd>Convert bam files to fastq files.</dd>
@@ -79,6 +89,11 @@
           <code><a href="DownloadBam.html">DownloadBam()</a></code> 
         </dt>
         <dd>Download bam.</dd>
+      </dl><dl><dt>
+          
+          <code><a href="DownloadFastq.html">DownloadFastq()</a></code> 
+        </dt>
+        <dd>Download FASTQ Files.</dd>
       </dl><dl><dt>
           
           <code><a href="DownloadSRA.html">DownloadSRA()</a></code> 
@@ -119,6 +134,11 @@
           <code><a href="ExtractGEOExpSupp10x.html">ExtractGEOExpSupp10x()</a></code> 
         </dt>
         <dd>Fortmat Supplementary Files to 10x.</dd>
+      </dl><dl><dt>
+          
+          <code><a href="ExtractGEOExpSupp10xSingle.html">ExtractGEOExpSupp10xSingle()</a></code> 
+        </dt>
+        <dd>Fortmat Supplementary Files to 10x (separate files).</dd>
       </dl><dl><dt>
           
           <code><a href="ExtractGEOExpSuppAll.html">ExtractGEOExpSuppAll()</a></code> 
@@ -166,6 +186,11 @@
         <dd>Prepare Dataframe with Zenodo DOIs.</dd>
       </dl><dl><dt>
           
+          <code><a href="Fastq2R.html">Fastq2R()</a></code> 
+        </dt>
+        <dd>Pipe FASTQ files to SeuratObject and DESeqDataSet.</dd>
+      </dl><dl><dt>
+          
           <code><a href="ImportSeurat.html">ImportSeurat()</a></code> 
         </dt>
         <dd>Convert Other Formats to SeuratObject.</dd>
@@ -188,12 +213,12 @@
           
           <code><a href="ParseCELLxGENE.html">ParseCELLxGENE()</a></code> 
         </dt>
-        <dd>Download CELLxGENE Datasets.</dd>
+        <dd>Download CELLxGENE Datasets and Return SeuratObject.</dd>
       </dl><dl><dt>
           
           <code><a href="ParseGEO.html">ParseGEO()</a></code> 
         </dt>
-        <dd>Download Matrix from GEO and Load to Seurat.</dd>
+        <dd>Download Matrix from GEO and Load to Seurat/DESeq2.</dd>
       </dl><dl><dt>
           
           <code><a href="ParseHCA.html">ParseHCA()</a></code> 
@@ -208,7 +233,22 @@
           
           <code><a href="ParseZenodo.html">ParseZenodo()</a></code> 
         </dt>
-        <dd>Download Data with Zenodo DOI.</dd>
+        <dd>Download Data with Zenodo DOI and Return SeuratObject.</dd>
+      </dl><dl><dt>
+          
+          <code><a href="RunCellRanger.html">RunCellRanger()</a></code> 
+        </dt>
+        <dd>Run CellRanger on Downloaded FASTQ Files.</dd>
+      </dl><dl><dt>
+          
+          <code><a href="RunSTAR.html">RunSTAR()</a></code> 
+        </dt>
+        <dd>Run STAR on Downloaded FASTQ Files.</dd>
+      </dl><dl><dt>
+          
+          <code><a href="SCE2AD.html">SCE2AD()</a></code> 
+        </dt>
+        <dd>Convert SingleCellExperiemnt to AnnData using sceasy/scDIOR/zellkonverter.</dd>
       </dl><dl><dt>
           
           <code><a href="SCEAnnData.html">SCEAnnData()</a></code> 
@@ -219,6 +259,11 @@
           <code><a href="SCELoom.html">SCELoom()</a></code> 
         </dt>
         <dd>Data Format Conversion between SingleCellExperiment and loom.</dd>
+      </dl><dl><dt>
+          
+          <code><a href="Seu2AD.html">Seu2AD()</a></code> 
+        </dt>
+        <dd>Convert SeuratObject to AnnData using SeuratDisk/sceasy/scDIOR.</dd>
       </dl><dl><dt>
           
           <code><a href="ShowCBDatasets.html">ShowCBDatasets()</a></code> 

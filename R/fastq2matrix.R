@@ -81,7 +81,7 @@ RunCellRangerSingle <- function(fq.dir, transcriptome, localcores = 4, localmem 
     message(fq.dir, " doesn't exist, please check and re-run!")
     return(basename(fq.dir))
   } else {
-    fq.files <- list.files(path = fq.dir, pattern = "fastq.gz$")
+    fq.files <- list.files(path = fq.dir, pattern = "fastq.gz$", recursive = T)
     if (length(fq.files) == 0) {
       message("There is no fastq.gz files under ", fq.dir, " , please check and re-run!")
       return(basename(fq.dir))
@@ -90,7 +90,9 @@ RunCellRangerSingle <- function(fq.dir, transcriptome, localcores = 4, localmem 
       fq2.file <- grep(pattern = ".*_S[0-9]_L[0-9]{3}_R2_[0-9]{3}.fastq.gz", x = fq.files, value = T)
       if (length(fq1.file) > 0 && length(fq2.file) > 0) {
         sample.id <- basename(fq.dir)
-        sample.name <- basename(fq.dir)
+        # merge multiple run as a single sample
+        sample.name <- paste0(dir(path = fq.dir), collapse = ",")
+        # sample.name <- basename(fq.dir)
         # check additional paras
         if (grepl(pattern = "--id|--transcriptome|--fastqs|--sample|--localcores|--localmem", cr.paras)) {
           message(
@@ -305,6 +307,7 @@ RunSTARSingle <- function(fq.dir, ref, out.folder = NULL, thread = 4, star.path 
 #' @examples
 #' \dontrun{
 #' # run CellRanger (10x Genomics)
+#' # the sample.dir corresponding to sra.folder (SplitSRA) or out.folder (DownloadFastq)
 #' seu <- Fastq2R(
 #'   sample.dir = "/path/to/fastq",
 #'   ref = "/path/to/10x/ref",
@@ -313,6 +316,7 @@ RunSTARSingle <- function(fq.dir, ref, out.folder = NULL, thread = 4, star.path 
 #'   st.path = "/path/to/cellranger"
 #' )
 #' # run STAR (Smart-seq2 or bulk RNA-seq)
+#' # the sample.dir corresponding to sra.folder/GSMXXXX (SplitSRA) or out.folder/GSMXXXX (DownloadFastq)
 #' deobj <- Fastq2R(
 #'   sample.dir = "/path/to/fastq",
 #'   ref = "/path/to/star/ref",

@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">GEfetch2R</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -27,10 +27,10 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/DownloadRaw.html">Download fastq/bam files</a>
-    <a class="dropdown-item" href="../articles/DownloadMatrices.html">Download count matrices</a>
-    <a class="dropdown-item" href="../articles/DownloadObjects.html">Download processed objects</a>
-    <a class="dropdown-item" href="../articles/ObjectConversion.html">Convert formats between objects</a>
+    <a class="dropdown-item" href="../articles/DownloadRaw.html">Download raw data (sra/fastq/bam)</a>
+    <a class="dropdown-item" href="../articles/DownloadMatrices.html">Download count matrix and annotation</a>
+    <a class="dropdown-item" href="../articles/DownloadObjects.html">Download processed object</a>
+    <a class="dropdown-item" href="../articles/ObjectConversion.html">Format conversion and benchmark</a>
   </div>
 </li>
 <li class="active nav-item">
@@ -56,7 +56,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Data Format Conversion between SingleCellExperiment and AnnData.</h1>
-      
+      <small class="dont-index">Source: <a href="https://github.com/showteeth/GEfetch2R/blob/HEAD/R/DataIO.R" class="external-link"><code>R/DataIO.R</code></a></small>
       <div class="d-none name"><code>SCEAnnData.Rd</code></div>
     </div>
 
@@ -114,11 +114,16 @@ Default: counts.</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># library(scRNAseq)</span></span></span>
-<span class="r-in"><span><span class="co"># seger &lt;- SegerstolpePancreasData()</span></span></span>
-<span class="r-in"><span><span class="co"># SCEAnnData(from = "SingleCellExperiment", to = "AnnData", sce = seger, X_name = "counts")</span></span></span>
-<span class="r-in"><span><span class="co"># sce = SCEAnnData(from = "AnnData", to = "SingleCellExperiment", anndata.file = "path/to/seger.h5ad")</span></span></span>
-<span class="r-in"></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">scRNAseq</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">seger</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scRNAseq/man/SegerstolpePancreasData.html" class="external-link">SegerstolpePancreasData</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">SCEAnnData</span><span class="op">(</span>from <span class="op">=</span> <span class="st">"SingleCellExperiment"</span>, to <span class="op">=</span> <span class="st">"AnnData"</span>, sce <span class="op">=</span> <span class="va">seger</span>, X_name <span class="op">=</span> <span class="st">"counts"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># need users to provide the output file</span></span></span>
+<span class="r-in"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu">SCEAnnData</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  from <span class="op">=</span> <span class="st">"AnnData"</span>, to <span class="op">=</span> <span class="st">"SingleCellExperiment"</span>,</span></span>
+<span class="r-in"><span>  anndata.file <span class="op">=</span> <span class="st">"path/to/seger.h5ad"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

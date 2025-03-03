@@ -5,9 +5,10 @@ articles:
   DownloadMatrices: DownloadMatrices.html
   DownloadObjects: DownloadObjects.html
   DownloadRaw: DownloadRaw.html
+  GEfetch2R: GEfetch2R.html
   ObjectConversion: ObjectConversion.html
-last_built: 2023-08-30T17:57Z
+last_built: 2025-03-03T07:19Z
 urls:
-  reference: https://showteeth.github.io/scfetch/reference
-  article: https://showteeth.github.io/scfetch/articles
+  reference: https://showteeth.github.io/GEfetch2R/reference
+  article: https://showteeth.github.io/GEfetch2R/articles
 

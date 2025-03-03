@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">GEfetch2R</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -27,10 +27,10 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/DownloadRaw.html">Download fastq/bam files</a>
-    <a class="dropdown-item" href="../articles/DownloadMatrices.html">Download count matrices</a>
-    <a class="dropdown-item" href="../articles/DownloadObjects.html">Download processed objects</a>
-    <a class="dropdown-item" href="../articles/ObjectConversion.html">Convert formats between objects</a>
+    <a class="dropdown-item" href="../articles/DownloadRaw.html">Download raw data (sra/fastq/bam)</a>
+    <a class="dropdown-item" href="../articles/DownloadMatrices.html">Download count matrix and annotation</a>
+    <a class="dropdown-item" href="../articles/DownloadObjects.html">Download processed object</a>
+    <a class="dropdown-item" href="../articles/ObjectConversion.html">Format conversion and benchmark</a>
   </div>
 </li>
 <li class="active nav-item">
@@ -56,7 +56,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Stat Database Attributes.</h1>
-      
+      <small class="dont-index">Source: <a href="https://github.com/showteeth/GEfetch2R/blob/HEAD/R/summary.R" class="external-link"><code>R/summary.R</code></a></small>
       <div class="d-none name"><code>StatDBAttribute.Rd</code></div>
     </div>
 
@@ -67,9 +67,13 @@
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">StatDBAttribute</span><span class="op">(</span></span>
-<span>  <span class="va">df</span>,</span>
+<span>  df <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">filter</span>,</span>
-<span>  database <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"PanglaoDB"</span>, <span class="st">"UCSC"</span>, <span class="st">"CELLxGENE"</span>, <span class="st">"HCA"</span><span class="op">)</span></span>
+<span>  database <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"PanglaoDB"</span>, <span class="st">"UCSC"</span>, <span class="st">"CELLxGENE"</span>, <span class="st">"HCA"</span><span class="op">)</span>,</span>
+<span>  combine <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  use.census <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  census.version <span class="op">=</span> <span class="st">"stable"</span>,</span>
+<span>  organism <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -77,7 +81,7 @@
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>df</dt>
 <dd><p>All metadata, can be <code>PanglaoDBMeta</code> and obtained with <code>ShowCBDatasets</code>, <code>ShowCELLxGENEDatasets</code>,
-and <code>ShowHCAProjects</code>.</p></dd>
+and <code>ShowHCAProjects</code>. Skip when <code>use.census</code> is TRUE. Default: NULL.</p></dd>
 
 
 <dt>filter</dt>
@@ -87,28 +91,50 @@ and <code>ShowHCAProjects</code>.</p></dd>
 <dt>database</dt>
 <dd><p>Database name, choose from "PanglaoDB", "UCSC", "CELLxGENE", "HCA". Default: "PanglaoDB".</p></dd>
 
+
+<dt>combine</dt>
+<dd><p>Logical value, whether to combine all attributes in <code>filter</code> for summarising.
+Default: FALSE.</p></dd>
+
+
+<dt>use.census</dt>
+<dd><p>Logical value, whether to use CZ CELLxGENE Census to summarise metadata. Default: FALSE.</p></dd>
+
+
+<dt>census.version</dt>
+<dd><p>The version of the Census, e.g., "2024-05-13", or "latest" or "stable". Default: stable.</p></dd>
+
+
+<dt>organism</dt>
+<dd><p>Organism, should be in lower case and replace space with '_'. Default: FALSE (human).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>List of attributes information, including attribute, value and number.</p>
+<p>List of attributes information (attribute, value and number) when <code>combine</code> is FALSE,
+dataframe when <code>combine</code> is TRUE.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># # PanglaoDB</span></span></span>
-<span class="r-in"><span><span class="co"># StatDBAttribute(df = PanglaoDBMeta, filter = c("species", "protocol"), database = "PanglaoDB")</span></span></span>
-<span class="r-in"><span><span class="co"># # UCSC Cell Browser</span></span></span>
-<span class="r-in"><span><span class="co"># ucsc.cb.samples = ShowCBDatasets(lazy = TRUE, json.folder = NULL, update = FALSE)</span></span></span>
-<span class="r-in"><span><span class="co"># StatDBAttribute(df = ucsc.cb.samples, filter = c("organism", "organ"), database = "UCSC")</span></span></span>
-<span class="r-in"><span><span class="co"># # CELLxGENE</span></span></span>
-<span class="r-in"><span><span class="co"># all.cellxgene.datasets = ShowCELLxGENEDatasets()</span></span></span>
-<span class="r-in"><span><span class="co"># StatDBAttribute(df = all.cellxgene.datasets, filter = c("organism", "sex"), database = "CELLxGENE")</span></span></span>
-<span class="r-in"><span><span class="co"># # HCA</span></span></span>
-<span class="r-in"><span><span class="co"># all.hca.projects = ShowHCAProjects()</span></span></span>
-<span class="r-in"><span><span class="co"># StatDBAttribute(df = all.hca.projects, filter = c("organism", "sex"), database = "HCA")</span></span></span>
-<span class="r-in"></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="co"># PanglaoDB</span></span></span>
+<span class="r-in"><span><span class="fu">StatDBAttribute</span><span class="op">(</span>df <span class="op">=</span> <span class="va">PanglaoDBMeta</span>, filter <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"species"</span>, <span class="st">"protocol"</span><span class="op">)</span>, database <span class="op">=</span> <span class="st">"PanglaoDB"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># UCSC Cell Browser, need users to provide the json folder</span></span></span>
+<span class="r-in"><span><span class="va">ucsc.cb.samples</span> <span class="op">&lt;-</span> <span class="fu"><a href="ShowCBDatasets.html">ShowCBDatasets</a></span><span class="op">(</span>lazy <span class="op">=</span> <span class="cn">TRUE</span>, json.folder <span class="op">=</span> <span class="cn">NULL</span>, update <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">StatDBAttribute</span><span class="op">(</span>df <span class="op">=</span> <span class="va">ucsc.cb.samples</span>, filter <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"organism"</span>, <span class="st">"organ"</span><span class="op">)</span>, database <span class="op">=</span> <span class="st">"UCSC"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># CELLxGENE</span></span></span>
+<span class="r-in"><span><span class="va">all.cellxgene.datasets</span> <span class="op">&lt;-</span> <span class="fu"><a href="ShowCELLxGENEDatasets.html">ShowCELLxGENEDatasets</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">StatDBAttribute</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  df <span class="op">=</span> <span class="va">all.cellxgene.datasets</span>, filter <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"organism"</span>, <span class="st">"sex"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  database <span class="op">=</span> <span class="st">"CELLxGENE"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># HCA</span></span></span>
+<span class="r-in"><span><span class="va">all.hca.projects</span> <span class="op">&lt;-</span> <span class="fu"><a href="ShowHCAProjects.html">ShowHCAProjects</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">StatDBAttribute</span><span class="op">(</span>df <span class="op">=</span> <span class="va">all.hca.projects</span>, filter <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"organism"</span>, <span class="st">"sex"</span><span class="op">)</span>, database <span class="op">=</span> <span class="st">"HCA"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

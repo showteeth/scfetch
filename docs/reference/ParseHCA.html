@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">GEfetch2R</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -27,10 +27,10 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/DownloadRaw.html">Download fastq/bam files</a>
-    <a class="dropdown-item" href="../articles/DownloadMatrices.html">Download count matrices</a>
-    <a class="dropdown-item" href="../articles/DownloadObjects.html">Download processed objects</a>
-    <a class="dropdown-item" href="../articles/ObjectConversion.html">Convert formats between objects</a>
+    <a class="dropdown-item" href="../articles/DownloadRaw.html">Download raw data (sra/fastq/bam)</a>
+    <a class="dropdown-item" href="../articles/DownloadMatrices.html">Download count matrix and annotation</a>
+    <a class="dropdown-item" href="../articles/DownloadObjects.html">Download processed object</a>
+    <a class="dropdown-item" href="../articles/ObjectConversion.html">Format conversion and benchmark</a>
   </div>
 </li>
 <li class="active nav-item">
@@ -56,7 +56,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Download Human Cell Atlas Datasets.</h1>
-      
+      <small class="dont-index">Source: <a href="https://github.com/showteeth/GEfetch2R/blob/HEAD/R/hca.R" class="external-link"><code>R/hca.R</code></a></small>
       <div class="d-none name"><code>ParseHCA.Rd</code></div>
     </div>
 
@@ -68,11 +68,14 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">ParseHCA</span><span class="op">(</span></span>
 <span>  <span class="va">meta</span>,</span>
-<span>  file.ext <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rds"</span>, <span class="st">"rdata"</span>, <span class="st">"h5"</span>, <span class="st">"h5ad"</span>, <span class="st">"loom"</span><span class="op">)</span>,</span>
+<span>  file.ext <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rds"</span>, <span class="st">"rdata"</span>, <span class="st">"h5"</span>, <span class="st">"h5ad"</span>, <span class="st">"loom"</span>, <span class="st">"tsv"</span><span class="op">)</span>,</span>
 <span>  out.folder <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  timeout <span class="op">=</span> <span class="fl">3600</span>,</span>
 <span>  quiet <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  parallel <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  parallel <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  use.cores <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  return.seu <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  merge <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -81,6 +84,11 @@
     <dl><dt>meta</dt>
 <dd><p>Metadata used to download, can be from <code>ExtractHCAMeta</code>,
 should contain entryId and name catalog.</p></dd>
+
+
+<dt>file.ext</dt>
+<dd><p>The valid file extension for download. When NULL, use "rds", "rdata", "h5", "h5ad", "loom", "tsv".
+Default: c("rds", "rdata", "h5", "h5ad", "loom", "tsv").</p></dd>
 
 
 <dt>out.folder</dt>
@@ -100,28 +108,43 @@ should contain entryId and name catalog.</p></dd>
 the parallel is done by default (<code>parallel</code> can be FALSE).</p></dd>
 
 
-<dt>file.ext.</dt>
-<dd><p>The valid file extension for download. When NULL, use "rds", "rdata", "h5", "h5ad", "loom".
-Default: c("rds", "rdata", "h5", "h5ad", "loom").</p></dd>
+<dt>use.cores</dt>
+<dd><p>The number of cores used. Default: NULL (the minimum value of
+extracted <code>length(download.urls)</code> and <code><a href="https://rdrr.io/r/parallel/detectCores.html" class="external-link">parallel::detectCores()</a></code>).</p></dd>
+
+
+<dt>return.seu</dt>
+<dd><p>Logical value, whether to load downloaded datasets to Seurat. Valid when rds in <code>file.ext</code> and all
+datasets download successfully. Default: FALSE.</p></dd>
+
+
+<dt>merge</dt>
+<dd><p>Logical value, whether to merge Seurat list when there are multiple rds files,
+used when <code>return.seu</code> is TRUE. Default: FALSE.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>Dataframe contains failed projects or NULL.</p>
+<p>SeuratObject (<code>return.seu</code> is TRUE, rds in <code>file.ext</code>) or
+list contains files' metadata of downloaded successfully (down.meta) and failed (fail.meta).</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># # all available projects</span></span></span>
-<span class="r-in"><span><span class="co"># all.hca.projects = ShowHCAProjects()</span></span></span>
-<span class="r-in"><span><span class="co"># # all human and 10x 3' v2</span></span></span>
-<span class="r-in"><span><span class="co"># all.human.10x.projects = ExtractHCAMeta(all.projects.df = all.hca.projects,  organism = "Homo sapiens",</span></span></span>
-<span class="r-in"><span><span class="co">#                                         protocol = c("10x 3' v2", "10x 3' v3"))</span></span></span>
-<span class="r-in"><span><span class="co"># # download</span></span></span>
-<span class="r-in"><span><span class="co"># ParseHCA(meta = all.human.10x.projects, out.folder = "/path/to/output")</span></span></span>
-<span class="r-in"></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="co"># all available projects</span></span></span>
+<span class="r-in"><span><span class="va">all.hca.projects</span> <span class="op">&lt;-</span> <span class="fu"><a href="ShowHCAProjects.html">ShowHCAProjects</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># all human and 10x 3' v2</span></span></span>
+<span class="r-in"><span><span class="va">all.human.10x.projects</span> <span class="op">&lt;-</span> <span class="fu"><a href="ExtractHCAMeta.html">ExtractHCAMeta</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  all.projects.df <span class="op">=</span> <span class="va">all.hca.projects</span>,</span></span>
+<span class="r-in"><span>  organism <span class="op">=</span> <span class="st">"Homo sapiens"</span>,</span></span>
+<span class="r-in"><span>  protocol <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"10x 3' v2"</span>, <span class="st">"10x 3' v3"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># download, need users to provide the output folder</span></span></span>
+<span class="r-in"><span><span class="fu">ParseHCA</span><span class="op">(</span>meta <span class="op">=</span> <span class="va">all.human.10x.projects</span>, out.folder <span class="op">=</span> <span class="st">"/path/to/output"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

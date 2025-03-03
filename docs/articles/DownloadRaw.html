@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">GEfetch2R</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,10 +44,10 @@
 <li class="active nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/DownloadRaw.html">Download fastq/bam files</a>
-    <a class="dropdown-item" href="../articles/DownloadMatrices.html">Download count matrices</a>
-    <a class="dropdown-item" href="../articles/DownloadObjects.html">Download processed objects</a>
-    <a class="dropdown-item" href="../articles/ObjectConversion.html">Convert formats between objects</a>
+    <a class="dropdown-item" href="../articles/DownloadRaw.html">Download raw data (sra/fastq/bam)</a>
+    <a class="dropdown-item" href="../articles/DownloadMatrices.html">Download count matrix and annotation</a>
+    <a class="dropdown-item" href="../articles/DownloadObjects.html">Download processed object</a>
+    <a class="dropdown-item" href="../articles/ObjectConversion.html">Format conversion and benchmark</a>
   </div>
 </li>
 <li class="nav-item">
@@ -83,7 +83,7 @@
       <img src="" class="logo" alt=""><h1>DownloadRaw</h1>
             
       
-      
+      <small class="dont-index">Source: <a href="https://github.com/showteeth/GEfetch2R/blob/HEAD/vignettes/DownloadRaw.Rmd" class="external-link"><code>vignettes/DownloadRaw.Rmd</code></a></small>
       <div class="d-none name"><code>DownloadRaw.Rmd</code></div>
     </div>
 
@@ -95,88 +95,171 @@
 <p>A common situation is that we need to use a unified software version
 (e.g. CellRanger) to obtain the count matrix, in order to better
 integrate and compare multiple datasets. Here, we will use
-<code>GEfetch2R</code> to download fastq and bam files. With bam files,
-<code>GEfetch2R</code> also provides function for user to convert the bam
-to fastq.</p>
+<code>GEfetch2R</code> to download raw data
+(<code>sra/fastq/bam</code>). With <code>bam</code> files,
+<code>GEfetch2R</code> also provides function for user to convert the
+<code>bam</code> to <code>fastq</code> files.</p>
+<blockquote>
+<p><code>GEfetch2R</code> supports downloading raw data
+(<code>sra/fastq/bam</code>) from <code>SRA</code> and <code>ENA</code>
+with <strong>GEO accessions</strong>. In general, downloading raw data
+from ENA is much faster than SRA, because of <code>ascp</code> and
+<strong>parallel</strong> support.</p>
+</blockquote>
+<pre><code><span><span class="co">#&gt; Warning: replacing previous import 'LoomExperiment::import' by</span></span>
+<span><span class="co">#&gt; 'reticulate::import' when loading 'GEfetch2R'</span></span></code></pre>
 <hr>
 </div>
 <div class="section level2">
-<h2 id="download-fastq">Download fastq<a class="anchor" aria-label="anchor" href="#download-fastq"></a>
+<h2 id="download-sra">Download sra<a class="anchor" aria-label="anchor" href="#download-sra"></a>
 </h2>
 <div class="section level3">
-<h3 id="prepare-run-number">Prepare run number<a class="anchor" aria-label="anchor" href="#prepare-run-number"></a>
+<h3 id="extract-all-samples-runs">Extract all samples (runs)<a class="anchor" aria-label="anchor" href="#extract-all-samples-runs"></a>
 </h3>
-<p>For fastq files stored in SRA, <code>GEfetch2R</code> can extract
-sample information and run number with GEO accession number or users can
-also provide a dataframe contains the run number of interested
-samples.</p>
+<p>For <code>fastq</code> files stored in <code>SRA/ENA</code>,
+<code>GEfetch2R</code> can extract sample information and run number
+with <strong>GEO accessions</strong> or users can also <strong>provide a
+dataframe containing the run number of interested samples</strong>.</p>
 <p>Extract all samples under <code>GSE130636</code> and the platform is
 <code>GPL20301</code> (use <code>platform = NULL</code> for all
 platforms):</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># library</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">GEfetch2R</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Setting options('download.file.method.GEOquery'='auto')</span></span>
-<span><span class="co">#&gt; Setting options('GEOquery.inmemory.gpl'=FALSE)</span></span>
-<span><span class="co">#&gt; Registered S3 method overwritten by 'SeuratDisk':</span></span>
-<span><span class="co">#&gt;   method            from  </span></span>
-<span><span class="co">#&gt;   as.sparse.H5Group Seurat</span></span>
-<span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/showteeth/GEfetch2R" class="external-link">GEfetch2R</a></span><span class="op">)</span></span>
 <span><span class="va">GSE130636.runs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ExtractRun.html">ExtractRun</a></span><span class="op">(</span>acce <span class="op">=</span> <span class="st">"GSE130636"</span>, platform <span class="op">=</span> <span class="st">"GPL20301"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Extract all GSM with acce: GSE130636 and platform: GPL20301</span></span>
-<span><span class="co">#&gt; Found 1 file(s)</span></span>
-<span><span class="co">#&gt; GSE130636_series_matrix.txt.gz</span></span>
-<span><span class="co">#&gt; <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">0</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">7</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span></span>
-<span><span class="co">#&gt; <span style="font-weight: bold;">Delimiter:</span> "\t"</span></span>
-<span><span class="co">#&gt; <span style="color: #BB0000;">chr</span> (7): ID_REF, GSM3745992, GSM3745993, GSM3745994, GSM3745995, GSM3745996,...</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span></span>
-<span><span class="co">#&gt; File stored at: </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; /var/folders/_4/k4qmvf7s2gx_6789px8n_sxh0000gn/T//RtmpXDGHCE/GPL20301.soft</span></span>
-<span><span class="co">#&gt; 6 GSMs to process</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">GSE130636.runs</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                    title   gsm_name experiment        run</span></span>
-<span><span class="co">#&gt; SRR9004325 Fovea donor 1 GSM3745992 SRX5783051 SRR9004325</span></span>
-<span><span class="co">#&gt; SRR9004326 Fovea donor 1 GSM3745992 SRX5783051 SRR9004326</span></span>
-<span><span class="co">#&gt; SRR9004327 Fovea donor 1 GSM3745992 SRX5783051 SRR9004327</span></span>
-<span><span class="co">#&gt; SRR9004328 Fovea donor 1 GSM3745992 SRX5783051 SRR9004328</span></span>
-<span><span class="co">#&gt; SRR9004329 Fovea donor 1 GSM3745992 SRX5783051 SRR9004329</span></span>
-<span><span class="co">#&gt; SRR9004330 Fovea donor 1 GSM3745992 SRX5783051 SRR9004330</span></span></code></pre></div>
+<span><span class="co"># a small test</span></span>
+<span><span class="va">GSE130636.runs</span> <span class="op">&lt;-</span> <span class="va">GSE130636.runs</span><span class="op">[</span><span class="va">GSE130636.runs</span><span class="op">$</span><span class="va">run</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SRR9004346"</span>, <span class="st">"SRR9004351"</span><span class="op">)</span>, <span class="op">]</span></span></code></pre></div>
+<p>Show the sample information:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">GSE130636.runs</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                   run experiment   gsm_name         title geo_accession</span></span>
+<span><span class="co">#&gt; SRR9004346 SRR9004346 SRX5783052 GSM3745993 Fovea donor 2    GSM3745993</span></span>
+<span><span class="co">#&gt; SRR9004351 SRR9004351 SRX5783052 GSM3745993 Fovea donor 2    GSM3745993</span></span>
+<span><span class="co">#&gt;                           status submission_date last_update_date type</span></span>
+<span><span class="co">#&gt; SRR9004346 Public on May 17 2019     May 02 2019      Dec 20 2019  SRA</span></span>
+<span><span class="co">#&gt; SRR9004351 Public on May 17 2019     May 02 2019      Dec 20 2019  SRA</span></span>
+<span><span class="co">#&gt;            channel_count source_name_ch1 organism_ch1 taxid_ch1</span></span>
+<span><span class="co">#&gt; SRR9004346             1          Retina Homo sapiens      9606</span></span>
+<span><span class="co">#&gt; SRR9004351             1          Retina Homo sapiens      9606</span></span>
+<span><span class="co">#&gt;            characteristics_ch1 characteristics_ch1.1 molecule_ch1</span></span>
+<span><span class="co">#&gt; SRR9004346     location: Fovea        donor: Donor 2    total RNA</span></span>
+<span><span class="co">#&gt; SRR9004351     location: Fovea        donor: Donor 2    total RNA</span></span>
+<span><span class="co">#&gt;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             extract_protocol_ch1</span></span>
+<span><span class="co">#&gt; SRR9004346 A 2-mm foveal centered and a 4-mm peripheral punch from the inferotemporal region were acquired from three clinically normal human donors. Tissue was dissociated using the Papain Dissociation System (Worthington Biochemical Corporation, Lakewood NJ). Dissociated cells were resuspended in DMSO-based Recovery Cell Culture Freezing Media (Life Technologies Corporation, Grand Island NY). Suspensions were placed in a Cryo-Safe cooler (CryoSafe, Summerville SC) to cool at 1°C/minute in a -80°C freezer for 3-8 hours before storage in liquid nitrogen.</span></span>
+<span><span class="co">#&gt; SRR9004351 A 2-mm foveal centered and a 4-mm peripheral punch from the inferotemporal region were acquired from three clinically normal human donors. Tissue was dissociated using the Papain Dissociation System (Worthington Biochemical Corporation, Lakewood NJ). Dissociated cells were resuspended in DMSO-based Recovery Cell Culture Freezing Media (Life Technologies Corporation, Grand Island NY). Suspensions were placed in a Cryo-Safe cooler (CryoSafe, Summerville SC) to cool at 1°C/minute in a -80°C freezer for 3-8 hours before storage in liquid nitrogen.</span></span>
+<span><span class="co">#&gt;                                                                                                                                                                                                                                                                                                                                                                                                                        extract_protocol_ch1.1</span></span>
+<span><span class="co">#&gt; SRR9004346 Single-cell RNA libraries were prepared for sequencing using standard 10X genomics protocols. Briefly, cryopreserved samples were thawed, and single cells were captured and barcoded using the Chromium System with the v3 single cell-reagent kit (10x Genomics, Pleasanton CA). Sequencing was performed on pooled libraries using the Illumina HiSeq 4000 platform (San Diego, CA), generating 150 base pair paired-end reads.</span></span>
+<span><span class="co">#&gt; SRR9004351 Single-cell RNA libraries were prepared for sequencing using standard 10X genomics protocols. Briefly, cryopreserved samples were thawed, and single cells were captured and barcoded using the Chromium System with the v3 single cell-reagent kit (10x Genomics, Pleasanton CA). Sequencing was performed on pooled libraries using the Illumina HiSeq 4000 platform (San Diego, CA), generating 150 base pair paired-end reads.</span></span>
+<span><span class="co">#&gt;                                                                                             data_processing</span></span>
+<span><span class="co">#&gt; SRR9004346 FASTQ files were generated from the raw BCL files using Illumina’s bcl2fastq conversion program.</span></span>
+<span><span class="co">#&gt; SRR9004351 FASTQ files were generated from the raw BCL files using Illumina’s bcl2fastq conversion program.</span></span>
+<span><span class="co">#&gt;                                                                                                                                                                                           data_processing.1</span></span>
+<span><span class="co">#&gt; SRR9004346 Sequenced reads were mapped to the CellRanger human genome build hg19 (v3.0.0) with CellRanger (v3.0.1) using the CellRanger default human GTF and the following parameter: --expect-cells=8000.</span></span>
+<span><span class="co">#&gt; SRR9004351 Sequenced reads were mapped to the CellRanger human genome build hg19 (v3.0.0) with CellRanger (v3.0.1) using the CellRanger default human GTF and the following parameter: --expect-cells=8000.</span></span>
+<span><span class="co">#&gt;                                                                                                                            data_processing.2</span></span>
+<span><span class="co">#&gt; SRR9004346 The six samples were collectively aggregated with the cellranger aggr function with the following parameter: --normalized=mapped.</span></span>
+<span><span class="co">#&gt; SRR9004351 The six samples were collectively aggregated with the cellranger aggr function with the following parameter: --normalized=mapped.</span></span>
+<span><span class="co">#&gt;            data_processing = Cells were filtered with Seurat (v2.3.4) FilterCells function. Cells with nUMIs less than 200 (to remove cells with poor read quality) or greater than 2500 (to remove cells likely to be doublets) were removed. Cells with greater tha ...</span></span>
+<span><span class="co">#&gt; SRR9004346                                                                                                                                                                                                                                                         TRUE).</span></span>
+<span><span class="co">#&gt; SRR9004351                                                                                                                                                                                                                                                         TRUE).</span></span>
+<span><span class="co">#&gt;            data_processing = Aggregated reads were normalized with Seurat (v2.3.4) with the following command: NormalizeData(object = seurat_object, normalization.method = "LogNormalize",  scale.factor = 10000). Variable genes were identified from downstream no ...</span></span>
+<span><span class="co">#&gt; SRR9004346                                                                                                                                                                                                                                    c("nUMI", "percent.mito")).</span></span>
+<span><span class="co">#&gt; SRR9004351                                                                                                                                                                                                                                    c("nUMI", "percent.mito")).</span></span>
+<span><span class="co">#&gt;                                                                                                                                                                                                                                                                                                      data_processing.3</span></span>
+<span><span class="co">#&gt; SRR9004346 Clustering was performed with Seurat (v2.3.4) FindClusters. In order to generate the shared nearest neighbor (SNN) graph, the principal component analysis reduction technique was utilized for the first 10 principal components. A granularity resolution value of 0.6 was used to discriminate clusters.</span></span>
+<span><span class="co">#&gt; SRR9004351 Clustering was performed with Seurat (v2.3.4) FindClusters. In order to generate the shared nearest neighbor (SNN) graph, the principal component analysis reduction technique was utilized for the first 10 principal components. A granularity resolution value of 0.6 was used to discriminate clusters.</span></span>
+<span><span class="co">#&gt;             data_processing.4</span></span>
+<span><span class="co">#&gt; SRR9004346 Genome_build: hg19</span></span>
+<span><span class="co">#&gt; SRR9004351 Genome_build: hg19</span></span>
+<span><span class="co">#&gt;                                                                                                                                                                                                                                                                                                                                                                                        data_processing.5</span></span>
+<span><span class="co">#&gt; SRR9004346 Supplementary_files_format_and_content: Processed expression data matrix files are provided in tab-delimited format. Log-normalized expression values (from the seurat_object@data slot) were appended to relevant metadata (barcode and cluster label from the manuscript). Each row represents a unique cell, and columns correspond to metadata and log normalized gene expression values.</span></span>
+<span><span class="co">#&gt; SRR9004351 Supplementary_files_format_and_content: Processed expression data matrix files are provided in tab-delimited format. Log-normalized expression values (from the seurat_object@data slot) were appended to relevant metadata (barcode and cluster label from the manuscript). Each row represents a unique cell, and columns correspond to metadata and log normalized gene expression values.</span></span>
+<span><span class="co">#&gt;            platform_id  contact_name          contact_email  contact_institute</span></span>
+<span><span class="co">#&gt; SRR9004346    GPL20301 Todd,,Scheetz todd-scheetz@uiowa.edu UNIVERSITY OF IOWA</span></span>
+<span><span class="co">#&gt; SRR9004351    GPL20301 Todd,,Scheetz todd-scheetz@uiowa.edu UNIVERSITY OF IOWA</span></span>
+<span><span class="co">#&gt;            contact_address contact_city contact_state contact_zip/postal_code</span></span>
+<span><span class="co">#&gt; SRR9004346      3181B MERF    Iowa City            IA                   52242</span></span>
+<span><span class="co">#&gt; SRR9004351      3181B MERF    Iowa City            IA                   52242</span></span>
+<span><span class="co">#&gt;            contact_country    instrument_model library_selection library_source</span></span>
+<span><span class="co">#&gt; SRR9004346             USA Illumina HiSeq 4000              cDNA TRANSCRIPTOMIC</span></span>
+<span><span class="co">#&gt; SRR9004351             USA Illumina HiSeq 4000              cDNA TRANSCRIPTOMIC</span></span>
+<span><span class="co">#&gt;            library_strategy                 relation</span></span>
+<span><span class="co">#&gt; SRR9004346          RNA-Seq Reanalyzed by: GSE142449</span></span>
+<span><span class="co">#&gt; SRR9004351          RNA-Seq Reanalyzed by: GSE142449</span></span>
+<span><span class="co">#&gt;                                                                relation.1</span></span>
+<span><span class="co">#&gt; SRR9004346 BioSample: https://www.ncbi.nlm.nih.gov/biosample/SAMN11566805</span></span>
+<span><span class="co">#&gt; SRR9004351 BioSample: https://www.ncbi.nlm.nih.gov/biosample/SAMN11566805</span></span>
+<span><span class="co">#&gt;                                                       relation.2</span></span>
+<span><span class="co">#&gt; SRR9004346 SRA: https://www.ncbi.nlm.nih.gov/sra?term=SRX5783052</span></span>
+<span><span class="co">#&gt; SRR9004351 SRA: https://www.ncbi.nlm.nih.gov/sra?term=SRX5783052</span></span>
+<span><span class="co">#&gt;                                                                                                     supplementary_file_1</span></span>
+<span><span class="co">#&gt; SRR9004346 ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM3745nnn/GSM3745993/suppl/GSM3745993_fovea_donor_2_expression.tsv.gz</span></span>
+<span><span class="co">#&gt; SRR9004351 ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM3745nnn/GSM3745993/suppl/GSM3745993_fovea_donor_2_expression.tsv.gz</span></span>
+<span><span class="co">#&gt;            series_id data_row_count library_layout taxon_id</span></span>
+<span><span class="co">#&gt; SRR9004346 GSE130636              0         PAIRED     9606</span></span>
+<span><span class="co">#&gt; SRR9004351 GSE130636              0         PAIRED     9606</span></span>
+<span><span class="co">#&gt;                          ebi_dir              ncbi_dir</span></span>
+<span><span class="co">#&gt; SRR9004346 SRR900/006/SRR9004346 SRR900/006/SRR9004346</span></span>
+<span><span class="co">#&gt; SRR9004351 SRR900/001/SRR9004351 SRR900/001/SRR9004351</span></span></code></pre></div>
 <hr>
 </div>
 <div class="section level3">
-<h3 id="download-sra">Download sra<a class="anchor" aria-label="anchor" href="#download-sra"></a>
+<h3 id="download-sra-1">Download sra<a class="anchor" aria-label="anchor" href="#download-sra-1"></a>
 </h3>
-<p>With the dataframe contains gsm and run number, <code>GEfetch2R</code>
-will download sra files using <code>prefetch</code>. The returned result
-is a dataframe contains failed runs. If not <code>NULL</code>, users can
-re-run <code>DownloadSRA</code> by setting <code>gsm.df</code> to the
-returned result.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># a small test</span></span>
-<span><span class="va">GSE130636.runs</span> <span class="op">&lt;-</span> <span class="va">GSE130636.runs</span><span class="op">[</span><span class="va">GSE130636.runs</span><span class="op">$</span><span class="va">run</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SRR9004346"</span>, <span class="st">"SRR9004351"</span><span class="op">)</span>, <span class="op">]</span></span>
+<p>With the dataframe contains gsm and run number,
+<code>GEfetch2R</code> will use <code>prefetch</code> to download
+<code>sra</code> files from <code>SRA</code> or using
+<code>ascp/download.file</code> to download <code>sra</code> files from
+<code>ENA</code>. The returned value is a dataframe contains failed
+runs. If not <code>NULL</code>, users can re-run
+<code>DownloadSRA</code> by setting <code>gsm.df</code> to the returned
+value.</p>
+<p>Download from <code>SRA</code>:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="co"># download</span></span>
 <span><span class="va">GSE130636.down</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DownloadSRA.html">DownloadSRA</a></span><span class="op">(</span></span>
 <span>  gsm.df <span class="op">=</span> <span class="va">GSE130636.runs</span>,</span>
 <span>  prefetch.path <span class="op">=</span> <span class="st">"/Users/soyabean/software/sratoolkit.3.0.6-mac64/bin/prefetch"</span>,</span>
-<span>  out.folder <span class="op">=</span> <span class="st">"/Users/soyabean/Desktop/tmp/scdown/download_fastq"</span></span>
+<span>  out.folder <span class="op">=</span> <span class="st">"/Volumes/soyabean/GEfetch2R/download_fastq"</span></span>
 <span><span class="op">)</span></span>
+<span><span class="co"># GSE130636.down is null or dataframe contains failed runs</span></span></code></pre></div>
+<p>Download from <code>ENA</code> (<strong>parallel</strong>):</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">out.folder</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co"># download from ENA using download.file</span></span>
+<span><span class="va">GSE130636.down</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DownloadSRA.html">DownloadSRA</a></span><span class="op">(</span></span>
+<span>  gsm.df <span class="op">=</span> <span class="va">GSE130636.runs</span>, download.method <span class="op">=</span> <span class="st">"download.file"</span>,</span>
+<span>  timeout <span class="op">=</span> <span class="fl">3600</span>, out.folder <span class="op">=</span> <span class="st">"/path/to/download_fastq"</span>,</span>
+<span>  parallel <span class="op">=</span> <span class="cn">TRUE</span>, use.cores <span class="op">=</span> <span class="fl">2</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># download from ENA using ascp</span></span>
+<span><span class="va">GSE130636.down</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DownloadSRA.html">DownloadSRA</a></span><span class="op">(</span></span>
+<span>  gsm.df <span class="op">=</span> <span class="va">GSE130636.runs</span>, download.method <span class="op">=</span> <span class="st">"ascp"</span>,</span>
+<span>  ascp.path <span class="op">=</span> <span class="st">"~/.aspera/connect/bin/ascp"</span>, max.rate <span class="op">=</span> <span class="st">"300m"</span>,</span>
+<span>  rename <span class="op">=</span> <span class="cn">TRUE</span>, out.folder <span class="op">=</span> <span class="st">"/path/to/download_fastq"</span>,</span>
+<span>  parallel <span class="op">=</span> <span class="cn">TRUE</span>, use.cores <span class="op">=</span> <span class="fl">2</span></span>
+<span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># GSE130636.down is null or dataframe contains failed runs</span></span></code></pre></div>
 <p>The <code>out.folder</code> structure will be:
 <code>gsm_number/run_number</code>.</p>
 <hr>
 </div>
+</div>
+<div class="section level2">
+<h2 id="download-fastq">Download fastq<a class="anchor" aria-label="anchor" href="#download-fastq"></a>
+</h2>
 <div class="section level3">
-<h3 id="split-fastq">Split fastq<a class="anchor" aria-label="anchor" href="#split-fastq"></a>
+<h3 id="split-sra-to-generate-fastq">Split sra to generate fastq<a class="anchor" aria-label="anchor" href="#split-sra-to-generate-fastq"></a>
 </h3>
-<p>After obtaining the sra files, <code>GEfetch2R</code> provides function
-<code>SplitSRA</code> to split sra files to fastq files using
-<code>parallel-fastq-dump</code> (parallel, fastest and gzip output),
-<code>fasterq-dump</code> (parallel, fast but unzipped output) and
-<code>fastq-dump</code> (slowest and gzip output).</p>
+<p>After obtaining the <code>sra</code> files, <code>GEfetch2R</code>
+provides function <code>SplitSRA</code> to split <code>sra</code> files
+to fastq files using <code>parallel-fastq-dump</code> (<strong>parallel,
+fastest and gzip output</strong>), <code>fasterq-dump</code>
+(<strong>parallel, fast but unzipped output</strong>) and
+<code>fastq-dump</code> (<strong>slowest and gzip output</strong>).</p>
 <p>For fastqs generated with 10x Genomics, <code>SplitSRA</code> can
 identify read1, read2 and index files and format the read1 and read2 to
 10x required format (<code>sample1_S1_L001_R1_001.fastq.gz</code> and
@@ -186,35 +269,62 @@ read length 26 or 28 is considered as read1, the files with read length
 as read2. The read length rules is from <a href="https://www.10xgenomics.com/cn/support/single-cell-gene-expression/documentation/steps/sequencing/sequencing-requirements-for-single-cell-3" class="external-link">Sequencing
 Requirements for Single Cell 3’</a> and <a href="https://www.10xgenomics.com/cn/support/single-cell-immune-profiling/documentation/steps/sequencing/sequencing-requirements-for-single-cell-v-d-j" class="external-link">Sequencing
 Requirements for Single Cell V(D)J</a>.</p>
-<p>The returned result is a vector of failed sra files. If not
-<code>NULL</code>, users can re-run <code>SplitSRA</code> by setting
-<code>sra.path</code> to the returned result.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<p>The returned value is a vector of failed <code>sra</code> files. If
+not <code>NULL</code>, users can re-run <code>SplitSRA</code> by setting
+<code>sra.path</code> to the returned value.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># parallel-fastq-dump requires sratools.path</span></span>
 <span><span class="va">GSE130636.split</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SplitSRA.html">SplitSRA</a></span><span class="op">(</span></span>
-<span>  sra.folder <span class="op">=</span> <span class="st">"/Users/soyabean/Desktop/tmp/scdown/download_fastq"</span>,</span>
+<span>  sra.folder <span class="op">=</span> <span class="st">"/Volumes/soyabean/GEfetch2R/download_fastq"</span>,</span>
 <span>  fastq.type <span class="op">=</span> <span class="st">"10x"</span>,</span>
 <span>  split.cmd.path <span class="op">=</span> <span class="st">"/Applications/anaconda3/bin/parallel-fastq-dump"</span>,</span>
-<span>  sratools.path <span class="op">=</span> <span class="st">"/usr/local/bin"</span>, split.cmd.threads <span class="op">=</span> <span class="fl">4</span></span>
+<span>  sratools.path <span class="op">=</span> <span class="st">"/usr/local/bin"</span>, split.cmd.paras <span class="op">=</span> <span class="st">"--gzip"</span>,</span>
+<span>  split.cmd.threads <span class="op">=</span> <span class="fl">4</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>The final <code>out.folder</code> structure will be:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tree</span> /Users/soyabean/Desktop/tmp/scdown/download_fastq</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [01;34m/Users/soyabean/Desktop/tmp/scdown/download_fastq [0m</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; └──  [01;34mGSM3745993 [0m</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     ├──  [01;34mSRR9004346 [0m</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     │   ├──  [00mSRR9004346.sra [0m</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     │   ├──  [01;31mSRR9004346_1.fastq.gz [0m</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     │   ├──  [01;31mSRR9004346_2.fastq.gz [0m</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     │   ├──  [01;31mSRR9004346_S1_L001_R1_001.fastq.gz [0m</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     │   └──  [01;31mSRR9004346_S1_L001_R2_001.fastq.gz [0m</span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     └──  [01;34mSRR9004351 [0m</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         ├──  [00mSRR9004351.sra [0m</span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         ├──  [01;31mSRR9004351_1.fastq.gz [0m</span></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         ├──  [01;31mSRR9004351_2.fastq.gz [0m</span></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         ├──  [01;31mSRR9004351_S1_L001_R1_001.fastq.gz [0m</span></span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         └──  [01;31mSRR9004351_S1_L001_R2_001.fastq.gz [0m</span></span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 directories, 10 files</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tree</span> /Volumes/soyabean/GEfetch2R/download_fastq</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [01;34m/Volumes/soyabean/GEfetch2R/download_fastq [0m</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; └──  [01;34mGSM3745993 [0m</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     ├──  [01;34mSRR9004346 [0m</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     │   ├──  [01;32mSRR9004346.sra [0m</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     │   ├──  [01;32mSRR9004346_1.fastq.gz [0m</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     │   ├──  [01;32mSRR9004346_2.fastq.gz [0m</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     │   ├──  [01;32mSRR9004346_S1_L001_R1_001.fastq.gz [0m</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     │   └──  [01;32mSRR9004346_S1_L001_R2_001.fastq.gz [0m</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     └──  [01;34mSRR9004351 [0m</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         ├──  [01;32mSRR9004351.sra [0m</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         ├──  [01;32mSRR9004351_1.fastq.gz [0m</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         ├──  [01;32mSRR9004351_2.fastq.gz [0m</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         ├──  [01;32mSRR9004351_S1_L001_R1_001.fastq.gz [0m</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         └──  [01;32mSRR9004351_S1_L001_R2_001.fastq.gz [0m</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 directories, 10 files</span></span></code></pre></div>
+<hr>
+</div>
+<div class="section level3">
+<h3 id="download-fastq-directly-from-ena">Download fastq directly from ENA<a class="anchor" aria-label="anchor" href="#download-fastq-directly-from-ena"></a>
+</h3>
+<p>Alternatively, <code>GEfetch2R</code> provides function
+<code>DownloadFastq</code> to download <code>fastq</code> files directly
+from <code>ENA</code> (<strong>parallel, faster than the above
+method</strong>). The returned value is a dataframe contains failed
+runs. If not <code>NULL</code>, users can re-run
+<code>DownloadFastq</code> by setting <code>gsm.df</code> to the
+returned value.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># use download.file</span></span>
+<span><span class="va">GSE130636.down.fastq</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DownloadFastq.html">DownloadFastq</a></span><span class="op">(</span></span>
+<span>  gsm.df <span class="op">=</span> <span class="va">GSE130636.runs</span>, out.folder <span class="op">=</span> <span class="st">"/path/to/download_fastq"</span>,</span>
+<span>  download.method <span class="op">=</span> <span class="st">"download.file"</span>,</span>
+<span>  parallel <span class="op">=</span> <span class="cn">TRUE</span>, use.cores <span class="op">=</span> <span class="fl">2</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># use ascp</span></span>
+<span><span class="va">GSE130636.down.fastq</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DownloadFastq.html">DownloadFastq</a></span><span class="op">(</span></span>
+<span>  gsm.df <span class="op">=</span> <span class="va">GSE130636.runs</span>, out.folder <span class="op">=</span> <span class="st">"/path/to/download_fastq"</span>,</span>
+<span>  download.method <span class="op">=</span> <span class="st">"ascp"</span>, ascp.path <span class="op">=</span> <span class="st">"~/.aspera/connect/bin/ascp"</span>, max.rate <span class="op">=</span> <span class="st">"300m"</span>,</span>
+<span>  parallel <span class="op">=</span> <span class="cn">TRUE</span>, use.cores <span class="op">=</span> <span class="fl">2</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <hr>
 </div>
 </div>
@@ -222,87 +332,126 @@ Requirements for Single Cell V(D)J</a>.</p>
 <h2 id="download-bam">Download bam<a class="anchor" aria-label="anchor" href="#download-bam"></a>
 </h2>
 <div class="section level3">
-<h3 id="prepare-run-number-1">Prepare run number<a class="anchor" aria-label="anchor" href="#prepare-run-number-1"></a>
+<h3 id="extract-all-samples-runs-1">Extract all samples (runs)<a class="anchor" aria-label="anchor" href="#extract-all-samples-runs-1"></a>
 </h3>
 <p><code>GEfetch2R</code> can extract sample information and run number
-with GEO accession number or users can also provide a dataframe contains
-the run number of interested samples.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">GSE138266.runs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ExtractRun.html">ExtractRun</a></span><span class="op">(</span>acce <span class="op">=</span> <span class="st">"GSE138266"</span>, platform <span class="op">=</span> <span class="st">"GPL18573"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Extract all GSM with acce: GSE138266 and platform: GPL18573</span></span>
-<span><span class="co">#&gt; Found 1 file(s)</span></span>
-<span><span class="co">#&gt; GSE138266_series_matrix.txt.gz</span></span>
-<span><span class="co">#&gt; <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">0</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">23</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span></span>
-<span><span class="co">#&gt; <span style="font-weight: bold;">Delimiter:</span> "\t"</span></span>
-<span><span class="co">#&gt; <span style="color: #BB0000;">chr</span> (23): ID_REF, GSM4104122, GSM4104123, GSM4104124, GSM4104125, GSM4104126...</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span></span>
-<span><span class="co">#&gt; File stored at: </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; /var/folders/_4/k4qmvf7s2gx_6789px8n_sxh0000gn/T//RtmpXDGHCE/GPL18573.soft</span></span>
-<span><span class="co">#&gt; 22 GSMs to process</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">GSE138266.runs</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                   title   gsm_name experiment         run</span></span>
-<span><span class="co">#&gt; SRR10211551 MS19270_CSF GSM4104122 SRX6931239 SRR10211551</span></span>
-<span><span class="co">#&gt; SRR10211552 MS58637_CSF GSM4104123 SRX6931240 SRR10211552</span></span>
-<span><span class="co">#&gt; SRR10211553 MS71658_CSF GSM4104124 SRX6931241 SRR10211553</span></span>
-<span><span class="co">#&gt; SRR10211554 MS49131_CSF GSM4104125 SRX6931242 SRR10211554</span></span>
-<span><span class="co">#&gt; SRR10211555 MS60249_CSF GSM4104126 SRX6931243 SRR10211555</span></span>
-<span><span class="co">#&gt; SRR10211556 MS74594_CSF GSM4104127 SRX6931244 SRR10211556</span></span></code></pre></div>
+with <strong>GEO accessions</strong> or users can also <strong>provide a
+dataframe containing the run number of interested samples</strong>.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">GSE138266.runs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ExtractRun.html">ExtractRun</a></span><span class="op">(</span>acce <span class="op">=</span> <span class="st">"GSE138266"</span>, platform <span class="op">=</span> <span class="st">"GPL18573"</span><span class="op">)</span></span></code></pre></div>
+<p>Show the sample information:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">GSE138266.runs</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                     run experiment   gsm_name        title geo_accession</span></span>
+<span><span class="co">#&gt; SRR10211566 SRR10211566 SRX6931254 GSM4104137 MS60249_PBMC    GSM4104137</span></span>
+<span><span class="co">#&gt;                            status submission_date last_update_date type</span></span>
+<span><span class="co">#&gt; SRR10211566 Public on Dec 10 2019     Oct 01 2019      Dec 10 2019  SRA</span></span>
+<span><span class="co">#&gt;             channel_count                   source_name_ch1 organism_ch1</span></span>
+<span><span class="co">#&gt; SRR10211566             1 peripheral blood mononuclear cell Homo sapiens</span></span>
+<span><span class="co">#&gt;             taxid_ch1                   characteristics_ch1 molecule_ch1</span></span>
+<span><span class="co">#&gt; SRR10211566      9606 disease condition: Multiple Sclerosis    total RNA</span></span>
+<span><span class="co">#&gt;                                                                                                                                                                                                                                                                                           extract_protocol_ch1</span></span>
+<span><span class="co">#&gt; SRR10211566 Patient Inclusion Criterior: 1) treatment naive patients with a first episode suggestive of MS (i.e. clinically isolated syndrome (CIS)) or with relapsing-remitting (RR)MS diagnosed based on MAGNIMS criteria86, 2) patients receiving LP for diagnostic purposes and consenting to participate.</span></span>
+<span><span class="co">#&gt;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 extract_protocol_ch1.1</span></span>
+<span><span class="co">#&gt; SRR10211566 Patient Exclusion Criterior: 1) questionable diagnosis of MS by clinical signs or magnetic resonance imaging (MRI) findings, 2) secondary chronic progressive MS or primary progressive MS. IIH patients were included, if they gave informed consent. Exclusion criteria for all patients were: 1) immunologically relevant co-morbidities (e.g. rheumatologic diseases), 2) severe concomitant infectious diseases (e.g. HIV, meningitis, encephalitis), 3) pregnancy or breastfeeding, 4) younger than 18 years, 5) mental illness impairing the ability to give informed consent, 6) artificial blood contamination during the lumbar puncture resulting in &gt;200 red blood cells / μl.</span></span>
+<span><span class="co">#&gt;                                                                                  extract_protocol_ch1.2</span></span>
+<span><span class="co">#&gt; SRR10211566 Chromium Single Cell Controller using the Chromium Single Cell 3' Library &amp; Gel Bead Kit v2</span></span>
+<span><span class="co">#&gt;                     extract_protocol_ch1.3</span></span>
+<span><span class="co">#&gt; SRR10211566 AMPure beads (Beckman Coulter)</span></span>
+<span><span class="co">#&gt;                                                                        extract_protocol_ch1.4</span></span>
+<span><span class="co">#&gt; SRR10211566  Illumina Nextseq 500 using the High-Out 75 cycle kit with a 26-8-0-57 read setup</span></span>
+<span><span class="co">#&gt;              description</span></span>
+<span><span class="co">#&gt; SRR10211566 MS60249_PBMC</span></span>
+<span><span class="co">#&gt;                                                               data_processing</span></span>
+<span><span class="co">#&gt; SRR10211566 Raw bcl files were de-multiplexed using cellranger v2.0.2 mkfastq</span></span>
+<span><span class="co">#&gt;                                                                                                                                     data_processing.1</span></span>
+<span><span class="co">#&gt; SRR10211566 Subsequent read alignments and transcript counting was done individually for each sample using cellranger count with standard parameters.</span></span>
+<span><span class="co">#&gt;                                                                                                              data_processing.2</span></span>
+<span><span class="co">#&gt; SRR10211566 Cellranger aggr was employed, to ensure that all samples had the same number of confidently mapped reads per cell.</span></span>
+<span><span class="co">#&gt;                data_processing.3</span></span>
+<span><span class="co">#&gt; SRR10211566 Genome_build: GRCh38</span></span>
+<span><span class="co">#&gt;                                                                     data_processing.4</span></span>
+<span><span class="co">#&gt; SRR10211566 Supplementary_files_format_and_content: Standard cellranger output format</span></span>
+<span><span class="co">#&gt;             platform_id contact_name                 contact_email</span></span>
+<span><span class="co">#&gt; SRR10211566    GPL18573 Chenling,,Xu chenlingantelope@berkeley.edu</span></span>
+<span><span class="co">#&gt;             contact_laboratory    contact_department contact_institute</span></span>
+<span><span class="co">#&gt; SRR10211566          Yosef Lab Computational Biology       UC Berkeley</span></span>
+<span><span class="co">#&gt;             contact_address contact_city contact_state contact_zip/postal_code</span></span>
+<span><span class="co">#&gt; SRR10211566    Stanley Hall     Berkeley            CA                   94704</span></span>
+<span><span class="co">#&gt;             contact_country     instrument_model library_selection</span></span>
+<span><span class="co">#&gt; SRR10211566             USA Illumina NextSeq 500              cDNA</span></span>
+<span><span class="co">#&gt;             library_source library_strategy</span></span>
+<span><span class="co">#&gt; SRR10211566 TRANSCRIPTOMIC          RNA-Seq</span></span>
+<span><span class="co">#&gt;                                                                   relation</span></span>
+<span><span class="co">#&gt; SRR10211566 BioSample: https://www.ncbi.nlm.nih.gov/biosample/SAMN12880976</span></span>
+<span><span class="co">#&gt;                                                        relation.1</span></span>
+<span><span class="co">#&gt; SRR10211566 SRA: https://www.ncbi.nlm.nih.gov/sra?term=SRX6931254</span></span>
+<span><span class="co">#&gt;                                                                                                           supplementary_file_1</span></span>
+<span><span class="co">#&gt; SRR10211566 ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM4104nnn/GSM4104137/suppl/GSM4104137_MS60249_PBMCs_GRCh38_barcodes.tsv.gz</span></span>
+<span><span class="co">#&gt;                                                                                                        supplementary_file_2</span></span>
+<span><span class="co">#&gt; SRR10211566 ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM4104nnn/GSM4104137/suppl/GSM4104137_MS60249_PBMCs_GRCh38_genes.tsv.gz</span></span>
+<span><span class="co">#&gt;                                                                                                         supplementary_file_3</span></span>
+<span><span class="co">#&gt; SRR10211566 ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM4104nnn/GSM4104137/suppl/GSM4104137_MS60249_PBMCs_GRCh38_matrix.mtx.gz</span></span>
+<span><span class="co">#&gt;             series_id data_row_count library_layout taxon_id</span></span>
+<span><span class="co">#&gt; SRR10211566 GSE138266              0         PAIRED     9606</span></span>
+<span><span class="co">#&gt;                            ebi_dir               ncbi_dir</span></span>
+<span><span class="co">#&gt; SRR10211566 SRR102/066/SRR10211566 SRR102/066/SRR10211566</span></span></code></pre></div>
 <hr>
 </div>
 <div class="section level3">
-<h3 id="download-bam-1">Download bam<a class="anchor" aria-label="anchor" href="#download-bam-1"></a>
+<h3 id="download-bam-from-sra">Download bam from SRA<a class="anchor" aria-label="anchor" href="#download-bam-from-sra"></a>
 </h3>
-<p>With the dataframe contains gsm and run number, <code>GEfetch2R</code>
-provides <code>DownloadBam</code> to download bam files using
-<code>prefetch</code>. It suooorts 10x generated bam files and normal
-bam files.</p>
+<p>With the dataframe contains gsm and run number,
+<code>GEfetch2R</code> provides <code>DownloadBam</code> to download
+<code>bam</code> files using <code>prefetch</code>. It supports 10x
+generated <code>bam</code> files and normal <code>bam</code> files.</p>
 <ul>
-<li>10x generated bam: While bam files generated from 10x softwares
-(e.g. CellRanger) contain custom tags which are not kept when using
-default parameters of <code>prefetch</code>, <code>GEfetch2R</code> adds
-<code>--type TenX</code> to make sure the downloaded bam files contain
-these tags.</li>
-<li>normal bam: For normal bam files, <code>DownloadBam</code> will
-download sra files first and then convert sra files to bam files with
+<li>
+<strong>10x generated bam</strong>: While <code>bam</code> files
+generated from 10x softwares (e.g. CellRanger) contain custom tags which
+are not kept when using default parameters of <code>prefetch</code>,
+<code>GEfetch2R</code> adds <code>--type TenX</code> to make sure the
+downloaded <code>bam</code> files contain these tags.</li>
+<li>
+<strong>normal bam</strong>: For normal bam files,
+<code>DownloadBam</code> will download <code>sra</code> files first and
+then convert <code>sra</code> files to <code>bam</code> files with
 <code>sam-dump</code>. After testing the efficiency of
 <code>prefetch</code> + <code>sam-dump</code> and <code>sam-dump</code>,
-the former is much faster than the latter (52G sra and 72G bam
-files):</li>
+the former is much faster than the latter (52G <code>sra</code> and 72G
+<code>bam</code> files):</li>
 </ul>
-<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># # use prefetch to download sra file</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># prefetch -X 60G SRR1976036</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># # real    117m26.334s</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># # user    16m42.062s</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># # sys 3m28.295s</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co"># # use sam-dump to convert sra to bam</span></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co"># time (sam-dump SRR1976036.sra | samtools view -bS - -o SRR1976036.bam)</span></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co"># # real    536m2.721s</span></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co"># # user    749m41.421s</span></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co"># # sys 20m49.069s</span></span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co"># use sam-dump to download bam directly</span></span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co"># time (sam-dump SRR1976036 | samtools view -bS - -o SRR1976036.bam)</span></span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co"># # more than 36hrs only get ~3G bam files, too slow</span></span></code></pre></div>
-<p>The returned result is a dataframe containing failed runs (either
-failed to download sra files or failed to convert to bam files for
-normal bam; failed to download bam files for 10x generated bam). If not
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># # use prefetch to download sra file</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co"># prefetch -X 60G SRR1976036</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># # real    117m26.334s</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># # user    16m42.062s</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co"># # sys 3m28.295s</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co"># # use sam-dump to convert sra to bam</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="co"># time (sam-dump SRR1976036.sra | samtools view -bS - -o SRR1976036.bam)</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="co"># # real    536m2.721s</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="co"># # user    749m41.421s</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="co"># # sys 20m49.069s</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="co"># use sam-dump to download bam directly</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="co"># time (sam-dump SRR1976036 | samtools view -bS - -o SRR1976036.bam)</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="co"># # more than 36hrs only get ~3G bam files, too slow</span></span></code></pre></div>
+<p>The returned value is a dataframe containing failed runs (either
+failed to download <code>sra</code> files or failed to convert to
+<code>bam</code> files for normal <code>bam</code>; failed to download
+<code>bam</code> files for 10x generated <code>bam</code>). If not
 <code>NULL</code>, users can re-run <code>DownloadBam</code> by setting
-<code>gsm.df</code> to the returned result. The following is an example
-to download 10x generated bam file:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code>gsm.df</code> to the returned value. The following is an example
+to download 10x generated <code>bam</code> file:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># a small test</span></span>
 <span><span class="va">GSE138266.runs</span> <span class="op">&lt;-</span> <span class="va">GSE138266.runs</span><span class="op">[</span><span class="va">GSE138266.runs</span><span class="op">$</span><span class="va">run</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SRR10211566"</span><span class="op">)</span>, <span class="op">]</span></span>
 <span><span class="co"># download</span></span>
 <span><span class="va">GSE138266.down</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DownloadBam.html">DownloadBam</a></span><span class="op">(</span></span>
 <span>  gsm.df <span class="op">=</span> <span class="va">GSE138266.runs</span>,</span>
 <span>  prefetch.path <span class="op">=</span> <span class="st">"/Users/soyabean/software/sratoolkit.3.0.6-mac64/bin/prefetch"</span>,</span>
-<span>  out.folder <span class="op">=</span> <span class="st">"/Users/soyabean/Desktop/tmp/scdown/download_bam"</span></span>
+<span>  out.folder <span class="op">=</span> <span class="st">"/Volumes/soyabean/GEfetch2R/download_bam"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co"># GSE138266.down is null or dataframe contains failed runs</span></span></code></pre></div>
 <p>The <code>out.folder</code> structure will be:
@@ -310,58 +459,126 @@ to download 10x generated bam file:</p>
 <hr>
 </div>
 <div class="section level3">
+<h3 id="download-bam-from-ena">Download bam from ENA<a class="anchor" aria-label="anchor" href="#download-bam-from-ena"></a>
+</h3>
+<p>The returned value is a dataframe containing failed runs. If not
+<code>NULL</code>, users can re-run <code>DownloadBam</code> by setting
+<code>gsm.df</code> to the returned value. The following is an example
+to download 10x generated <code>bam</code> file from
+<code>ENA</code>:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># download.file</span></span>
+<span><span class="va">GSE138266.down</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DownloadBam.html">DownloadBam</a></span><span class="op">(</span></span>
+<span>  gsm.df <span class="op">=</span> <span class="va">GSE138266.runs</span>, download.method <span class="op">=</span> <span class="st">"download.file"</span>,</span>
+<span>  timeout <span class="op">=</span> <span class="fl">3600</span>, out.folder <span class="op">=</span> <span class="st">"/path/to/download_bam"</span>,</span>
+<span>  parallel <span class="op">=</span> <span class="cn">TRUE</span>, use.cores <span class="op">=</span> <span class="fl">2</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co"># ascp</span></span>
+<span><span class="va">GSE138266.down</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DownloadBam.html">DownloadBam</a></span><span class="op">(</span></span>
+<span>  gsm.df <span class="op">=</span> <span class="va">GSE138266.runs</span>, download.method <span class="op">=</span> <span class="st">"ascp"</span>,</span>
+<span>  ascp.path <span class="op">=</span> <span class="st">"~/.aspera/connect/bin/ascp"</span>, max.rate <span class="op">=</span> <span class="st">"300m"</span>,</span>
+<span>  rename <span class="op">=</span> <span class="cn">TRUE</span>, out.folder <span class="op">=</span> <span class="st">"/path/to/download_bam"</span>,</span>
+<span>  parallel <span class="op">=</span> <span class="cn">TRUE</span>, use.cores <span class="op">=</span> <span class="fl">2</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<hr>
+</div>
+<div class="section level3">
 <h3 id="convert-bam-to-fastq">Convert bam to fastq<a class="anchor" aria-label="anchor" href="#convert-bam-to-fastq"></a>
 </h3>
-<p>With downloaded bam files, <code>GEfetch2R</code> provides function
-<code>Bam2Fastq</code> to convert bam files to fastq files. For bam
-files generated from 10x softwares, <code>Bam2Fastq</code> utilizes
-<code>bamtofastq</code> tool developed by 10x Genomics.</p>
-<p>The returned result is a vector of bam files failed to convert to
-fastq files. If not <code>NULL</code>, users can re-run
-<code>Bam2Fastq</code> by setting <code>bam.path</code> to the returned
-result.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<p>With downloaded <code>bam</code> files, <code>GEfetch2R</code>
+provides function <code>Bam2Fastq</code> to convert <code>bam</code>
+files to <code>fastq</code> files. For <code>bam</code> files generated
+from 10x softwares, <code>Bam2Fastq</code> utilizes
+<code>bamtofastq</code> tool developed by 10x Genomics, otherwise,
+<code>samtools</code> is utilized.</p>
+<p>The returned value is a vector of <code>bam</code> files failed to
+convert to <code>fastq</code> files. If not <code>NULL</code>, users can
+re-run <code>Bam2Fastq</code> by setting <code>bam.path</code> to the
+returned value.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">GSE138266.convert</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/Bam2Fastq.html">Bam2Fastq</a></span><span class="op">(</span></span>
-<span>  bam.folder <span class="op">=</span> <span class="st">"/Users/soyabean/Desktop/tmp/scdown/download_bam"</span>,</span>
+<span>  bam.folder <span class="op">=</span> <span class="st">"/Volumes/soyabean/GEfetch2R/download_bam"</span>, bam.type <span class="op">=</span> <span class="st">"10x"</span>,</span>
 <span>  bamtofastq.path <span class="op">=</span> <span class="st">"/Users/soyabean/software/bamtofastq_macos"</span>,</span>
 <span>  bamtofastq.paras <span class="op">=</span> <span class="st">"--nthreads 4"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>The final <code>out.folder</code> structure will be:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tree</span> /Users/soyabean/Desktop/tmp/scdown/download_bam</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [01;34m/Users/soyabean/Desktop/tmp/scdown/download_bam [0m</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; └──  [01;34mGSM4104137 [0m</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     └──  [01;34mSRR10211566 [0m</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         ├──  [01;34mbam2fastq [0m</span></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │   └──  [01;34mMS60249_PBMC_2_0_MissingLibrary_1_H72VGBGX2 [0m</span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;31mbamtofastq_S1_L001_I1_001.fastq.gz [0m</span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;31mbamtofastq_S1_L001_I1_002.fastq.gz [0m</span></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;31mbamtofastq_S1_L001_R1_001.fastq.gz [0m</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;31mbamtofastq_S1_L001_R1_002.fastq.gz [0m</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;31mbamtofastq_S1_L001_R2_001.fastq.gz [0m</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;31mbamtofastq_S1_L001_R2_002.fastq.gz [0m</span></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;31mbamtofastq_S1_L002_I1_001.fastq.gz [0m</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;31mbamtofastq_S1_L002_I1_002.fastq.gz [0m</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;31mbamtofastq_S1_L002_R1_001.fastq.gz [0m</span></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;31mbamtofastq_S1_L002_R1_002.fastq.gz [0m</span></span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;31mbamtofastq_S1_L002_R2_001.fastq.gz [0m</span></span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;31mbamtofastq_S1_L002_R2_002.fastq.gz [0m</span></span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;31mbamtofastq_S1_L003_I1_001.fastq.gz [0m</span></span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;31mbamtofastq_S1_L003_I1_002.fastq.gz [0m</span></span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;31mbamtofastq_S1_L003_R1_001.fastq.gz [0m</span></span>
-<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;31mbamtofastq_S1_L003_R1_002.fastq.gz [0m</span></span>
-<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;31mbamtofastq_S1_L003_R2_001.fastq.gz [0m</span></span>
-<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;31mbamtofastq_S1_L003_R2_002.fastq.gz [0m</span></span>
-<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;31mbamtofastq_S1_L004_I1_001.fastq.gz [0m</span></span>
-<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;31mbamtofastq_S1_L004_I1_002.fastq.gz [0m</span></span>
-<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;31mbamtofastq_S1_L004_R1_001.fastq.gz [0m</span></span>
-<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;31mbamtofastq_S1_L004_R1_002.fastq.gz [0m</span></span>
-<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;31mbamtofastq_S1_L004_R2_001.fastq.gz [0m</span></span>
-<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       └──  [01;31mbamtofastq_S1_L004_R2_002.fastq.gz [0m</span></span>
-<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         └──  [00mbamfiles_MS60249_PBMC_possorted_genome_bam.bam [0m</span></span>
-<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 directories, 25 files</span></span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tree</span> /Volumes/soyabean/GEfetch2R/download_bam</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [01;34m/Volumes/soyabean/GEfetch2R/download_bam [0m</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; └──  [01;34mGSM4104137 [0m</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     └──  [01;34mSRR10211566 [0m</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         ├──  [01;34mbam2fastq [0m</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │   └──  [01;34mMS60249_PBMC_2_0_MissingLibrary_1_H72VGBGX2 [0m</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;32mbamtofastq_S1_L001_I1_001.fastq.gz [0m</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;32mbamtofastq_S1_L001_I1_002.fastq.gz [0m</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;32mbamtofastq_S1_L001_R1_001.fastq.gz [0m</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;32mbamtofastq_S1_L001_R1_002.fastq.gz [0m</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;32mbamtofastq_S1_L001_R2_001.fastq.gz [0m</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;32mbamtofastq_S1_L001_R2_002.fastq.gz [0m</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;32mbamtofastq_S1_L002_I1_001.fastq.gz [0m</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;32mbamtofastq_S1_L002_I1_002.fastq.gz [0m</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;32mbamtofastq_S1_L002_R1_001.fastq.gz [0m</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;32mbamtofastq_S1_L002_R1_002.fastq.gz [0m</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;32mbamtofastq_S1_L002_R2_001.fastq.gz [0m</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;32mbamtofastq_S1_L002_R2_002.fastq.gz [0m</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;32mbamtofastq_S1_L003_I1_001.fastq.gz [0m</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;32mbamtofastq_S1_L003_I1_002.fastq.gz [0m</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;32mbamtofastq_S1_L003_R1_001.fastq.gz [0m</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;32mbamtofastq_S1_L003_R1_002.fastq.gz [0m</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;32mbamtofastq_S1_L003_R2_001.fastq.gz [0m</span></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;32mbamtofastq_S1_L003_R2_002.fastq.gz [0m</span></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;32mbamtofastq_S1_L004_I1_001.fastq.gz [0m</span></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;32mbamtofastq_S1_L004_I1_002.fastq.gz [0m</span></span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;32mbamtofastq_S1_L004_R1_001.fastq.gz [0m</span></span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;32mbamtofastq_S1_L004_R1_002.fastq.gz [0m</span></span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       ├──  [01;32mbamtofastq_S1_L004_R2_001.fastq.gz [0m</span></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         │       └──  [01;32mbamtofastq_S1_L004_R2_002.fastq.gz [0m</span></span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         └──  [01;32mbamfiles_MS60249_PBMC_possorted_genome_bam.bam [0m</span></span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 directories, 25 files</span></span></code></pre></div>
 <hr>
 </div>
+</div>
+<div class="section level2">
+<h2 id="load-fastq-to-r">Load fastq to R<a class="anchor" aria-label="anchor" href="#load-fastq-to-r"></a>
+</h2>
+<p>With downloaded/converted <code>fastq</code> files,
+<code>GEfetch2R</code> provides function <code>Fastq2R</code> to align
+them to reference genome with <a href="https://www.10xgenomics.com/cn/support/software/cell-ranger/latest/tutorials/cr-tutorial-ct" class="external-link">CellRanger</a>
+(10x-generated <code>fastq</code> files) or <a href="https://github.com/alexdobin/STAR/tree/master" class="external-link">STAR</a>
+(Smart-seq2 or bulk RNA-seq data), and load the output to
+<code>Seurat</code> (10x-generated <code>fastq</code> files) or
+<code>DESEq2</code> (Smart-seq2 or bulk RNA-seq data).</p>
+<p>Here, we use the downloaded <code>fastq</code> files as an example.
+There are two runs (<code>SRR9004346</code> and <code>SRR9004351</code>)
+corresponding to sample name <code>GSM3745993</code>. When running
+<code>CellRanger</code>, we will process <code>SRR9004346</code> and
+<code>SRR9004351</code> as a single merged sample by specifying
+<code>--sample=SRR9004346,SRR9004351</code>:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># run CellRanger (10x Genomics)</span></span>
+<span><span class="va">seu</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/Fastq2R.html">Fastq2R</a></span><span class="op">(</span></span>
+<span>  sample.dir <span class="op">=</span> <span class="st">"/Volumes/soyabean/GEfetch2R/download_fastq"</span>,</span>
+<span>  ref <span class="op">=</span> <span class="st">"/path/to/10x/ref"</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"CellRanger"</span>,</span>
+<span>  out.folder <span class="op">=</span> <span class="st">"/path/to/results"</span>,</span>
+<span>  st.path <span class="op">=</span> <span class="st">"/path/to/cellranger"</span>,</span>
+<span>  st.paras <span class="op">=</span> <span class="st">"--chemistry=auto --jobmode=local"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co"># run STAR (Smart-seq2 or bulk RNA-seq)</span></span>
+<span><span class="va">deobj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/Fastq2R.html">Fastq2R</a></span><span class="op">(</span></span>
+<span>  sample.dir <span class="op">=</span> <span class="st">"/path/to/fastq"</span>,</span>
+<span>  ref <span class="op">=</span> <span class="st">"/path/to/star/ref"</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"STAR"</span>,</span>
+<span>  out.folder <span class="op">=</span> <span class="st">"/path/to/results"</span>,</span>
+<span>  st.path <span class="op">=</span> <span class="st">"/path/to/STAR"</span>,</span>
+<span>  st.paras <span class="op">=</span> <span class="st">"--outBAMsortingThreadN 4 --twopassMode None"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>Since <code>fastq</code> files from Smart-seq2 or bulk RNA-seq data
+are usually included in a single run, the <code>sample.dir</code> should
+specify the parent directory of run
+(<code>sample.dir = "/Volumes/soyabean/GEfetch2R/download_fastq/GSM3745993"</code>
+in the above example).</p>
+<hr>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>

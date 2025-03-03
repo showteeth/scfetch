@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">GEfetch2R</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -27,10 +27,10 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/DownloadRaw.html">Download fastq/bam files</a>
-    <a class="dropdown-item" href="../articles/DownloadMatrices.html">Download count matrices</a>
-    <a class="dropdown-item" href="../articles/DownloadObjects.html">Download processed objects</a>
-    <a class="dropdown-item" href="../articles/ObjectConversion.html">Convert formats between objects</a>
+    <a class="dropdown-item" href="../articles/DownloadRaw.html">Download raw data (sra/fastq/bam)</a>
+    <a class="dropdown-item" href="../articles/DownloadMatrices.html">Download count matrix and annotation</a>
+    <a class="dropdown-item" href="../articles/DownloadObjects.html">Download processed object</a>
+    <a class="dropdown-item" href="../articles/ObjectConversion.html">Format conversion and benchmark</a>
   </div>
 </li>
 <li class="active nav-item">
@@ -56,7 +56,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Download bam.</h1>
-      
+      <small class="dont-index">Source: <a href="https://github.com/showteeth/GEfetch2R/blob/HEAD/R/bam.R" class="external-link"><code>R/bam.R</code></a></small>
       <div class="d-none name"><code>DownloadBam.Rd</code></div>
     </div>
 
@@ -68,12 +68,20 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">DownloadBam</span><span class="op">(</span></span>
 <span>  <span class="va">gsm.df</span>,</span>
+<span>  out.folder <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  download.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"prefetch"</span>, <span class="st">"download.file"</span>, <span class="st">"ascp"</span><span class="op">)</span>,</span>
 <span>  bam.type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"10x"</span>, <span class="st">"other"</span><span class="op">)</span>,</span>
 <span>  prefetch.path <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  samdump.path <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  out.folder <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  prefetch.paras <span class="op">=</span> <span class="st">"-X 100G"</span>,</span>
-<span>  samdump.paras <span class="op">=</span> <span class="st">""</span></span>
+<span>  samdump.path <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  samdump.paras <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  quiet <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  timeout <span class="op">=</span> <span class="fl">3600</span>,</span>
+<span>  ascp.path <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  max.rate <span class="op">=</span> <span class="st">"300m"</span>,</span>
+<span>  rename <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  parallel <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  use.cores <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -83,28 +91,67 @@
 <dd><p>Dataframe contains GSM and Run numbers, obtained from <code>ExtractRun</code>.</p></dd>
 
 
+<dt>out.folder</dt>
+<dd><p>Output folder. Default: NULL (current working directory).</p></dd>
+
+
+<dt>download.method</dt>
+<dd><p>Method to download sra files, chosen from "prefetch", "download.file", "ascp".
+Default: "prefetch".</p></dd>
+
+
 <dt>bam.type</dt>
-<dd><p>The source of bam files to download, choose from 10x (e.g. CellRanger) or other. Default: 10x.</p></dd>
+<dd><p>The source of bam files to download, choose from 10x (e.g. CellRanger) or other.
+Used when <code>download.method</code> is "prefetch". Default: 10x.</p></dd>
 
 
 <dt>prefetch.path</dt>
 <dd><p>Path to prefetch. Default: NULL (conduct automatic detection).</p></dd>
 
 
-<dt>samdump.path</dt>
-<dd><p>Path to sam-dump, used when <code>bam.type</code> is other. Default: NULL (conduct automatic detection).</p></dd>
-
-
-<dt>out.folder</dt>
-<dd><p>Output folder. Default: NULL (current working directory).</p></dd>
-
-
 <dt>prefetch.paras</dt>
 <dd><p>Parameters for <code>prefetch</code>. This should not contain --type or -T values. Default: "-X 100G".</p></dd>
 
 
+<dt>samdump.path</dt>
+<dd><p>Path to sam-dump, used when <code>bam.type</code> is other. Default: NULL (conduct automatic detection).</p></dd>
+
+
 <dt>samdump.paras</dt>
 <dd><p>Parameters for <code>sam-dump</code>. Default: "".</p></dd>
+
+
+<dt>quiet</dt>
+<dd><p>Logical value, whether to show downloading progress. Used when <code>download.method</code> is "download.file".
+Default: FALSE (show).</p></dd>
+
+
+<dt>timeout</dt>
+<dd><p>Maximum request time. Used when <code>download.method</code> is "download.file". Default: 3600.</p></dd>
+
+
+<dt>ascp.path</dt>
+<dd><p>Path to ascp (/path/bin/ascp), please ensure that the relative path of asperaweb_id_dsa.openssh file
+(/path/bin/ascp/../etc/asperaweb_id_dsa.openssh). Default: NULL (conduct automatic detection).</p></dd>
+
+
+<dt>max.rate</dt>
+<dd><p>Max transfer rate. Used when <code>download.method</code> is "ascp". Default: 300m.</p></dd>
+
+
+<dt>rename</dt>
+<dd><p>Logical value, whether to rename the download sra files. Recommended when <code>download.method</code> is "ascp".
+Default: FALSE (show).</p></dd>
+
+
+<dt>parallel</dt>
+<dd><p>Logical value, whether to download parallelly. Used when <code>download.method</code> is "ascp" or "download.file".
+Default: TRUE.</p></dd>
+
+
+<dt>use.cores</dt>
+<dd><p>The number of cores used. Used when <code>download.method</code> is "ascp" or "download.file".
+Default: NULL (the minimum value of <code>nrow(gsm.df)</code> and <code><a href="https://rdrr.io/r/parallel/detectCores.html" class="external-link">parallel::detectCores()</a></code>).</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -116,10 +163,27 @@
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># GSE138266.runs = ExtractRun(acce = "GSE138266", platform = "GPL18573")</span></span></span>
-<span class="r-in"><span><span class="co"># GSE138266.down = DownloadBam(gsm.df = GSE138266.runs, bam.type = "10x", prefetch.path = "/path/to/prefetch",</span></span></span>
-<span class="r-in"><span><span class="co">#                              out.folder = "/path/to/output")</span></span></span>
-<span class="r-in"></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="va">GSE138266.runs</span> <span class="op">&lt;-</span> <span class="fu"><a href="ExtractRun.html">ExtractRun</a></span><span class="op">(</span>acce <span class="op">=</span> <span class="st">"GSE138266"</span>, platform <span class="op">=</span> <span class="st">"GPL18573"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># prefetch</span></span></span>
+<span class="r-in"><span><span class="va">GSE138266.down</span> <span class="op">&lt;-</span> <span class="fu">DownloadBam</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  gsm.df <span class="op">=</span> <span class="va">GSE138266.runs</span>, bam.type <span class="op">=</span> <span class="st">"10x"</span>,</span></span>
+<span class="r-in"><span>  prefetch.path <span class="op">=</span> <span class="st">"/path/to/prefetch"</span>, out.folder <span class="op">=</span> <span class="st">"/path/to/output"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># download.file</span></span></span>
+<span class="r-in"><span><span class="va">GSE138266.down</span> <span class="op">&lt;-</span> <span class="fu">DownloadBam</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  gsm.df <span class="op">=</span> <span class="va">GSE138266.runs</span>, download.method <span class="op">=</span> <span class="st">"download.file"</span>,</span></span>
+<span class="r-in"><span>  timeout <span class="op">=</span> <span class="fl">3600</span>, out.folder <span class="op">=</span> <span class="st">"/path/to/output"</span>,</span></span>
+<span class="r-in"><span>  parallel <span class="op">=</span> <span class="cn">TRUE</span>, use.cores <span class="op">=</span> <span class="fl">2</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># ascp</span></span></span>
+<span class="r-in"><span><span class="va">GSE138266.down</span> <span class="op">&lt;-</span> <span class="fu">DownloadBam</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  gsm.df <span class="op">=</span> <span class="va">GSE138266.runs</span>, download.method <span class="op">=</span> <span class="st">"ascp"</span>,</span></span>
+<span class="r-in"><span>  ascp.path <span class="op">=</span> <span class="st">"/path/to/ascp"</span>, max.rate <span class="op">=</span> <span class="st">"300m"</span>,</span></span>
+<span class="r-in"><span>  rename <span class="op">=</span> <span class="cn">TRUE</span>, out.folder <span class="op">=</span> <span class="st">"/path/to/output"</span>,</span></span>
+<span class="r-in"><span>  parallel <span class="op">=</span> <span class="cn">TRUE</span>, use.cores <span class="op">=</span> <span class="fl">2</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
