@@ -1,5 +1,5 @@
 
-# GEfetch2R - Access Single-cell/Bulk RNA-seq Data from Public Repositories and Benchmark the Subsequent Format Conversion Tools
+# *GEfetch2R* - Access Single-cell/Bulk RNA-seq Data from Public Repositories and Benchmark the Subsequent Format Conversion Tools
 
 <img src = "man/figures/GEfetch2R.png" align = "right" width = "200"/>
 
