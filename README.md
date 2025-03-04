@@ -104,6 +104,11 @@ conda install -c bioconda 'parallel-fastq-dump' 'sra-tools>=3.0.0'
 
 # install bamtofastq, the following installs linux version
 wget --quiet https://github.com/10XGenomics/bamtofastq/releases/download/v1.4.1/bamtofastq_linux && chmod +x bamtofastq_linux
+
+# install ascp
+conda install -c hcc aspera-cli -y
+# ascp path: ~/miniconda3/bin/ascp (path/bin/ascp)
+# private-key file : ~/miniconda3/etc/asperaweb_id_dsa.openssh (path/etc/asperaweb_id_dsa.openssh)
 ```
 
 <hr />
